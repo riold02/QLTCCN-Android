@@ -10,6 +10,7 @@
     <color name="green_200">#A7F3D0</color>
     <color name="green_100">#D1FAE5</color>
     <color name="green_500">#00C897</color>
+    <color name="green_700">#059669</color>
 
     <!-- Màu xanh dương -->
     <color name="blue_500">#3B82F6</color>
@@ -39,6 +40,14 @@
 
     <!-- Màu đặc biệt -->
     <color name="red">#D32F2F</color>
+    <color name="red_500">#EF4444</color>
+    <color name="red_700">#B91C1C</color>
     <color name="expense_color">#FF4D4F</color>
     <color name="income_color">#00C897</color>
+    
+    <!-- Màu cho biểu đồ -->
+    <color name="income_green">#10B981</color>
+    <color name="expense_red">#EF4444</color>
+    <color name="savings_yellow">#F59E0B</color>
+    <color name="savings_blue">#3B82F6</color>
 </resources>

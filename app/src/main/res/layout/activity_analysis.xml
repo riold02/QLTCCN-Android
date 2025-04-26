@@ -237,13 +237,13 @@
                         <ImageView
                             android:layout_width="24dp"
                             android:layout_height="24dp"
-                            android:src="@drawable/ic_trans" />
+                            android:src="@drawable/ic_calendar" />
 
                         <ImageView
                             android:layout_width="24dp"
                             android:layout_height="24dp"
                             android:layout_marginStart="8dp"
-                            android:src="@drawable/ic_food" />
+                            android:src="@drawable/ic_calendar" />
                     </LinearLayout>
 
                     <com.github.mikephil.charting.charts.BarChart

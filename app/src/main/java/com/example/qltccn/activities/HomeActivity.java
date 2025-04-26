@@ -49,7 +49,7 @@ public class HomeActivity extends AppCompatActivity {
     // Header
     private TextView welcomeText, goodMorningText;
     private ImageView userIcon;
-    
+
     // Footer navigation
     private ImageView iconHome;
     private ImageView iconAnalysis;
@@ -64,7 +64,7 @@ public class HomeActivity extends AppCompatActivity {
     private TextView tvTotalExpense;
     private TextView tvLastIncome; // TextView cho số tiền nạp gần nhất
     private TextView tvLastExpense; // TextView cho chi tiêu gần nhất
-    
+
     // Transactions section
     private LinearLayoutManager layoutManager;
     private RecyclerView recyclerViewTransactions;
@@ -72,11 +72,11 @@ public class HomeActivity extends AppCompatActivity {
     private List<Transaction> recentTransactions = new ArrayList<>();
     private List<Transaction> allTransactions = new ArrayList<>();
     private View transactionsContainer;
-    
+
     // Filter
     private Button tabDaily, tabWeekly, tabMonthly;
     private String currentTimeFilter = "monthly"; // Mặc định là monthly view
-    
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -107,48 +107,48 @@ public class HomeActivity extends AppCompatActivity {
             iconTrans = findViewById(R.id.iconTrans);
             iconCategory = findViewById(R.id.iconCategory);
             iconUser = findViewById(R.id.iconUser);
-            
+
             // Thông tin số dư và chi tiêu
             tvBalance = findViewById(R.id.tv_total_balance);
             tvTotalExpense = findViewById(R.id.tv_total_expense);
-            
+
             // TextView cho giao dịch gần nhất
             tvLastIncome = findViewById(R.id.tvLastIncome);
             tvLastExpense = findViewById(R.id.tvLastExpenseValue);
 
             progressBar = findViewById(R.id.progressBar);
-            
+
             // Khởi tạo thông tin mục tiêu tiết kiệm
             ProgressBar savingsProgressBar = findViewById(R.id.savingsProgressBar);
             TextView savingsProgressText = findViewById(R.id.savingsProgressText);
             TextView savingsGoalText = findViewById(R.id.savingsGoalText);
-            
+
             // Thêm sự kiện click cho khu vực Savings để mở màn hình Savings
             View savingsSection = findViewById(R.id.goalsCard);
             if (savingsSection != null) {
                 savingsSection.setOnClickListener(v -> navigateToSavings());
             }
-            
+
             // Tải dữ liệu mục tiêu tiết kiệm từ cơ sở dữ liệu
-            String userId = FirebaseUtils.getCurrentUser() != null ? 
+            String userId = FirebaseUtils.getCurrentUser() != null ?
                             FirebaseUtils.getCurrentUser().getUid() : null;
-                            
+
             if (userId != null) {
                 loadSavingsGoalData(userId, savingsProgressBar, savingsProgressText, savingsGoalText);
             } else {
                 // Giá trị mặc định nếu không có người dùng
                 updateSavingsGoalUI(savingsProgressBar, savingsProgressText, savingsGoalText, 0, 1);
             }
-            
+
             if (iconHome != null) {
                 iconHome.setImageResource(R.drawable.ic_home1);
             }
-            
+
             // Filter buttons
             tabDaily = findViewById(R.id.tabDaily);
             tabWeekly = findViewById(R.id.tabWeekly);
             tabMonthly = findViewById(R.id.tabMonthly);
-            
+
             // Transactions
             transactionsContainer = findViewById(R.id.transactionsContainer);
             // If we have a RecyclerView for transactions, initialize it
@@ -181,7 +181,7 @@ public class HomeActivity extends AppCompatActivity {
                     startActivity(intent);
                 });
             }
-            
+
             if (iconTrans != null) {
                 iconTrans.setOnClickListener(v -> {
                     // Navigate to Transactions Activity
@@ -189,18 +189,18 @@ public class HomeActivity extends AppCompatActivity {
                     startActivity(intent);
                 });
             }
-            
+
             if (iconCategory != null) {
                 iconCategory.setOnClickListener(v -> navigateToCategory());
             }
-            
+
             if (iconUser != null) {
                 iconUser.setOnClickListener(v -> {
                     Intent intent = new Intent(this, ProfileActivity.class);
                     startActivity(intent);
                 });
             }
-            
+
             // User icon click to go to profile
             if (userIcon != null) {
                 userIcon.setOnClickListener(v -> {
@@ -208,7 +208,7 @@ public class HomeActivity extends AppCompatActivity {
                     startActivity(intent);
                 });
             }
-            
+
             // Filter button listeners
             if (tabDaily != null) {
                 tabDaily.setOnClickListener(v -> {
@@ -217,7 +217,7 @@ public class HomeActivity extends AppCompatActivity {
                     filterTransactions();
                 });
             }
-            
+
             if (tabWeekly != null) {
                 tabWeekly.setOnClickListener(v -> {
                     updateTabSelection(tabWeekly);
@@ -225,7 +225,7 @@ public class HomeActivity extends AppCompatActivity {
                     filterTransactions();
                 });
             }
-            
+
             if (tabMonthly != null) {
                 tabMonthly.setOnClickListener(v -> {
                     updateTabSelection(tabMonthly);
@@ -248,35 +248,35 @@ public class HomeActivity extends AppCompatActivity {
                         showLoader(false);
                         if (user != null) {
                             currentUser = user;
-                            
+
                             // Đảm bảo dữ liệu người dùng đầy đủ
                             ensureUserDataComplete(user);
-                            
+
                             // Hiển thị số dư, xử lý nếu balance là null
                             if (tvBalance != null) {
                                 tvBalance.setText(com.example.qltccn.utils.CurrencyUtils.formatVND(user.getBalance()));
                             }
-                            
+
                             // Hiển thị tên người dùng, xử lý nếu name là null
                             if (welcomeText != null) {
                                 welcomeText.setText(user.getName() != null ? user.getName() : "");
                             }
-                            
+
                             // Cập nhật thông tin mục tiêu tiết kiệm
                             loadSavingsGoalData(user.getId(), null, null, null);
-                            
+
                             // Đối với tài khoản mới, không hiển thị chi tiêu, vì chưa có giao dịch nào
                             if (FirebaseUtils.isNewAccount()) {
                                 if (tvTotalExpense != null) {
                                     tvTotalExpense.setText("-0 đồng");
                                 }
-                                
+
                                 // Lưu tổng chi tiêu 0 vào SharedPreferences
                                 android.content.SharedPreferences prefs = getSharedPreferences("UserData", MODE_PRIVATE);
                                 android.content.SharedPreferences.Editor editor = prefs.edit();
                                 editor.putFloat("total_expense", 0f);
                                 editor.apply();
-                                
+
                                 Log.d(TAG, "Tài khoản mới tạo, thiết lập chi tiêu = 0");
                             } else {
                                 // Đồng bộ với chi tiêu thực tế sau khi dữ liệu cơ bản đã hiển thị
@@ -295,7 +295,7 @@ public class HomeActivity extends AppCompatActivity {
                             if (tvTotalExpense != null) {
                                 tvTotalExpense.setText("-0 đồng");
                             }
-                            
+
                             Toast.makeText(HomeActivity.this, "Không thể tải thông tin người dùng", Toast.LENGTH_SHORT).show();
                         }
                     } catch (Exception e) {
@@ -303,7 +303,7 @@ public class HomeActivity extends AppCompatActivity {
                         showDefaultUI();
                     }
                 }
-                
+
                 @Override
                 public void onError(String errorMessage) {
                     try {
@@ -315,7 +315,7 @@ public class HomeActivity extends AppCompatActivity {
                         if (tvTotalExpense != null) {
                             tvTotalExpense.setText("-0 đồng");
                         }
-                        
+
                         Log.e(TAG, "Lỗi tải thông tin: " + errorMessage);
 
 
@@ -331,7 +331,7 @@ public class HomeActivity extends AppCompatActivity {
             showDefaultUI();
         }
     }
-    
+
     /**
      * Tải dữ liệu mục tiêu tiết kiệm từ Firestore
      */
@@ -343,7 +343,7 @@ public class HomeActivity extends AppCompatActivity {
             .addOnSuccessListener(queryDocumentSnapshots -> {
                 double totalCurrentAmount = 0;
                 double totalTargetAmount = 0;
-                
+
                 if (!queryDocumentSnapshots.isEmpty()) {
                     // Tính tổng số tiền hiện tại và mục tiêu từ tất cả các mục tiêu tiết kiệm
                     for (DocumentSnapshot document : queryDocumentSnapshots.getDocuments()) {
@@ -352,14 +352,14 @@ public class HomeActivity extends AppCompatActivity {
                         if (currentAmount != null) {
                             totalCurrentAmount += currentAmount;
                         }
-                        
+
                         // Lấy số tiền mục tiêu
                         Double targetAmount = document.getDouble("targetAmount");
                         if (targetAmount != null) {
                             totalTargetAmount += targetAmount;
                         }
                     }
-                    
+
                     // Cập nhật UI với dữ liệu từ cơ sở dữ liệu
                     updateSavingsGoalUI(progressBar, progressText, goalText, totalCurrentAmount, totalTargetAmount);
                 } else {
@@ -373,7 +373,7 @@ public class HomeActivity extends AppCompatActivity {
                 updateSavingsGoalUI(progressBar, progressText, goalText, 0, 1);
             });
     }
-    
+
     // Hiển thị/ẩn loader
     private void showLoader(boolean show) {
         if (progressBar != null) {
@@ -392,7 +392,7 @@ public class HomeActivity extends AppCompatActivity {
     private void ensureUserDataComplete(User user) {
         boolean needsUpdate = false;
         FirebaseUser authUser = FirebaseUtils.getCurrentUser();
-        
+
         if (authUser != null) {
             // Kiểm tra và cập nhật tên nếu cần
             if (user.getName() == null || user.getName().isEmpty()) {
@@ -404,7 +404,7 @@ public class HomeActivity extends AppCompatActivity {
                     needsUpdate = true;
                 }
             }
-            
+
             // Kiểm tra và cập nhật email nếu cần
             if (user.getEmail() == null || user.getEmail().isEmpty()) {
                 if (authUser.getEmail() != null && !authUser.getEmail().isEmpty()) {
@@ -412,14 +412,14 @@ public class HomeActivity extends AppCompatActivity {
                     needsUpdate = true;
                 }
             }
-            
+
             // Lưu lại nếu có thay đổi
             if (needsUpdate) {
                 updateUserData(user);
             }
         }
     }
-    
+
     // Đồng bộ với số dư thực tế từ các giao dịch
     private void syncWithActualTransactions(User user) {
         if (user == null || user.getId() == null) return;
@@ -462,10 +462,10 @@ public class HomeActivity extends AppCompatActivity {
                                 }
                             }
                         }
-                        
+
                         // Chỉ cập nhật thông tin hiển thị chi tiêu, không tự động thay đổi số dư
                         updateTotalExpense(totalExpense);
-                        
+
                         // Ghi log thông tin chi tiêu và thu nhập để debug
                         Log.d(TAG, "Thu nhập: " + totalIncome + ", Chi tiêu: " + totalExpense);
                     } catch (Exception e) {
@@ -482,7 +482,7 @@ public class HomeActivity extends AppCompatActivity {
             Log.e(TAG, "Lỗi trong quá trình đồng bộ chi tiêu: " + e.getMessage(), e);
         }
     }
-    
+
     // Cập nhật tổng chi tiêu
     private void updateTotalExpense(double totalExpense) {
         try {
@@ -498,31 +498,31 @@ public class HomeActivity extends AppCompatActivity {
                     tvTotalExpense.setText("-" + com.example.qltccn.utils.CurrencyUtils.formatVND(totalExpense));
                 }
             }
-            
+
             // Lưu tổng chi tiêu vào SharedPreferences để các màn hình khác có thể truy cập
             android.content.SharedPreferences prefs = getSharedPreferences("UserData", MODE_PRIVATE);
             android.content.SharedPreferences.Editor editor = prefs.edit();
             editor.putFloat("total_expense", (float) totalExpense);
             editor.apply();
-            
+
         } catch (Exception e) {
             Log.e(TAG, "Lỗi khi cập nhật tổng chi tiêu: " + e.getMessage(), e);
         }
     }
-    
+
     // Cập nhật số dư người dùng
     private void updateUserBalance(User user, double newBalance) {
         if (user == null || user.getId() == null) return;
-        
+
         try {
             // Cập nhật dữ liệu người dùng cục bộ
             user.setBalance(newBalance);
-            
+
             // Cập nhật UI trước để có UX tốt
             if (tvBalance != null) {
                 tvBalance.setText(com.example.qltccn.utils.CurrencyUtils.formatVND(newBalance));
             }
-            
+
             // Cập nhật lên Firestore
             FirebaseUtils.getUsersCollection()
                 .document(user.getId())
@@ -541,7 +541,7 @@ public class HomeActivity extends AppCompatActivity {
             Log.e(TAG, "Lỗi trong quá trình cập nhật số dư: " + e.getMessage(), e);
         }
     }
-    
+
     // Cập nhật toàn bộ thông tin người dùng
     private void updateUserData(User user) {
         FirebaseUtils.getUsersCollection()
@@ -562,24 +562,24 @@ public class HomeActivity extends AppCompatActivity {
             if (tvBalance != null) {
                 tvBalance.setText("0 đồng");
             }
-            
+
             if (welcomeText != null) {
                 welcomeText.setText("");
             }
-            
+
             if (tvTotalExpense != null) {
                 tvTotalExpense.setText("-0 đồng");
             }
-            
+
             // Đặt giá trị mặc định cho giao dịch gần nhất
             if (tvLastIncome != null) {
                 tvLastIncome.setText("0 đồng");
             }
-            
+
             if (tvLastExpense != null) {
                 tvLastExpense.setText("0 đồng");
             }
-            
+
             showLoader(false);
         } catch (Exception e) {
             Log.e(TAG, "Lỗi khi hiển thị UI mặc định: " + e.getMessage(), e);
@@ -604,19 +604,19 @@ public class HomeActivity extends AppCompatActivity {
             Log.e(TAG, "loadRecentTransactions: Người dùng chưa đăng nhập");
             return;
         }
-        
+
         String userId = FirebaseUtils.getCurrentUser().getUid();
         Log.d(TAG, "loadRecentTransactions: Đang tải giao dịch cho userId: " + userId);
-        
+
         // Kiểm tra tham chiếu transactions collection
         CollectionReference transactionsRef = FirebaseUtils.getUserTransactionsCollection();
         if (transactionsRef == null) {
             Log.e(TAG, "loadRecentTransactions: Không thể lấy tham chiếu đến collection giao dịch");
             return;
         }
-        
+
         Log.d(TAG, "loadRecentTransactions: Đường dẫn collection: " + transactionsRef.getPath());
-        
+
         // Lấy tất cả giao dịch
         transactionsRef
             .whereEqualTo("userId", userId)
@@ -625,13 +625,13 @@ public class HomeActivity extends AppCompatActivity {
             .addOnSuccessListener(queryDocumentSnapshots -> {
                 Log.d(TAG, "loadRecentTransactions: Đã tìm thấy " + queryDocumentSnapshots.size() + " giao dịch");
                 allTransactions.clear();
-                
+
                 for (DocumentSnapshot doc : queryDocumentSnapshots) {
                     try {
                         // Xử lý thủ công thay vì sử dụng toObject() để xử lý vấn đề với Timestamp
                         Transaction transaction = new Transaction();
                         transaction.setId(doc.getId());
-                        
+
                         // Lấy các trường dữ liệu thông thường
                         if (doc.contains("userId")) transaction.setUserId(doc.getString("userId"));
                         if (doc.contains("category")) transaction.setCategory(doc.getString("category"));
@@ -641,7 +641,7 @@ public class HomeActivity extends AppCompatActivity {
                         if (doc.contains("description")) transaction.setDescription(doc.getString("description"));
                         if (doc.contains("note")) transaction.setNote(doc.getString("note"));
                         if (doc.contains("type")) transaction.setType(doc.getString("type"));
-                        
+
                         // Xử lý trường date - chuyển từ Timestamp sang long
                         if (doc.contains("date")) {
                             Object dateObj = doc.get("date");
@@ -652,7 +652,7 @@ public class HomeActivity extends AppCompatActivity {
                                 transaction.setDate(((Number) dateObj).longValue());
                             }
                         }
-                        
+
                         // Xử lý các trường thời gian khác nếu cần
                         if (doc.contains("createdAt")) {
                             Object createdAtObj = doc.get("createdAt");
@@ -667,7 +667,7 @@ public class HomeActivity extends AppCompatActivity {
                         } else {
                             transaction.setCreatedAt(System.currentTimeMillis());
                         }
-                        
+
                         if (doc.contains("updatedAt")) {
                             Object updatedAtObj = doc.get("updatedAt");
                             if (updatedAtObj instanceof com.google.firebase.Timestamp) {
@@ -681,19 +681,19 @@ public class HomeActivity extends AppCompatActivity {
                         } else {
                             transaction.setUpdatedAt(System.currentTimeMillis());
                         }
-                        
+
                         allTransactions.add(transaction);
                         Log.d(TAG, "loadRecentTransactions: Đã thêm giao dịch: " + transaction.getCategory() + ", " + transaction.getAmount());
                     } catch (Exception e) {
                         Log.e(TAG, "loadRecentTransactions: Lỗi khi chuyển đổi dữ liệu giao dịch: " + e.getMessage() + ", DocumentID: " + doc.getId());
                     }
                 }
-                
+
                 Log.d(TAG, "loadRecentTransactions: Tổng số giao dịch đã tải: " + allTransactions.size());
-                
+
                 // Cập nhật thông tin giao dịch gần nhất
                 updateLatestTransactionsInfo();
-                
+
                 // Lọc và hiển thị giao dịch gần đây
                 filterTransactions();
             })
@@ -701,7 +701,7 @@ public class HomeActivity extends AppCompatActivity {
                 Log.e(TAG, "loadRecentTransactions: Lỗi khi tải giao dịch gần đây: " + e.getMessage());
             });
     }
-    
+
     /**
      * Cập nhật tab được chọn
      */
@@ -712,19 +712,19 @@ public class HomeActivity extends AppCompatActivity {
             tabDaily.setBackgroundResource(android.R.color.transparent);
             tabDaily.setTextColor(getResources().getColor(android.R.color.black));
         }
-        
+
         if (tabWeekly != null) {
             tabWeekly.setSelected(false);
             tabWeekly.setBackgroundResource(android.R.color.transparent);
             tabWeekly.setTextColor(getResources().getColor(android.R.color.black));
         }
-        
+
         if (tabMonthly != null) {
             tabMonthly.setSelected(false);
             tabMonthly.setBackgroundResource(android.R.color.transparent);
             tabMonthly.setTextColor(getResources().getColor(android.R.color.black));
         }
-        
+
         // Đặt tab được chọn
         if (selectedTab != null) {
             selectedTab.setSelected(true);
@@ -732,25 +732,25 @@ public class HomeActivity extends AppCompatActivity {
             selectedTab.setTextColor(getResources().getColor(android.R.color.white));
         }
     }
-    
+
     /**
      * Lọc giao dịch dựa trên chế độ đã chọn (daily, weekly, monthly)
      */
     private void filterTransactions() {
         recentTransactions.clear();
-        
+
         if (allTransactions.isEmpty()) {
             updateTransactionsUI();
             return;
         }
-        
+
         Calendar calendar = Calendar.getInstance();
         long currentTime = calendar.getTimeInMillis();
         long startTime;
-        
+
         // Biến để tính tổng chi tiêu theo thời kỳ đã chọn
         double periodTotalExpense = 0;
-        
+
         switch (currentTimeFilter) {
             case "daily":
                 // Lấy giao dịch trong ngày
@@ -759,14 +759,14 @@ public class HomeActivity extends AppCompatActivity {
                 calendar.set(Calendar.SECOND, 0);
                 calendar.set(Calendar.MILLISECOND, 0);
                 startTime = calendar.getTimeInMillis();
-                
+
                 Log.d(TAG, "filterTransactions: Lọc theo ngày từ " + new Date(startTime) + " đến " + new Date(currentTime));
-                
+
                 for (Transaction transaction : allTransactions) {
                     if (transaction.getDate() >= startTime && transaction.getDate() <= currentTime) {
                         // Thêm tất cả giao dịch vào danh sách hiển thị (bao gồm cả tiết kiệm)
                         recentTransactions.add(transaction);
-                        
+
                         // Tính tổng chi tiêu chỉ cho loại "expense" (không bao gồm "savings")
                         if ("expense".equals(transaction.getType())) {
                             periodTotalExpense += transaction.getAmount();
@@ -774,19 +774,19 @@ public class HomeActivity extends AppCompatActivity {
                     }
                 }
                 break;
-                
+
             case "weekly":
                 // Lấy giao dịch trong tuần (7 ngày qua)
                 calendar.add(Calendar.DAY_OF_MONTH, -7);
                 startTime = calendar.getTimeInMillis();
-                
+
                 Log.d(TAG, "filterTransactions: Lọc theo tuần từ " + new Date(startTime) + " đến " + new Date(currentTime));
-                
+
                 for (Transaction transaction : allTransactions) {
                     if (transaction.getDate() >= startTime && transaction.getDate() <= currentTime) {
                         // Thêm tất cả giao dịch vào danh sách hiển thị (bao gồm cả tiết kiệm)
                         recentTransactions.add(transaction);
-                        
+
                         // Tính tổng chi tiêu chỉ cho loại "expense" (không bao gồm "savings")
                         if ("expense".equals(transaction.getType())) {
                             periodTotalExpense += transaction.getAmount();
@@ -794,7 +794,7 @@ public class HomeActivity extends AppCompatActivity {
                     }
                 }
                 break;
-                
+
             case "monthly":
             default:
                 // Lấy giao dịch trong tháng
@@ -804,14 +804,14 @@ public class HomeActivity extends AppCompatActivity {
                 calendar.set(Calendar.SECOND, 0);
                 calendar.set(Calendar.MILLISECOND, 0);
                 startTime = calendar.getTimeInMillis();
-                
+
                 Log.d(TAG, "filterTransactions: Lọc theo tháng từ " + new Date(startTime) + " đến " + new Date(currentTime));
-                
+
                 for (Transaction transaction : allTransactions) {
                     if (transaction.getDate() >= startTime && transaction.getDate() <= currentTime) {
                         // Thêm tất cả giao dịch vào danh sách hiển thị (bao gồm cả tiết kiệm)
                         recentTransactions.add(transaction);
-                        
+
                         // Tính tổng chi tiêu chỉ cho loại "expense" (không bao gồm "savings")
                         if ("expense".equals(transaction.getType())) {
                             periodTotalExpense += transaction.getAmount();
@@ -820,175 +820,221 @@ public class HomeActivity extends AppCompatActivity {
                 }
                 break;
         }
-        
+
         // Cập nhật tổng chi tiêu theo thời kỳ đã chọn
         updateTotalExpense(periodTotalExpense);
         Log.d(TAG, "filterTransactions: Tổng chi tiêu theo " + currentTimeFilter + ": " + periodTotalExpense);
-        
+
         // Bỏ giới hạn số lượng giao dịch hiển thị để hiển thị tất cả giao dịch
-        
+
         Log.d(TAG, "filterTransactions: Hiển thị " + recentTransactions.size() + " giao dịch sau khi lọc theo " + currentTimeFilter);
-        
+
         // Cập nhật UI
         updateTransactionsUI();
     }
-    
+
     // Update the UI with recent transactions
     private void updateTransactionsUI() {
-        transactionsContainer.removeAllViews();
-        double totalIncome = 0;
-        double totalExpense = 0;
+        try {
+            Log.d(TAG, "updateTransactionsUI: Cập nhật UI với " + recentTransactions.size() + " giao dịch");
 
-        if (recentTransactions.isEmpty()) {
-            // Hiển thị thông báo không có giao dịch
-            TextView noTransactionsMsg = new TextView(this);
-            noTransactionsMsg.setText("Không có giao dịch nào");
-            noTransactionsMsg.setTextSize(16);
-            noTransactionsMsg.setGravity(Gravity.CENTER);
-            noTransactionsMsg.setPadding(0, 40, 0, 40);
-            transactionsContainer.addView(noTransactionsMsg);
-            
-            // Cập nhật tổng thu/chi
-            updateIncomeBudgetProgress(0);
-            incomeValueTextView.setText(CurrencyUtils.formatVND(0));
-            expenseValueTextView.setText(CurrencyUtils.formatVND(0));
-            
-            return;
-        }
+            // If we have a RecyclerView, update it
+            if (recyclerViewTransactions != null && transactionAdapter != null) {
+                Log.d(TAG, "updateTransactionsUI: Sử dụng RecyclerView để hiển thị");
+                transactionAdapter.updateData(recentTransactions);
 
-        // Sắp xếp giao dịch theo thời gian giảm dần (mới nhất lên đầu)
-        Collections.sort(recentTransactions, (t1, t2) -> Long.compare(t2.getDate(), t1.getDate()));
-        
-        // Tăng chiều cao của ScrollView để hiển thị tất cả giao dịch
-        ScrollView scrollView = findViewById(R.id.transactionsScrollView);
-        LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) scrollView.getLayoutParams();
-        params.height = LinearLayout.LayoutParams.WRAP_CONTENT;
-        scrollView.setLayoutParams(params);
-        
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
-        String currentDateStr = null;
-        
-        for (Transaction transaction : recentTransactions) {
-            // Tính tổng thu nhập và chi tiêu
-            if ("income".equals(transaction.getType())) {
-                totalIncome += transaction.getAmount();
-            } else if ("expense".equals(transaction.getType())) {
-                totalExpense += transaction.getAmount();
+                // Show/hide empty state text
+                TextView emptyText = findViewById(R.id.emptyTransactionsText);
+                if (emptyText != null) {
+                    if (recentTransactions.isEmpty()) {
+                        Log.d(TAG, "updateTransactionsUI: Hiển thị trạng thái trống");
+                        recyclerViewTransactions.setVisibility(View.GONE);
+                        emptyText.setVisibility(View.VISIBLE);
+                    } else {
+                        Log.d(TAG, "updateTransactionsUI: Hiển thị danh sách " + recentTransactions.size() + " giao dịch");
+                        recyclerViewTransactions.setVisibility(View.VISIBLE);
+                        emptyText.setVisibility(View.GONE);
+                    }
+                } else {
+                    Log.e(TAG, "updateTransactionsUI: emptyText là null");
+                }
+                return;
+            } else {
+                Log.w(TAG, "updateTransactionsUI: RecyclerView hoặc adapter là null, sử dụng cách hiển thị thay thế");
             }
-            
-            // Tạo nhóm giao dịch theo ngày
-            String transactionDateStr = dateFormat.format(new Date(transaction.getDate()));
-            if (!transactionDateStr.equals(currentDateStr)) {
-                currentDateStr = transactionDateStr;
-                
-                // Thêm tiêu đề ngày
-                TextView dateHeader = new TextView(this);
-                dateHeader.setText(currentDateStr);
-                dateHeader.setTextSize(14);
-                dateHeader.setTypeface(null, Typeface.BOLD);
-                dateHeader.setPadding(0, 16, 0, 8);
-                transactionsContainer.addView(dateHeader);
+
+            // Otherwise, update the static transaction views in layout
+            try {
+                // Clear existing transaction views if container exists
+                if (transactionsContainer != null && transactionsContainer instanceof android.view.ViewGroup) {
+                    android.view.ViewGroup container = (android.view.ViewGroup) transactionsContainer;
+                    container.removeAllViews();
+
+                    // Show message if no transactions
+                    if (recentTransactions.isEmpty()) {
+                        Log.d(TAG, "updateTransactionsUI: Hiển thị thông báo trống bằng TextView");
+                        TextView emptyText = new TextView(this);
+                        emptyText.setText("Chưa có giao dịch nào");
+                        emptyText.setTextSize(16);
+                        emptyText.setGravity(android.view.Gravity.CENTER);
+                        emptyText.setPadding(32, 32, 32, 32);
+                        container.addView(emptyText);
+                    } else {
+                        Log.d(TAG, "updateTransactionsUI: Hiển thị " + recentTransactions.size() + " giao dịch theo cách thủ công");
+                        // Add transaction items manually
+
+                        // Nhóm giao dịch theo ngày
+                        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+                        SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
+
+                        String currentDateStr = null;
+
+                        for (Transaction transaction : recentTransactions) {
+                            // Thêm tiêu đề ngày nếu là ngày mới
+                            String transactionDateStr = dateFormat.format(new Date(transaction.getDate()));
+                            if (!transactionDateStr.equals(currentDateStr)) {
+                                currentDateStr = transactionDateStr;
+
+                                // Thêm tiêu đề ngày
+                                TextView dateHeader = new TextView(this);
+                                dateHeader.setText(currentDateStr);
+                                dateHeader.setTextSize(14);
+                                dateHeader.setTypeface(null, android.graphics.Typeface.BOLD);
+                                dateHeader.setPadding(0, 16, 0, 8);
+                                container.addView(dateHeader);
+                            }
+
+                            // Tạo view cho giao dịch
+                            View transactionView = getLayoutInflater().inflate(R.layout.item_transaction, null);
+
+                            ImageView iconView = transactionView.findViewById(R.id.ivCategoryIcon);
+                            TextView categoryView = transactionView.findViewById(R.id.tvCategory);
+                            TextView dateView = transactionView.findViewById(R.id.tvDate);
+                            TextView amountView = transactionView.findViewById(R.id.tvAmount);
+                            TextView descView = transactionView.findViewById(R.id.tvDescription);
+
+                            // Set data
+                            if (iconView != null) {
+                                iconView.setImageResource(getCategoryIcon(transaction.getCategory()));
+                            }
+
+                            if (categoryView != null) {
+                                categoryView.setText(transaction.getCategory());
+                            }
+
+                            if (descView != null) {
+                                descView.setText(transaction.getDescription() != null && !transaction.getDescription().isEmpty()
+                                    ? transaction.getDescription() : "");
+                            }
+
+                            if (dateView != null) {
+                                String formattedTime = timeFormat.format(new Date(transaction.getDate()));
+                                dateView.setText(formattedTime);
+                            }
+
+                            if (amountView != null) {
+                                String prefix;
+                                int color;
+
+                                // Xác định prefix và màu sắc dựa vào loại giao dịch
+                                switch (transaction.getType()) {
+                                    case "income":
+                                        prefix = "+";
+                                        color = getResources().getColor(android.R.color.holo_green_dark);
+                                        break;
+                                    case "expense":
+                                        prefix = "-";
+                                        color = getResources().getColor(android.R.color.holo_red_dark);
+                                        break;
+                                    case "savings":
+                                        prefix = "-";
+                                        color = getResources().getColor(android.R.color.holo_blue_dark);
+                                        break;
+                                    default:
+                                        prefix = "";
+                                        color = getResources().getColor(android.R.color.black);
+                                        break;
+                                }
+
+                                String formattedAmount = String.format(Locale.getDefault(), "%s%,.0f đồng",
+                                        prefix, transaction.getAmount());
+                                amountView.setText(formattedAmount);
+                                amountView.setTextColor(color);
+                            }
+
+                            // Add click listener
+                            transactionView.setOnClickListener(v -> {
+                                showTransactionDetail(transaction);
+                            });
+
+                            // Add to container
+                            container.addView(transactionView);
+
+                            // Thêm đường phân cách
+                            View divider = new View(this);
+                            divider.setBackgroundColor(getResources().getColor(android.R.color.darker_gray));
+                            android.view.ViewGroup.LayoutParams dividerParams = new android.view.ViewGroup.LayoutParams(
+                                    android.view.ViewGroup.LayoutParams.MATCH_PARENT, 1);
+                            divider.setLayoutParams(dividerParams);
+                            container.addView(divider);
+                        }
+                    }
+                } else {
+                    Log.e(TAG, "updateTransactionsUI: transactionsContainer là null hoặc không phải ViewGroup");
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "updateTransactionsUI: Lỗi khi cập nhật UI giao dịch: " + e.getMessage(), e);
             }
-            
-            // Tạo view cho giao dịch
-            View transactionView = getLayoutInflater().inflate(R.layout.transaction_item, null);
-            
-            ImageView categoryIcon = transactionView.findViewById(R.id.categoryIcon);
-            TextView categoryName = transactionView.findViewById(R.id.categoryName);
-            TextView transactionAmount = transactionView.findViewById(R.id.transactionAmount);
-            TextView transactionTime = transactionView.findViewById(R.id.transactionTime);
-            
-            // Đặt icon và tên danh mục
-            setTransactionCategoryDisplay(transaction, categoryIcon, categoryName);
-            
-            // Định dạng và hiển thị số tiền
-            String amountText;
-            if ("income".equals(transaction.getType())) {
-                amountText = "+ " + CurrencyUtils.formatVND(transaction.getAmount());
-                transactionAmount.setTextColor(getResources().getColor(R.color.income_green));
-            } else if ("expense".equals(transaction.getType())) {
-                amountText = "- " + CurrencyUtils.formatVND(transaction.getAmount());
-                transactionAmount.setTextColor(getResources().getColor(R.color.expense_red));
-            } else { // savings
-                amountText = "⭐ " + CurrencyUtils.formatVND(transaction.getAmount());
-                transactionAmount.setTextColor(getResources().getColor(R.color.savings_yellow));
-            }
-            transactionAmount.setText(amountText);
-            
-            // Định dạng và hiển thị thời gian
-            SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
-            String formattedTime = timeFormat.format(new Date(transaction.getDate()));
-            transactionTime.setText(formattedTime);
-            
-            // Thêm chức năng xem chi tiết khi nhấn vào giao dịch
-            transactionView.setOnClickListener(v -> showTransactionDetails(transaction));
-            
-            // Thêm view giao dịch vào container
-            transactionsContainer.addView(transactionView);
-            
-            // Thêm đường phân cách
-            View divider = new View(this);
-            divider.setBackgroundColor(getResources().getColor(R.color.light_gray));
-            LinearLayout.LayoutParams dividerParams = new LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT, 1);
-            dividerParams.setMargins(0, 8, 0, 8);
-            divider.setLayoutParams(dividerParams);
-            transactionsContainer.addView(divider);
+        } catch (Exception e) {
+            Log.e(TAG, "updateTransactionsUI: Lỗi khi cập nhật UI giao dịch: " + e.getMessage(), e);
         }
-        
-        // Cập nhật số liệu ở trên cùng
-        incomeValueTextView.setText(CurrencyUtils.formatVND(totalIncome));
-        expenseValueTextView.setText(CurrencyUtils.formatVND(totalExpense));
-        
-        // Cập nhật tiến trình ngân sách
-        updateIncomeBudgetProgress(totalIncome);
     }
 
     // Helper method to get icon resource for a category
     private int getCategoryIcon(String category) {
         if (category == null) return R.drawable.ic_category;
-        
+
         switch (category.toLowerCase()) {
             case "ăn uống":
             case "food":
                 return R.drawable.ic_food;
-                
+
             case "di chuyển":
             case "transport":
                 return R.drawable.ic_transport;
-                
+
             case "mua sắm":
             case "shopping":
                 return R.drawable.ic_shopping;
-                
+
             case "nhà cửa":
             case "housing":
                 return R.drawable.ic_home;
-                
+
             case "giải trí":
             case "entertainment":
                 return R.drawable.ic_entertainment;
-                
+
             case "giáo dục":
             case "education":
                 return R.drawable.ic_savings;
-                
+
             case "sức khỏe":
             case "health":
                 return R.drawable.ic_health;
-                
+
             case "lương":
             case "salary":
                 return R.drawable.ic_salary;
-                
+
             case "đầu tư":
             case "investment":
                 return R.drawable.ic_stock;
-                
+
             case "tiết kiệm":
             case "savings":
                 return R.drawable.ic_savings;
-                
+
             default:
                 return R.drawable.ic_category;
         }
@@ -1002,7 +1048,7 @@ public class HomeActivity extends AppCompatActivity {
             dialog.requestWindowFeature(android.view.Window.FEATURE_NO_TITLE);
             dialog.setContentView(R.layout.dialog_transaction_detail);
             dialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
-            
+
             // Get references to views in the dialog
             TextView tvCategory = dialog.findViewById(R.id.tvDetailCategory);
             TextView tvAmount = dialog.findViewById(R.id.tvDetailAmount);
@@ -1018,7 +1064,7 @@ public class HomeActivity extends AppCompatActivity {
             if (tvAmount != null) {
                 String prefix;
                 int color;
-                
+
                 // Xác định prefix và màu sắc dựa vào loại giao dịch
                 switch (transaction.getType()) {
                     case "income":
@@ -1038,18 +1084,18 @@ public class HomeActivity extends AppCompatActivity {
                         color = getResources().getColor(android.R.color.black);
                         break;
                 }
-                
-                String formattedAmount = String.format(Locale.getDefault(), "%s%,.0f đồng", 
+
+                String formattedAmount = String.format(Locale.getDefault(), "%s%,.0f đồng",
                         prefix, transaction.getAmount());
                 tvAmount.setText("Số tiền: " + formattedAmount);
                 tvAmount.setTextColor(color);
             }
-            
+
             if (tvDate != null) {
                 SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
                 tvDate.setText("Ngày: " + dateFormat.format(new Date(transaction.getDate())));
             }
-            
+
             if (tvType != null) {
                 String typeText;
                 switch (transaction.getType()) {
@@ -1067,7 +1113,7 @@ public class HomeActivity extends AppCompatActivity {
                 }
                 tvType.setText("Loại: " + typeText);
             }
-            
+
             if (tvDescription != null) {
                 String description = transaction.getDescription();
                 if (description == null || description.isEmpty()) {
@@ -1075,12 +1121,12 @@ public class HomeActivity extends AppCompatActivity {
                 }
                 tvDescription.setText("Mô tả: " + description);
             }
-            
+
             // Xử lý nút Đóng
             if (btnClose != null) {
                 btnClose.setOnClickListener(v -> dialog.dismiss());
             }
-            
+
             // Xử lý nút Chỉnh sửa
             if (btnEdit != null) {
                 btnEdit.setOnClickListener(v -> {
@@ -1095,7 +1141,7 @@ public class HomeActivity extends AppCompatActivity {
 
             // Hiển thị dialog
             dialog.show();
-            
+
         } catch (Exception e) {
             Log.e(TAG, "Lỗi hiển thị chi tiết giao dịch: " + e.getMessage(), e);
             Toast.makeText(this, "Không thể hiển thị chi tiết giao dịch", Toast.LENGTH_SHORT).show();
@@ -1108,12 +1154,12 @@ public class HomeActivity extends AppCompatActivity {
             Log.d(TAG, "Hiển thị thông báo chức năng đang phát triển");
             // Thay vì mở NotiActivity, hiển thị thông báo tính năng đang phát triển
             Toast.makeText(this, "Tính năng đang phát triển", Toast.LENGTH_SHORT).show();
-            
+
             // Có thể bổ sung thêm rung nhẹ để tăng trải nghiệm người dùng
             android.os.Vibrator vibrator = (android.os.Vibrator) getSystemService(android.content.Context.VIBRATOR_SERVICE);
             if (vibrator != null && vibrator.hasVibrator()) {
                 // Rung nhẹ 100ms
-                vibrator.vibrate(100);
+
             }
         } catch (Exception e) {
             Log.e(TAG, "Lỗi khi hiển thị thông báo: " + e.getMessage(), e);
@@ -1122,43 +1168,43 @@ public class HomeActivity extends AppCompatActivity {
 
     /**
      * Cập nhật giao diện cho mục tiêu tiết kiệm
-     * 
+     *
      * @param progressBar Thanh tiến trình
      * @param progressText Text hiển thị phần trăm
      * @param goalText Text hiển thị số tiền hiện tại/mục tiêu
      * @param currentAmount Số tiền hiện tại
      * @param targetAmount Mục tiêu
      */
-    private void updateSavingsGoalUI(ProgressBar progressBar, TextView progressText, TextView goalText, 
+    private void updateSavingsGoalUI(ProgressBar progressBar, TextView progressText, TextView goalText,
                                      double currentAmount, double targetAmount) {
         try {
             if (progressBar == null || progressText == null || goalText == null) {
                 return;
             }
-            
+
             // Đảm bảo targetAmount không thể là 0 để tránh chia cho 0
             if (targetAmount <= 0) {
                 targetAmount = 1;
             }
-            
+
             // Tính phần trăm hoàn thành
             int progress = (int) ((currentAmount / targetAmount) * 100);
-            
+
             // Giới hạn tiến độ từ 0-100%
             progress = Math.min(100, Math.max(0, progress));
-            
+
             // Cập nhật UI
             progressBar.setProgress(progress);
             progressText.setText(progress + "%");
-            
+
             // Định dạng và hiển thị số tiền mục tiêu
             goalText.setText(CurrencyUtils.formatVND(targetAmount));
-            
+
             // Log để debug
-            Log.d(TAG, "Cập nhật UI mục tiêu tiết kiệm: " + progress + "%, " + 
-                  "Hiện tại: " + CurrencyUtils.formatVND(currentAmount) + ", " + 
+            Log.d(TAG, "Cập nhật UI mục tiêu tiết kiệm: " + progress + "%, " +
+                  "Hiện tại: " + CurrencyUtils.formatVND(currentAmount) + ", " +
                   "Mục tiêu: " + CurrencyUtils.formatVND(targetAmount));
-            
+
         } catch (Exception e) {
             Log.e(TAG, "Lỗi khi cập nhật UI mục tiêu tiết kiệm: " + e.getMessage());
         }
@@ -1172,7 +1218,7 @@ public class HomeActivity extends AppCompatActivity {
         try {
             Transaction lastIncome = null;
             Transaction lastExpense = null;
-            
+
             // Tìm giao dịch nạp tiền và chi tiêu gần nhất
             for (Transaction transaction : allTransactions) {
                 if ("income".equals(transaction.getType()) && (lastIncome == null || transaction.getDate() > lastIncome.getDate())) {
@@ -1181,7 +1227,7 @@ public class HomeActivity extends AppCompatActivity {
                     lastExpense = transaction;
                 }
             }
-            
+
             // Cập nhật UI cho giao dịch nạp tiền gần nhất
             if (tvLastIncome != null) {
                 if (lastIncome != null) {
@@ -1192,7 +1238,7 @@ public class HomeActivity extends AppCompatActivity {
                     Log.d(TAG, "Không có giao dịch nạp tiền nào");
                 }
             }
-            
+
             // Cập nhật UI cho giao dịch chi tiêu gần nhất
             if (tvLastExpense != null) {
                 if (lastExpense != null) {

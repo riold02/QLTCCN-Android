@@ -207,23 +207,107 @@ public class CategoryAddActivity extends AppCompatActivity {
         // Lấy mô tả (không bắt buộc)
         String message = edtMessage.getText().toString().trim();
 
-        // Tạo đối tượng giao dịch
-        Transaction transaction = new Transaction();
-        transaction.setUserId(userId);
-        transaction.setCategory(categoryName);
-        transaction.setAmount(amount);
-        transaction.setDescription(title);
-        transaction.setNote(message);
-
-        transaction.setType("expense"); // Loại giao dịch là chi tiêu
-        transaction.setDate(selectedDate.getTime());
-        transaction.setCreatedAt(new Date().getTime());
-
         // Hiển thị loader
         showLoader(true);
+        
+        // Kiểm tra số dư trước khi thêm giao dịch
+        checkBalanceBeforeTransaction(userId, amount, () -> {
+            // Tạo đối tượng giao dịch sau khi kiểm tra số dư
+            Transaction transaction = new Transaction();
+            transaction.setUserId(userId);
+            transaction.setCategory(categoryName);
+            transaction.setAmount(amount);
+            transaction.setDescription(title);
+            transaction.setNote(message);
 
-        // Lưu vào Firestore
-        saveTransactionToFirestore(transaction);
+            transaction.setType("expense"); // Loại giao dịch là chi tiêu
+            transaction.setDate(selectedDate.getTime());
+            transaction.setCreatedAt(new Date().getTime());
+
+            // Lưu vào Firestore
+            saveTransactionToFirestore(transaction);
+        });
+    }
+    
+    /**
+     * Kiểm tra số dư trước khi thêm giao dịch chi tiêu
+     * @param userId ID người dùng
+     * @param transactionAmount Số tiền giao dịch
+     * @param onSuccess Callback khi số dư đủ
+     */
+    private void checkBalanceBeforeTransaction(String userId, double transactionAmount, Runnable onSuccess) {
+        FirebaseFirestore.getInstance().collection("users").document(userId)
+            .get()
+            .addOnSuccessListener(documentSnapshot -> {
+                if (documentSnapshot.exists()) {
+                    Double currentBalance = documentSnapshot.getDouble("balance");
+                    Log.d(TAG, "Số dư hiện tại: " + currentBalance + ", Số tiền giao dịch: " + transactionAmount);
+                    
+                    if (currentBalance != null) {
+                        if (currentBalance >= transactionAmount) {
+                            // Số dư đủ, tiếp tục thêm giao dịch
+                            Log.d(TAG, "Số dư đủ, tiếp tục tạo giao dịch");
+                            onSuccess.run();
+                        } else {
+                            // Số dư không đủ, hiển thị cảnh báo
+                            showLoader(false);
+                            showInsufficientBalanceWarning(currentBalance, transactionAmount);
+                        }
+                    } else {
+                        // Không có thông tin số dư, có thể là tài khoản mới
+                        Log.w(TAG, "Không tìm thấy thông tin số dư");
+                        showLoader(false);
+                        showInsufficientBalanceWarning(0, transactionAmount);
+                    }
+                } else {
+                    // Không tìm thấy document người dùng
+                    Log.e(TAG, "Không tìm thấy thông tin người dùng");
+                    showLoader(false);
+                    Toast.makeText(CategoryAddActivity.this, "Không thể lấy thông tin số dư", Toast.LENGTH_SHORT).show();
+                }
+            })
+            .addOnFailureListener(e -> {
+                showLoader(false);
+                Log.e(TAG, "Lỗi khi kiểm tra số dư: " + e.getMessage());
+                Toast.makeText(CategoryAddActivity.this, "Lỗi khi kiểm tra số dư: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            });
+    }
+    
+    /**
+     * Hiển thị cảnh báo khi số dư không đủ
+     * @param currentBalance Số dư hiện tại
+     * @param transactionAmount Số tiền giao dịch
+     */
+    private void showInsufficientBalanceWarning(double currentBalance, double transactionAmount) {
+        androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(this);
+        builder.setTitle("Số dư không đủ");
+        builder.setMessage("Số dư hiện tại của bạn là " + CurrencyUtils.formatVND(currentBalance) + 
+                          ", không đủ để chi tiêu " + CurrencyUtils.formatVND(transactionAmount) + 
+                          ".\n\nBạn có muốn tiếp tục tạo giao dịch này không?");
+        
+        builder.setPositiveButton("Tiếp tục", (dialog, which) -> {
+            // Tạo đối tượng giao dịch bất chấp số dư không đủ
+            Transaction transaction = new Transaction();
+            transaction.setUserId(FirebaseUtils.getCurrentUser().getUid());
+            transaction.setCategory(categoryName);
+            transaction.setAmount(Double.parseDouble(edtAmount.getText().toString().replaceAll("[^\\d.]", "")));
+            transaction.setDescription(edtTitle.getText().toString().trim());
+            transaction.setNote(edtMessage.getText().toString().trim());
+            transaction.setType("expense");
+            transaction.setDate(selectedDate.getTime());
+            transaction.setCreatedAt(new Date().getTime());
+            
+            // Hiển thị loader và lưu
+            showLoader(true);
+            saveTransactionToFirestore(transaction);
+        });
+        
+        builder.setNegativeButton("Hủy bỏ", (dialog, which) -> {
+            dialog.dismiss();
+        });
+        
+        builder.setCancelable(false);
+        builder.show();
     }
 
     private void saveTransactionToFirestore(Transaction transaction) {
