@@ -3,11 +3,15 @@ package com.example.qltccn.activities;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.TextUtils;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -34,6 +38,7 @@ import com.google.firebase.firestore.Query;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -820,10 +825,7 @@ public class HomeActivity extends AppCompatActivity {
         updateTotalExpense(periodTotalExpense);
         Log.d(TAG, "filterTransactions: Tổng chi tiêu theo " + currentTimeFilter + ": " + periodTotalExpense);
         
-        // Giới hạn số lượng giao dịch hiển thị (lấy 5 giao dịch gần nhất)
-        if (recentTransactions.size() > 5) {
-            recentTransactions = recentTransactions.subList(0, 5);
-        }
+        // Bỏ giới hạn số lượng giao dịch hiển thị để hiển thị tất cả giao dịch
         
         Log.d(TAG, "filterTransactions: Hiển thị " + recentTransactions.size() + " giao dịch sau khi lọc theo " + currentTimeFilter);
         
@@ -833,131 +835,113 @@ public class HomeActivity extends AppCompatActivity {
     
     // Update the UI with recent transactions
     private void updateTransactionsUI() {
-        try {
-            Log.d(TAG, "updateTransactionsUI: Cập nhật UI với " + recentTransactions.size() + " giao dịch");
-            
-            // If we have a RecyclerView, update it
-            if (recyclerViewTransactions != null && transactionAdapter != null) {
-                Log.d(TAG, "updateTransactionsUI: Sử dụng RecyclerView để hiển thị");
-                transactionAdapter.updateData(recentTransactions);
-                
-                // Show/hide empty state text
-                TextView emptyText = findViewById(R.id.emptyTransactionsText);
-                if (emptyText != null) {
-                    if (recentTransactions.isEmpty()) {
-                        Log.d(TAG, "updateTransactionsUI: Hiển thị trạng thái trống");
-                        recyclerViewTransactions.setVisibility(View.GONE);
-                        emptyText.setVisibility(View.VISIBLE);
-                    } else {
-                        Log.d(TAG, "updateTransactionsUI: Hiển thị danh sách " + recentTransactions.size() + " giao dịch");
-                        recyclerViewTransactions.setVisibility(View.VISIBLE);
-                        emptyText.setVisibility(View.GONE);
-                    }
-                } else {
-                    Log.e(TAG, "updateTransactionsUI: emptyText là null");
-                }
-                return;
-            } else {
-                Log.w(TAG, "updateTransactionsUI: RecyclerView hoặc adapter là null, sử dụng cách hiển thị thay thế");
-            }
-            
-            // Otherwise, update the static transaction views in layout
-            try {
-                // Clear existing transaction views if container exists
-                if (transactionsContainer != null && transactionsContainer instanceof android.view.ViewGroup) {
-                    android.view.ViewGroup container = (android.view.ViewGroup) transactionsContainer;
-                    container.removeAllViews();
-                    
-                    // Show message if no transactions
-                    if (recentTransactions.isEmpty()) {
-                        Log.d(TAG, "updateTransactionsUI: Hiển thị thông báo trống bằng TextView");
-                        TextView emptyText = new TextView(this);
-                        emptyText.setText("Chưa có giao dịch nào");
-                        emptyText.setTextSize(16);
-                        emptyText.setGravity(android.view.Gravity.CENTER);
-                        emptyText.setPadding(32, 32, 32, 32);
-                        container.addView(emptyText);
-                    } else {
-                        Log.d(TAG, "updateTransactionsUI: Hiển thị " + recentTransactions.size() + " giao dịch theo cách thủ công");
-                        // Add transaction items manually
-                        SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm - dd MMM", Locale.getDefault());
-                        
-                        for (Transaction transaction : recentTransactions) {
-                            Log.d(TAG, "updateTransactionsUI: Thêm giao dịch: " + transaction.getCategory() + " - " + transaction.getAmount());
-                            View transactionView = getLayoutInflater().inflate(R.layout.item_transaction, null);
-                            
-                            ImageView iconView = transactionView.findViewById(R.id.ivCategoryIcon);
-                            TextView categoryView = transactionView.findViewById(R.id.tvCategory);
-                            TextView dateView = transactionView.findViewById(R.id.tvDate);
-                            TextView amountView = transactionView.findViewById(R.id.tvAmount);
-                            TextView descView = transactionView.findViewById(R.id.tvDescription);
-                            
-                            // Set data
-                            if (iconView != null) {
-                                iconView.setImageResource(getCategoryIcon(transaction.getCategory()));
-                            }
-                            
-                            if (categoryView != null) {
-                                categoryView.setText(transaction.getCategory());
-                            }
-                            
-                            if (descView != null) {
-                                descView.setText(transaction.getDescription() != null && !transaction.getDescription().isEmpty() 
-                                    ? transaction.getDescription() : "");
-                            }
-                            
-                            if (dateView != null) {
-                                dateView.setText(dateFormat.format(new Date(transaction.getDate())));
-                            }
-                            
-                            if (amountView != null) {
-                                String prefix;
-                                int color;
-                                
-                                // Xác định prefix và màu sắc dựa vào loại giao dịch
-                                switch (transaction.getType()) {
-                                    case "income":
-                                        prefix = "+";
-                                        color = getResources().getColor(android.R.color.holo_green_dark);
-                                        break;
-                                    case "expense":
-                                        prefix = "-";
-                                        color = getResources().getColor(android.R.color.holo_red_dark);
-                                        break;
-                                    case "savings":
-                                        prefix = "-";
-                                        color = getResources().getColor(android.R.color.holo_blue_dark);
-                                        break;
-                                    default:
-                                        prefix = "";
-                                        color = getResources().getColor(android.R.color.black);
-                                        break;
-                                }
-                                
-                                String formattedAmount = String.format(Locale.getDefault(), "%s%,.0f đồng", 
-                                        prefix, transaction.getAmount());
-                                amountView.setText(formattedAmount);
-                                amountView.setTextColor(color);
-                            }
+        transactionsContainer.removeAllViews();
+        double totalIncome = 0;
+        double totalExpense = 0;
 
-                            // Add click listener
-                            transactionView.setOnClickListener(v -> {
-                                showTransactionDetail(transaction);
-                            });
-
-                            // Add to container
-                            container.addView(transactionView);
-                        }
-                    }
-                } else {
-                    Log.e(TAG, "updateTransactionsUI: transactionsContainer là null hoặc không phải ViewGroup");
-                }
-            } catch (Exception e) {
-                Log.e(TAG, "updateTransactionsUI: Lỗi khi cập nhật UI giao dịch: " + e.getMessage(), e);
-            }
-        } catch (Exception e) {
-            Log.e(TAG, "updateTransactionsUI: Lỗi khi cập nhật UI giao dịch: " + e.getMessage(), e);
+        if (recentTransactions.isEmpty()) {
+            // Hiển thị thông báo không có giao dịch
+            TextView noTransactionsMsg = new TextView(this);
+            noTransactionsMsg.setText("Không có giao dịch nào");
+            noTransactionsMsg.setTextSize(16);
+            noTransactionsMsg.setGravity(Gravity.CENTER);
+            noTransactionsMsg.setPadding(0, 40, 0, 40);
+            transactionsContainer.addView(noTransactionsMsg);
+            
+            // Cập nhật tổng thu/chi
+            updateIncomeBudgetProgress(0);
+            incomeValueTextView.setText(CurrencyUtils.formatVND(0));
+            expenseValueTextView.setText(CurrencyUtils.formatVND(0));
+            
+            return;
         }
+
+        // Sắp xếp giao dịch theo thời gian giảm dần (mới nhất lên đầu)
+        Collections.sort(recentTransactions, (t1, t2) -> Long.compare(t2.getDate(), t1.getDate()));
+        
+        // Tăng chiều cao của ScrollView để hiển thị tất cả giao dịch
+        ScrollView scrollView = findViewById(R.id.transactionsScrollView);
+        LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) scrollView.getLayoutParams();
+        params.height = LinearLayout.LayoutParams.WRAP_CONTENT;
+        scrollView.setLayoutParams(params);
+        
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+        String currentDateStr = null;
+        
+        for (Transaction transaction : recentTransactions) {
+            // Tính tổng thu nhập và chi tiêu
+            if ("income".equals(transaction.getType())) {
+                totalIncome += transaction.getAmount();
+            } else if ("expense".equals(transaction.getType())) {
+                totalExpense += transaction.getAmount();
+            }
+            
+            // Tạo nhóm giao dịch theo ngày
+            String transactionDateStr = dateFormat.format(new Date(transaction.getDate()));
+            if (!transactionDateStr.equals(currentDateStr)) {
+                currentDateStr = transactionDateStr;
+                
+                // Thêm tiêu đề ngày
+                TextView dateHeader = new TextView(this);
+                dateHeader.setText(currentDateStr);
+                dateHeader.setTextSize(14);
+                dateHeader.setTypeface(null, Typeface.BOLD);
+                dateHeader.setPadding(0, 16, 0, 8);
+                transactionsContainer.addView(dateHeader);
+            }
+            
+            // Tạo view cho giao dịch
+            View transactionView = getLayoutInflater().inflate(R.layout.transaction_item, null);
+            
+            ImageView categoryIcon = transactionView.findViewById(R.id.categoryIcon);
+            TextView categoryName = transactionView.findViewById(R.id.categoryName);
+            TextView transactionAmount = transactionView.findViewById(R.id.transactionAmount);
+            TextView transactionTime = transactionView.findViewById(R.id.transactionTime);
+            
+            // Đặt icon và tên danh mục
+            setTransactionCategoryDisplay(transaction, categoryIcon, categoryName);
+            
+            // Định dạng và hiển thị số tiền
+            String amountText;
+            if ("income".equals(transaction.getType())) {
+                amountText = "+ " + CurrencyUtils.formatVND(transaction.getAmount());
+                transactionAmount.setTextColor(getResources().getColor(R.color.income_green));
+            } else if ("expense".equals(transaction.getType())) {
+                amountText = "- " + CurrencyUtils.formatVND(transaction.getAmount());
+                transactionAmount.setTextColor(getResources().getColor(R.color.expense_red));
+            } else { // savings
+                amountText = "⭐ " + CurrencyUtils.formatVND(transaction.getAmount());
+                transactionAmount.setTextColor(getResources().getColor(R.color.savings_yellow));
+            }
+            transactionAmount.setText(amountText);
+            
+            // Định dạng và hiển thị thời gian
+            SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
+            String formattedTime = timeFormat.format(new Date(transaction.getDate()));
+            transactionTime.setText(formattedTime);
+            
+            // Thêm chức năng xem chi tiết khi nhấn vào giao dịch
+            transactionView.setOnClickListener(v -> showTransactionDetails(transaction));
+            
+            // Thêm view giao dịch vào container
+            transactionsContainer.addView(transactionView);
+            
+            // Thêm đường phân cách
+            View divider = new View(this);
+            divider.setBackgroundColor(getResources().getColor(R.color.light_gray));
+            LinearLayout.LayoutParams dividerParams = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT, 1);
+            dividerParams.setMargins(0, 8, 0, 8);
+            divider.setLayoutParams(dividerParams);
+            transactionsContainer.addView(divider);
+        }
+        
+        // Cập nhật số liệu ở trên cùng
+        incomeValueTextView.setText(CurrencyUtils.formatVND(totalIncome));
+        expenseValueTextView.setText(CurrencyUtils.formatVND(totalExpense));
+        
+        // Cập nhật tiến trình ngân sách
+        updateIncomeBudgetProgress(totalIncome);
     }
 
     // Helper method to get icon resource for a category
