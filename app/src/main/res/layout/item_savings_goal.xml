@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/goalContainer"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    android:background="@drawable/rounded_bg1"
+    android:backgroundTint="#0066FF"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <ImageView
+        android:id="@+id/ivGoalIcon"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:src="@drawable/ic_travel"
+        app:tint="#FFFFFF" />
+
+    <TextView
+        android:id="@+id/tvGoalTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Du lịch"
+        android:textColor="#FFFFFF"
+        android:textSize="14sp" />
+        
+    <TextView
+        android:id="@+id/tvGoalAmount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="0"
+        android:textColor="#FFFFFF"
+        android:textSize="12sp" />
+        
+    <TextView
+        android:id="@+id/tvGoalProgress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="0%"
+        android:textColor="#FFFFFF"
+        android:textSize="12sp" />
+</LinearLayout> 

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">FinWise</string>
+    <!-- Transaction Arrays -->
+    <string-array name="transaction_types">
+        <item>Chi tiêu</item>
+        <item>Thu nhập</item>
+    </string-array>
+
+    <string-array name="transaction_categories">
+        <item>Thực phẩm</item>
+        <item>Mua sắm</item>
+        <item>Giao thông</item>
+        <item>Giải trí</item>
+        <item>Nhà ở</item>
+        <item>Hóa đơn</item>
+        <item>Sức khỏe</item>
+        <item>Lương</item>
+        <item>Quà tặng</item>
+        <item>Đầu tư</item>
+        <item>Khác</item>
+    </string-array>
+
+    <string name="default_notification_channel_id">default_channel</string>
+</resources>

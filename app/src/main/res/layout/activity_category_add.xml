@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#00D09E">
+
+    <!-- Header và Balance Info -->
+    <RelativeLayout
+        android:id="@+id/topContent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp">
+
+        <!-- Header -->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp">
+
+            <ImageView
+                android:id="@+id/btnBack"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                android:src="@drawable/ic_back"
+                android:tint="@color/white"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:text="Thêm Chi Tiêu"
+                android:textColor="@color/black"
+                android:textSize="20sp"
+                android:textStyle="bold"/>
+
+            <ImageView
+                android:id="@+id/btnNotification"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:src="@drawable/ic_noti"/>
+        </RelativeLayout>
+
+    </RelativeLayout>
+
+    <!-- Main Content with Form Fields -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/topContent"
+        android:background="@drawable/rounded_cir_full">
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <!-- Date Field -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Ngày"
+                    android:textColor="@color/black"
+                    android:textSize="16sp"
+                    android:layout_marginBottom="8dp"/>
+
+                <!-- Layout để chọn ngày -->
+                <RelativeLayout
+                    android:id="@+id/dateLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:padding="12dp"
+                    android:background="@drawable/rounded_edittext"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:contentDescription="Nhấn để chọn ngày và giờ">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Thời gian chi tiêu"
+                        android:textSize="14sp"
+                        android:textColor="@android:color/darker_gray"
+                        android:layout_alignParentStart="true"
+                        android:layout_centerVertical="true" />
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
+                        android:gravity="center_vertical">
+
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:src="@android:drawable/ic_menu_recent_history"
+                            android:layout_marginEnd="8dp"
+                            android:contentDescription="Chọn thời gian" />
+
+                        <TextView
+                            android:id="@+id/txtDate"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="01/01/2023 00:00"
+                            android:textSize="14sp"
+                            android:textColor="@android:color/black" />
+                    </LinearLayout>
+                </RelativeLayout>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Bạn có thể chọn cả ngày và giờ chi tiêu"
+                    android:textSize="12sp"
+                    android:textColor="@android:color/darker_gray"
+                    android:gravity="end"
+                    android:layout_marginBottom="16dp"
+                    android:layout_marginEnd="8dp"/>
+
+                <!-- Category Field -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Danh mục"
+                    android:textColor="@color/black"
+                    android:textSize="16sp"
+                    android:layout_marginBottom="8dp"/>
+
+                <RelativeLayout
+                    android:id="@+id/categoryLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/rounded_edittext"
+                    android:padding="12dp"
+                    android:layout_marginBottom="16dp">
+
+                    <TextView
+                        android:id="@+id/txtCategory"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Chọn danh mục"
+                        android:textColor="#AAAAAA"
+                        android:textSize="16sp"/>
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_alignParentEnd="true"
+                        android:src="@drawable/ic_dropdown"/>
+                </RelativeLayout>
+
+                <!-- Amount Field -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Số tiền (đ)"
+                    android:textColor="@color/black"
+                    android:textSize="16sp"
+                    android:layout_marginBottom="8dp"/>
+
+                <EditText
+                    android:id="@+id/edtAmount"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/rounded_edittext"
+                    android:padding="12dp"
+                    android:hint="0 đ"
+                    android:textSize="16sp"
+                    android:inputType="numberDecimal"
+                    android:layout_marginBottom="16dp"/>
+
+                <!-- Expense Title Field -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Tiêu đề chi tiêu"
+                    android:textColor="@color/black"
+                    android:textSize="16sp"
+                    android:layout_marginBottom="8dp"/>
+
+                <EditText
+                    android:id="@+id/edtTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/rounded_edittext"
+                    android:padding="12dp"
+                    android:hint="Nhập tiêu đề chi tiêu"
+                    android:textSize="16sp"
+                    android:layout_marginBottom="16dp"/>
+
+                <!-- Message Field -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Mô tả chi tiết"
+                    android:textColor="#00D09E"
+                    android:textSize="16sp"
+                    android:layout_marginBottom="8dp"/>
+
+                <EditText
+                    android:id="@+id/edtMessage"
+                    android:layout_width="match_parent"
+                    android:layout_height="100dp"
+                    android:background="@drawable/rounded_edittext"
+                    android:padding="12dp"
+                    android:gravity="top"
+                    android:hint="Nhập thông tin chi tiết (không bắt buộc)"
+                    android:textSize="16sp"
+                    android:layout_marginBottom="24dp"/>
+
+                <!-- Save Button -->
+                <Button
+                    android:id="@+id/btnSave"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Lưu chi tiêu"
+                    android:textColor="@color/white"
+                    android:textAllCaps="false"
+                    android:textSize="16sp"
+                    android:background="@drawable/button_save_bg"
+                    android:padding="12dp"
+                    android:layout_marginBottom="24dp"/>
+
+            </LinearLayout>
+
+
+        <!-- Footer Navigation -->
+    </RelativeLayout>
+
+</RelativeLayout>

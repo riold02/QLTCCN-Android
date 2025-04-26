@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="#00D09E" /> <!-- Màu nền xanh lá giống thiết kế Figma -->
+    <corners android:radius="20dp" /> <!-- Bo tròn góc -->
+    <padding
+        android:left="8dp"
+        android:top="8dp"
+        android:right="8dp"
+        android:bottom="8dp" />
+</shape> 

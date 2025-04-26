@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/rounded_white_bg">
+
+    <!-- Tiêu đề đơn giản -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Nạp tiền vào tài khoản"
+        android:textColor="@color/black"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:paddingTop="16dp"
+        android:paddingBottom="16dp"/>
+    
+    <!-- Đường kẻ phân cách -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/gray_400"/>
+
+    <!-- Nội dung đơn giản -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <!-- Trường số tiền -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Số tiền"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp"/>
+            
+        <EditText
+            android:id="@+id/editAmount"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/rounded_edittext"
+            android:padding="12dp"
+            android:hint="0 đ"
+            android:inputType="numberDecimal"
+            android:textSize="16sp"
+            android:layout_marginBottom="20dp"/>
+        
+        <!-- Trường ngày -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Ngày nạp tiền"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp"/>
+            
+        <LinearLayout
+            android:id="@+id/layoutDate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="@drawable/rounded_edittext"
+            android:padding="12dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:layout_marginBottom="20dp">
+            
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_calendar"
+                android:layout_marginEnd="8dp"/>
+                
+            <TextView
+                android:id="@+id/textDate"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Hôm nay"
+                android:textSize="16sp"
+                android:textColor="@color/black"/>
+        </LinearLayout>
+        
+        <!-- Trường ghi chú -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Ghi chú"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp"/>
+            
+        <EditText
+            android:id="@+id/editNote"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/rounded_edittext"
+            android:padding="12dp"
+            android:hint="Nhập ghi chú"
+            android:inputType="textMultiLine"
+            android:minLines="2"
+            android:gravity="top|start"
+            android:layout_marginBottom="16dp"/>
+    </LinearLayout>
+
+    <!-- Các nút hành động -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:paddingBottom="20dp">
+
+        <Button
+            android:id="@+id/btnCancel"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:text="HỦY"
+            android:backgroundTint="#F0F0F0"
+            android:textColor="@color/black"
+            android:textSize="14sp"
+            app:cornerRadius="4dp"
+            android:layout_marginEnd="8dp"/>
+
+        <Button
+            android:id="@+id/btnAddFunds"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:text="THÊM TIỀN"
+            android:backgroundTint="@color/colorPrimary"
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            app:cornerRadius="4dp"/>
+    </LinearLayout>
+</LinearLayout> 

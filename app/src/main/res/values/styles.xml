@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- AppBar and Popup styles -->
+    <style name="Theme.QLTCCN.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="Theme.QLTCCN.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
+    <!-- AppTheme styles -->
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
+        <item name="android:textColorPrimary">@color/white</item>
+        <item name="android:textColorSecondary">@color/white</item>
+        <item name="android:background">@color/colorPrimary</item>
+    </style>
+
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light">
+        <item name="android:textColorPrimary">@color/black</item>
+        <item name="android:textColorSecondary">@color/gray_600</item>
+        <item name="android:background">@color/white</item>
+    </style>
+
+    <!-- Text styles -->
+    <style name="TextAppearance.QLTCCN.Headline1" parent="TextAppearance.MaterialComponents.Headline1">
+        <item name="android:textSize">96sp</item>
+        <item name="android:textColor">@color/black</item>
+    </style>
+
+    <style name="TextAppearance.QLTCCN.Headline2" parent="TextAppearance.MaterialComponents.Headline2">
+        <item name="android:textSize">60sp</item>
+        <item name="android:textColor">@color/black</item>
+    </style>
+
+    <style name="TextAppearance.QLTCCN.Headline3" parent="TextAppearance.MaterialComponents.Headline3">
+        <item name="android:textSize">48sp</item>
+        <item name="android:textColor">@color/black</item>
+    </style>
+
+    <style name="TextAppearance.QLTCCN.Headline4" parent="TextAppearance.MaterialComponents.Headline4">
+        <item name="android:textSize">34sp</item>
+        <item name="android:textColor">@color/black</item>
+    </style>
+
+    <style name="TextAppearance.QLTCCN.Headline5" parent="TextAppearance.MaterialComponents.Headline5">
+        <item name="android:textSize">24sp</item>
+        <item name="android:textColor">@color/black</item>
+    </style>
+
+    <style name="TextAppearance.QLTCCN.Headline6" parent="TextAppearance.MaterialComponents.Headline6">
+        <item name="android:textSize">20sp</item>
+        <item name="android:textColor">@color/black</item>
+    </style>
+
+    <style name="TextAppearance.QLTCCN.Subtitle1" parent="TextAppearance.MaterialComponents.Subtitle1">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">@color/gray_600</item>
+    </style>
+
+    <style name="TextAppearance.QLTCCN.Subtitle2" parent="TextAppearance.MaterialComponents.Subtitle2">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/gray_600</item>
+    </style>
+
+    <style name="TextAppearance.QLTCCN.Body1" parent="TextAppearance.MaterialComponents.Body1">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">@color/black</item>
+    </style>
+
+    <style name="TextAppearance.QLTCCN.Body2" parent="TextAppearance.MaterialComponents.Body2">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/black</item>
+    </style>
+
+    <style name="TextAppearance.QLTCCN.Button" parent="TextAppearance.MaterialComponents.Button">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textAllCaps">true</item>
+    </style>
+
+    <style name="TextAppearance.QLTCCN.Caption" parent="TextAppearance.MaterialComponents.Caption">
+        <item name="android:textSize">12sp</item>
+        <item name="android:textColor">@color/gray_600</item>
+    </style>
+
+    <style name="TextAppearance.QLTCCN.Overline" parent="TextAppearance.MaterialComponents.Overline">
+        <item name="android:textSize">10sp</item>
+        <item name="android:textColor">@color/gray_600</item>
+        <item name="android:textAllCaps">true</item>
+    </style>
+
+    <!-- Widget styles -->
+    <style name="Widget.QLTCCN.Button" parent="Widget.MaterialComponents.Button">
+        <item name="android:textAppearance">@style/TextAppearance.QLTCCN.Button</item>
+        <item name="backgroundTint">@color/colorPrimary</item>
+    </style>
+
+    <style name="Widget.QLTCCN.Button.TextButton" parent="Widget.MaterialComponents.Button.TextButton">
+        <item name="android:textAppearance">@style/TextAppearance.QLTCCN.Button</item>
+        <item name="rippleColor">@color/colorPrimary</item>
+    </style>
+
+    <style name="Widget.QLTCCN.Button.OutlinedButton" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="android:textAppearance">@style/TextAppearance.QLTCCN.Button</item>
+        <item name="strokeColor">@color/colorPrimary</item>
+        <item name="android:textColor">@color/colorPrimary</item>
+    </style>
+
+    <style name="Widget.QLTCCN.CardView" parent="Widget.MaterialComponents.CardView">
+        <item name="cardCornerRadius">8dp</item>
+        <item name="cardElevation">2dp</item>
+        <item name="cardBackgroundColor">@color/white</item>
+    </style>
+
+    <style name="Widget.QLTCCN.TextInputLayout" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="boxStrokeColor">@color/colorPrimary</item>
+        <item name="hintTextColor">@color/colorPrimary</item>
+    </style>
+
+    <style name="Widget.QLTCCN.TextInputEditText" parent="Widget.MaterialComponents.TextInputEditText.OutlinedBox">
+        <item name="android:textAppearance">@style/TextAppearance.QLTCCN.Body1</item>
+    </style>
+
+    <style name="Widget.QLTCCN.Chip" parent="Widget.MaterialComponents.Chip.Choice">
+        <item name="chipBackgroundColor">@color/light_teal</item>
+        <item name="chipStrokeColor">@color/colorPrimary</item>
+        <item name="android:textColor">@color/colorPrimary</item>
+    </style>
+
+    <style name="Widget.QLTCCN.Chip.Action" parent="Widget.MaterialComponents.Chip.Action">
+        <item name="chipBackgroundColor">@color/light_teal</item>
+        <item name="chipStrokeColor">@color/colorPrimary</item>
+        <item name="android:textColor">@color/colorPrimary</item>
+    </style>
+
+    <style name="Widget.QLTCCN.Chip.Filter" parent="Widget.MaterialComponents.Chip.Filter">
+        <item name="chipBackgroundColor">@color/light_teal</item>
+        <item name="chipStrokeColor">@color/colorPrimary</item>
+        <item name="android:textColor">@color/colorPrimary</item>
+    </style>
+
+    <style name="Widget.QLTCCN.Chip.Input" parent="Widget.MaterialComponents.Chip.Entry">
+        <item name="chipBackgroundColor">@color/light_teal</item>
+        <item name="chipStrokeColor">@color/colorPrimary</item>
+        <item name="android:textColor">@color/colorPrimary</item>
+    </style>
+</resources> 

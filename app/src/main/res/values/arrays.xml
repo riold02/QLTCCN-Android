@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="category_types">
+        <item>Chi tiêu</item>
+        <item>Thu nhập</item>
+    </string-array>
+    
+    <string-array name="category_icons">
+        <item>Chung</item>
+        <item>Thức ăn</item>
+        <item>Di chuyển</item>
+        <item>Tạp hóa</item>
+        <item>Nhà ở</item>
+        <item>Giải trí</item>
+        <item>Y tế</item>
+        <item>Tiết kiệm</item>
+        <item>Mua sắm</item>
+    </string-array>
+</resources> 

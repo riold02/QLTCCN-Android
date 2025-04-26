@@ -1,0 +1,21 @@
+// Storage Rules
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Mặc định từ chối tất cả truy cập
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+    
+    // Cho phép truy cập thư mục receipts của người dùng
+    match /receipts/{userId}/{fileName} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Cho phép truy cập ảnh đại diện
+    match /profile_images/{userId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+} 

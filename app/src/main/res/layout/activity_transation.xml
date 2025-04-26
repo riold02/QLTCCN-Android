@@ -1,0 +1,324 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#00D09E">
+
+    <!-- Footer Navigation -->
+
+
+    <!-- Main Content -->
+
+
+
+    <!-- Header -->
+    <RelativeLayout
+        android:id="@+id/header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:padding="8dp">
+
+        <!-- Nút Quay Lại -->
+        <ImageView
+            android:id="@+id/backButton"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+                android:src="@drawable/ic_back"
+                android:tint="@color/white"/>
+
+        <!-- Tiêu đề Trung Tâm -->
+        <TextView
+            android:id="@+id/titleText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+                android:text="Transaction"
+            android:textColor="@color/black"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <!-- Nút Thông Báo có nền tròn -->
+        <RelativeLayout
+            android:id="@+id/notiContainer"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:background="@drawable/circle_bg">
+
+            <ImageView
+                android:id="@+id/notiIcon"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_centerInParent="true"
+                    android:src="@drawable/ic_noti" />
+            </RelativeLayout>
+    </RelativeLayout>
+
+    <!-- Balance Card -->
+    <RelativeLayout
+        android:id="@+id/balanceCard"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/header"
+        android:layout_margin="16dp"
+        android:background="@drawable/shape_rounded_white"
+        android:elevation="4dp"
+        android:padding="16dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:layout_centerInParent="true">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Total Balance"
+                android:textColor="@color/gray_600"
+                android:textSize="18sp"
+                android:gravity="center" />
+
+            <TextView
+                android:id="@+id/totalBalanceText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="$7,783.00"
+                android:textColor="@color/black"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:gravity="center" />
+        </LinearLayout>
+    </RelativeLayout>
+
+        <!-- Income/Expense Cards -->
+        <LinearLayout
+            android:id="@+id/statsCards"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/balanceCard"
+            android:layout_marginHorizontal="16dp"
+            android:orientation="horizontal"
+            android:weightSum="2">
+
+            <!-- Income Card -->
+            <RelativeLayout
+                android:id="@+id/incomeLayout"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/shape_rounded_white"
+                android:elevation="4dp"
+                android:padding="16dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center">
+
+                <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                    android:src="@drawable/ic_stock"
+                        android:tint="@color/green_500" />
+
+                <TextView
+                    android:id="@+id/incomeTitleText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Income"
+                    android:textColor="@color/black"
+                    android:textSize="16sp"
+                    android:layout_marginTop="4dp" />
+
+                <TextView
+                    android:id="@+id/incomeText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                        android:text="$4,120.00"
+                        android:textColor="@color/black"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:layout_marginTop="4dp" />
+            </LinearLayout>
+            </RelativeLayout>
+
+            <!-- Expense Card -->
+            <RelativeLayout
+                android:id="@+id/expenseLayout"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                android:background="@drawable/shape_rounded_white"
+                android:elevation="4dp"
+                android:padding="16dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:gravity="center">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_down"
+                    android:tint="@color/blue" />
+
+                <TextView
+                    android:id="@+id/expenseTitleText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Expense"
+                    android:textColor="@color/black"
+                    android:textSize="16sp"
+                    android:layout_marginTop="4dp" />
+
+                <TextView
+                    android:id="@+id/expenseText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                        android:text="$1,187.40"
+                    android:textColor="@color/blue_500"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:layout_marginTop="4dp" />
+            </LinearLayout>
+            </RelativeLayout>
+        </LinearLayout>
+
+        <!-- Transactions List Container -->
+        <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+            android:layout_below="@id/statsCards"
+            android:layout_marginTop="16dp"
+        android:background="@drawable/rounded_cir_full"
+            android:elevation="4dp">
+
+        <ScrollView
+            android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginBottom="80dp"
+                android:fillViewport="true"
+                android:scrollbars="none">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <!-- Month Header with Calendar Icon -->
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Giao dịch"
+                    android:textSize="18sp"
+                    android:textColor="@color/black"
+                    android:textStyle="bold"
+                            android:layout_alignParentStart="true"
+                            android:layout_centerVertical="true"/>
+
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:src="@drawable/ic_category"
+                            android:layout_alignParentEnd="true"
+                            android:layout_centerVertical="true"/>
+                        </RelativeLayout>
+
+                        <!-- Empty state text -->
+                        <TextView
+                            android:id="@+id/emptyTransactionsText"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Chưa có giao dịch nào"
+                            android:textSize="16sp"
+                            android:textColor="@color/gray_600"
+                            android:gravity="center"
+                            android:layout_margin="32dp"
+                            android:visibility="gone"/>
+
+                        <!-- RecyclerView for transactions -->
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/transactionsRecyclerView"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:nestedScrollingEnabled="false"/>
+
+            </LinearLayout>
+        </ScrollView>
+
+        <LinearLayout
+            android:id="@+id/footer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:background="@drawable/rounded_frontend"
+            android:elevation="8dp"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:padding="16dp"
+            android:weightSum="5">
+
+            <ImageView
+                android:id="@+id/iconHome"
+                android:layout_width="0dp"
+                android:layout_height="28dp"
+                android:layout_weight="1"
+                android:src="@drawable/ic_home" />
+
+            <ImageView
+                android:id="@+id/iconChart"
+                android:layout_width="0dp"
+                android:layout_height="28dp"
+                android:layout_weight="1"
+                android:src="@drawable/ic_analysis" />
+
+            <ImageView
+                android:id="@+id/iconTrans"
+                android:layout_width="0dp"
+                android:layout_height="28dp"
+                android:layout_weight="1"
+                android:src="@drawable/ic_trans" />
+
+            <ImageView
+                android:id="@+id/iconCategory"
+                android:layout_width="0dp"
+                android:layout_height="28dp"
+                android:layout_weight="1"
+                android:src="@drawable/ic_category" />
+
+            <ImageView
+                android:id="@+id/iconUser"
+                android:layout_width="0dp"
+                android:layout_height="28dp"
+                android:layout_weight="1"
+                android:src="@drawable/ic_profile_black" />
+        </LinearLayout>
+
+        </FrameLayout>
+</RelativeLayout>
+

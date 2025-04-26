@@ -1,0 +1,343 @@
+package com.example.qltccn.activities;
+
+import androidx.appcompat.app.AlertDialog;
+import android.content.Intent;
+import android.os.Bundle;
+import android.text.TextUtils;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+import android.widget.DatePicker;
+import android.app.DatePickerDialog;
+import java.util.Calendar;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+import com.example.qltccn.R;
+import com.example.qltccn.utils.CurrencyUtils;
+import com.example.qltccn.utils.UserUtils;
+import com.example.qltccn.utils.FirebaseUtils;
+
+public class CategoryActivity extends AppCompatActivity {
+
+    // Biến UI
+    private ImageView backButton;
+    private TextView txtTotalBalance;
+    private TextView txtTotalExpense;
+    private Button btnAddMoney;
+    
+    // Footer navigation
+    private ImageView iconHome;
+    private ImageView iconChart;
+    private ImageView iconTrans;
+    private ImageView iconCategory;
+    private ImageView iconUser;
+    
+    // Category icons
+    private LinearLayout foodCategory;
+    private LinearLayout transportCategory;
+    private LinearLayout medicineCategory;
+    private LinearLayout groceriesCategory;
+    private LinearLayout rentCategory;
+    private LinearLayout giftsCategory;
+    private LinearLayout savingsCategory;
+    private LinearLayout entertainmentCategory;
+    private LinearLayout moreCategory;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_category);
+        
+        initViews();
+        setupListeners();
+        loadUserData();
+    }
+    
+    private void initViews() {
+        // Header
+        backButton = findViewById(R.id.backButton);
+        txtTotalBalance = findViewById(R.id.txtTotalBalance);
+        txtTotalExpense = findViewById(R.id.txtTotalExpense);
+        btnAddMoney = findViewById(R.id.btnAddMoney);
+        
+        // Footer
+        iconHome = findViewById(R.id.iconHome);
+        iconChart = findViewById(R.id.iconChart);
+        iconTrans = findViewById(R.id.iconTrans);
+        iconCategory = findViewById(R.id.iconCategory);
+        iconUser = findViewById(R.id.iconUser);
+        
+        // Đặt biểu tượng Category là đã được chọn
+        if (iconCategory != null) {
+            iconCategory.setImageResource(R.drawable.ic_category1);
+        }
+        
+        // Categories
+        foodCategory = findViewById(R.id.foodCategory);
+        transportCategory = findViewById(R.id.transportCategory);
+        medicineCategory = findViewById(R.id.medicineCategory);
+        groceriesCategory = findViewById(R.id.groceriesCategory);
+        rentCategory = findViewById(R.id.rentCategory);
+        giftsCategory = findViewById(R.id.giftsCategory);
+        savingsCategory = findViewById(R.id.savingsCategory);
+        entertainmentCategory = findViewById(R.id.entertainmentCategory);
+        moreCategory = findViewById(R.id.moreCategory);
+    }
+    
+    private void setupListeners() {
+        // Back button
+        backButton.setOnClickListener(v -> finish());
+        
+        // Nạp tiền button
+        btnAddMoney.setOnClickListener(v -> showAddMoneyDialog());
+        
+        // Footer navigation
+        iconHome.setOnClickListener(v -> {
+            Intent intent = new Intent(this, HomeActivity.class);
+            startActivity(intent);
+            finish();
+        });
+        
+        iconChart.setOnClickListener(v -> {
+            Intent intent = new Intent(this, AnalysisActivity.class);
+            startActivity(intent);
+        });
+        
+        iconTrans.setOnClickListener(v -> {
+            Intent intent = new Intent(this, TranActivity.class);
+            startActivity(intent);
+        });
+        
+        // Không cần listener cho iconCategory vì đang ở màn hình Category
+        
+        iconUser.setOnClickListener(v -> {
+            Intent intent = new Intent(this, ProfileActivity.class);
+            startActivity(intent);
+        });
+        
+        // Category clicks
+        setupCategoryClickListeners();
+    }
+    
+    private void showAddMoneyDialog() {
+        // Sử dụng dialog có sẵn
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_add_funds, null);
+        builder.setView(dialogView);
+        
+        // Tham chiếu đến các view trong dialog
+        EditText edtAmount = dialogView.findViewById(R.id.editAmount);
+        EditText edtNote = dialogView.findViewById(R.id.editNote);
+        TextView textDate = dialogView.findViewById(R.id.textDate);
+        View layoutDate = dialogView.findViewById(R.id.layoutDate);
+        Button btnCancel = dialogView.findViewById(R.id.btnCancel);
+        Button btnAddFunds = dialogView.findViewById(R.id.btnAddFunds);
+        
+        // Biến để lưu thời gian được chọn
+        final Calendar[] selectedDateTime = {Calendar.getInstance()};
+        final java.text.SimpleDateFormat dateFormat = new java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.getDefault());
+        
+        // Thiết lập ngày hiện tại
+        textDate.setText(dateFormat.format(selectedDateTime[0].getTime()));
+        
+        // Thiết lập sự kiện cho view chọn ngày
+        layoutDate.setOnClickListener(v -> {
+            // Hiển thị DatePickerDialog
+            DatePickerDialog datePickerDialog = new DatePickerDialog(
+                CategoryActivity.this,
+                (view, year, monthOfYear, dayOfMonth) -> {
+                    // Cập nhật ngày được chọn
+                    selectedDateTime[0].set(Calendar.YEAR, year);
+                    selectedDateTime[0].set(Calendar.MONTH, monthOfYear);
+                    selectedDateTime[0].set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                    
+                    // Cập nhật hiển thị
+                    textDate.setText(dateFormat.format(selectedDateTime[0].getTime()));
+                },
+                selectedDateTime[0].get(Calendar.YEAR),
+                selectedDateTime[0].get(Calendar.MONTH),
+                selectedDateTime[0].get(Calendar.DAY_OF_MONTH)
+            );
+            
+            // Giới hạn không cho chọn quá ngày hiện tại và hiển thị dialog
+            datePickerDialog.getDatePicker().setMaxDate(System.currentTimeMillis());
+            datePickerDialog.show();
+        });
+        
+        // Tạo dialog
+        AlertDialog dialog = builder.create();
+        
+        // Xử lý sự kiện nút Hủy
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
+        
+        // Xử lý sự kiện nút Thêm tiền
+        btnAddFunds.setOnClickListener(v -> {
+            String amountStr = edtAmount.getText().toString().trim();
+            String note = edtNote.getText().toString().trim();
+            
+            if (TextUtils.isEmpty(amountStr)) {
+                Toast.makeText(CategoryActivity.this, "Vui lòng nhập số tiền", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            
+            try {
+                // Xử lý chuỗi trước khi chuyển đổi, loại bỏ dấu phẩy, chấm
+                amountStr = amountStr.replaceAll("[^\\d]", "");
+                
+                // Chuyển đổi sang số
+                double amount = Double.parseDouble(amountStr);
+                if (amount <= 0) {
+                    Toast.makeText(CategoryActivity.this, "Số tiền phải lớn hơn 0", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                // Đặt thời gian đã chọn
+                long selectedTime = selectedDateTime[0].getTimeInMillis();
+                
+                // Gọi API để nạp tiền và truyền ngày đã chọn
+                addMoneyToAccount(amount, note, selectedTime);
+                dialog.dismiss();
+                
+            } catch (NumberFormatException e) {
+                Toast.makeText(CategoryActivity.this, "Số tiền không hợp lệ", Toast.LENGTH_SHORT).show();
+            }
+        });
+        
+        // Hiển thị dialog
+        dialog.show();
+    }
+    
+    private void addMoneyToAccount(double amount, String note, long selectedTime) {
+        // Hiển thị thông báo đang xử lý
+        Toast.makeText(this, "Đang nạp tiền...", Toast.LENGTH_SHORT).show();
+        
+        try {
+            // Gọi hàm nạp tiền từ Firebase Utils
+            FirebaseUtils.addFundsToAccount(amount, note, selectedTime, new FirebaseUtils.FirebaseConnectionCallback() {
+                @Override
+                public void onConnected() {
+                    runOnUiThread(() -> {
+                        // Nạp tiền thành công
+                        Toast.makeText(CategoryActivity.this, 
+                                "Đã nạp " + CurrencyUtils.formatVND(amount) + " thành công", 
+                                Toast.LENGTH_SHORT).show();
+                        
+                        // Tải lại dữ liệu người dùng
+                        loadUserData();
+                    });
+                }
+                
+                @Override
+                public void onDisconnected(String message) {
+                    runOnUiThread(() -> {
+                        // Mất kết nối
+                        Toast.makeText(CategoryActivity.this, 
+                                "Mất kết nối: " + message, 
+                                Toast.LENGTH_SHORT).show();
+                    });
+                }
+                
+                @Override
+                public void onError(String error) {
+                    runOnUiThread(() -> {
+                        // Có lỗi xảy ra
+                        Toast.makeText(CategoryActivity.this, 
+                                "Lỗi: " + error, 
+                                Toast.LENGTH_SHORT).show();
+                    });
+                }
+            });
+        } catch (Exception e) {
+            Toast.makeText(this, "Lỗi khi nạp tiền: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
+    
+    private void setupCategoryClickListeners() {
+        // Xử lý click cho từng danh mục
+        View.OnClickListener categoryClickListener = v -> {
+            String categoryName = "";
+            
+            if (v.getId() == R.id.foodCategory) {
+                categoryName = "Food";
+            } else if (v.getId() == R.id.transportCategory) {
+                categoryName = "Transport";
+            } else if (v.getId() == R.id.medicineCategory) {
+                categoryName = "Medicine";
+            } else if (v.getId() == R.id.groceriesCategory) {
+                categoryName = "Groceries";
+            } else if (v.getId() == R.id.rentCategory) {
+                categoryName = "Rent";
+            } else if (v.getId() == R.id.giftsCategory) {
+                categoryName = "Gifts";
+            } else if (v.getId() == R.id.savingsCategory) {
+                // Chuyển đến SavingsActivity thay vì CategoryDetailActivity
+                Intent intent = new Intent(this, SavingsActivity.class);
+                startActivity(intent);
+                return;
+            } else if (v.getId() == R.id.entertainmentCategory) {
+                categoryName = "Entertainment";
+            } else if (v.getId() == R.id.moreCategory) {
+                // Xử lý riêng cho "More" - có thể mở CategoryManagementActivity
+             //   Intent intent = new Intent(this, CategoryManagementActivity.class);
+              //  startActivity(intent);
+                return;
+            }
+            
+            if (!categoryName.isEmpty()) {
+                // Mở màn hình chi tiết danh mục
+                Intent intent = new Intent(this, CategoryDetailActivity.class);
+                intent.putExtra("CATEGORY_NAME", categoryName);
+                startActivity(intent);
+            }
+        };
+        
+        // Gán listener cho từng danh mục
+        foodCategory.setOnClickListener(categoryClickListener);
+        transportCategory.setOnClickListener(categoryClickListener);
+        medicineCategory.setOnClickListener(categoryClickListener);
+        groceriesCategory.setOnClickListener(categoryClickListener);
+        rentCategory.setOnClickListener(categoryClickListener);
+        giftsCategory.setOnClickListener(categoryClickListener);
+        savingsCategory.setOnClickListener(categoryClickListener);
+        entertainmentCategory.setOnClickListener(categoryClickListener);
+        moreCategory.setOnClickListener(categoryClickListener);
+    }
+    
+    private void loadUserData() {
+        // Tải thông tin số dư và chi tiêu
+        UserUtils.getCurrentUser(new UserUtils.FetchUserCallback() {
+            @Override
+            public void onSuccess(com.example.qltccn.models.User user) {
+                if (user != null) {
+                    txtTotalBalance.setText(CurrencyUtils.formatVND(user.getBalance()));
+                    
+                    // Nếu là tài khoản mới tạo, hiển thị chi tiêu là 0
+                    if (FirebaseUtils.isNewAccount()) {
+                        txtTotalExpense.setText("-" + CurrencyUtils.formatVND(0));
+                    } else {
+                        // Lấy tổng chi tiêu từ SharedPreferences (có thể được lưu ở HomeActivity)
+                        android.content.SharedPreferences prefs = getSharedPreferences("UserData", MODE_PRIVATE);
+                        float totalExpense = prefs.getFloat("total_expense", 0f);
+                        txtTotalExpense.setText("-" + CurrencyUtils.formatVND(totalExpense));
+                    }
+                }
+            }
+            
+            @Override
+            public void onError(String errorMessage) {
+                Toast.makeText(CategoryActivity.this, "Không thể tải thông tin người dùng", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+    
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadUserData(); // Cập nhật dữ liệu khi quay lại màn hình này
+    }
+} 

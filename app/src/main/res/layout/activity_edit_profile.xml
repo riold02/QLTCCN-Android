@@ -1,0 +1,304 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#00D09E"
+    tools:context=".activities.HomeActivity">
+
+    <!-- Toolbar -->
+    <RelativeLayout
+        android:id="@+id/toolbarRL"
+        android:layout_width="match_parent"
+        android:layout_height="50dp">
+
+        <ImageButton
+            android:id="@+id/toolbarBackBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@android:color/transparent"
+            android:padding="10dp"
+            android:src="@drawable/back_white" />
+
+        <TextView
+            style="@style/TextAppearance.Material3.TitleMedium"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="10dp"
+            android:text="Edit My Profile"
+            android:textColor="@color/black" />
+            
+        <ImageButton
+            android:id="@+id/notificationBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:background="@android:color/transparent"
+            android:padding="10dp"
+            android:src="@drawable/ic_noti" />
+    </RelativeLayout>
+
+    <!-- Phần Nội dung chính -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+        
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:background="@drawable/rounded_background">
+
+            <!-- Avatar và thông tin -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <RelativeLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+
+                    <ImageView
+                        android:id="@+id/profileImage"
+                        android:layout_width="100dp"
+                        android:layout_height="100dp"
+                        android:background="@drawable/circle_background"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/profile" />
+
+                    <ImageView
+                        android:id="@+id/changePhotoBtn"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:layout_alignEnd="@+id/profileImage"
+                        android:layout_alignBottom="@+id/profileImage"
+                        android:background="@drawable/ic_camera"
+                        android:padding="5dp"
+                        android:src="@drawable/ic_camera" />
+                </RelativeLayout>
+
+                <TextView
+                    android:id="@+id/profileName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="John Smith"
+                    android:textColor="@color/black"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/profileId"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="ID: 25030024"
+                    android:textColor="@color/black"
+                    android:textSize="14sp" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Account Settings"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@color/black"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="16dp"/>
+
+            <!-- Form chỉnh sửa thông tin -->
+            <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:fillViewport="true"
+                android:paddingBottom="80dp"
+                android:clipToPadding="false">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <!-- Username -->
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Username"
+                        android:textColor="@color/black"
+                        android:textSize="14sp"
+                        android:layout_marginBottom="4dp"/>
+
+                    <EditText
+                        android:id="@+id/editUsername"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/edit_text_background"
+                        android:hint="John Smith"
+                        android:padding="12dp"
+                        android:textSize="14sp"
+                        android:layout_marginBottom="16dp"/>
+
+                    <!-- Phone -->
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Phone"
+                        android:textColor="@color/black"
+                        android:textSize="14sp"
+                        android:layout_marginBottom="4dp"/>
+
+                    <EditText
+                        android:id="@+id/editPhone"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/edit_text_background"
+                        android:hint="+44 555 5555 55"
+                        android:inputType="phone"
+                        android:padding="12dp"
+                        android:textSize="14sp"
+                        android:layout_marginBottom="16dp"/>
+
+                    <!-- Email Address -->
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Email Address"
+                        android:textColor="@color/black"
+                        android:textSize="14sp"
+                        android:layout_marginBottom="4dp"/>
+
+                    <EditText
+                        android:id="@+id/editEmail"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/edit_text_background"
+                        android:hint="example@example.com"
+                        android:inputType="textEmailAddress"
+                        android:padding="12dp"
+                        android:textSize="14sp"
+                        android:layout_marginBottom="16dp"/>
+
+                    <!-- Push Notifications -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="16dp">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Push Notifications"
+                            android:textColor="@color/black"
+                            android:textSize="16sp"/>
+
+                        <androidx.appcompat.widget.SwitchCompat
+                            android:id="@+id/switchNotifications"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:checked="true"
+                            app:thumbTint="#00D09E"
+                            app:trackTint="#80D09E"/>
+                    </LinearLayout>
+
+                    <!-- Dark Theme -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="24dp">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Turn Dark Theme"
+                            android:textColor="@color/black"
+                            android:textSize="16sp"/>
+
+                        <androidx.appcompat.widget.SwitchCompat
+                            android:id="@+id/switchDarkTheme"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:checked="true"
+                            app:thumbTint="#00D09E"
+                            app:trackTint="#80D09E"/>
+                    </LinearLayout>
+
+                    <!-- Update Profile Button -->
+                    <Button
+                        android:id="@+id/btnUpdateProfile"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="#00D09E"
+                        android:text="Update Profile"
+                        android:textColor="@android:color/white"
+                        android:textAllCaps="false"
+                        android:padding="12dp"
+                        android:layout_marginBottom="24dp"/>
+                </LinearLayout>
+            </ScrollView>
+        </LinearLayout>
+
+        <!-- Phần Footer cố định -->
+        <LinearLayout
+            android:id="@+id/footer"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:layout_gravity="bottom"
+            android:layout_marginBottom="0dp"
+            android:background="@drawable/rounded_frontend"
+            android:elevation="8dp"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:padding="16dp"
+            android:weightSum="5">
+
+            <ImageView
+                android:id="@+id/iconHome"
+                android:layout_width="0dp"
+                android:layout_height="28dp"
+                android:layout_weight="1"
+                android:src="@drawable/ic_home" />
+
+            <ImageView
+                android:id="@+id/iconChart"
+                android:layout_width="0dp"
+                android:layout_height="28dp"
+                android:layout_weight="1"
+                android:src="@drawable/ic_analysis" />
+
+            <ImageView
+                android:id="@+id/iconTrans"
+                android:layout_width="0dp"
+                android:layout_height="28dp"
+                android:layout_weight="1"
+                android:src="@drawable/ic_trans" />
+
+            <ImageView
+                android:id="@+id/iconCategory"
+                android:layout_width="0dp"
+                android:layout_height="28dp"
+                android:layout_weight="1"
+                android:src="@drawable/ic_category" />
+
+            <ImageView
+                android:id="@+id/iconUser"
+                android:layout_width="0dp"
+                android:layout_height="28dp"
+                android:layout_weight="1"
+                android:src="@drawable/ic_profile_black" />
+        </LinearLayout>
+    </FrameLayout>
+</LinearLayout> 

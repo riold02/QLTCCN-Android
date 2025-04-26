@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/rounded_white_bg">
+
+    <!-- Tiêu đề đơn giản -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Chi tiết giao dịch"
+        android:textColor="@color/black"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:paddingTop="16dp"
+        android:paddingBottom="16dp"/>
+    
+    <!-- Đường kẻ phân cách -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/gray_400"/>
+
+    <!-- Thông tin giao dịch -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <TextView
+            android:id="@+id/tvDetailCategory"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Danh mục: deposit"
+            android:textColor="@color/gray_600"
+            android:textSize="14sp"
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:id="@+id/tvDetailAmount"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Số tiền: 100.000 đ"
+            android:textColor="#FF4D4F"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:id="@+id/tvDetailDate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Ngày: 26/04/2023 15:28"
+            android:textColor="@color/gray_600"
+            android:textSize="14sp"
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:id="@+id/tvDetailType"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Loại: Thu nhập"
+            android:textColor="@color/gray_600"
+            android:textSize="14sp"
+            android:layout_marginBottom="16dp"/>
+
+        <!-- Đường kẻ phân cách -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/gray_400"
+            android:layout_marginBottom="16dp"/>
+
+        <!-- Ghi chú -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Ghi chú"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:id="@+id/tvDetailDescription"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Nạp tiền vào tài khoản"
+            android:textColor="@color/gray_600"
+            android:textSize="14sp"/>
+    </LinearLayout>
+
+    <!-- Các nút hành động -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="16dp">
+
+        <Button
+            android:id="@+id/btnClose"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:text="ĐÓNG"
+            android:backgroundTint="#F0F0F0"
+            android:textColor="@color/black"
+            android:textSize="14sp"
+            app:cornerRadius="4dp"
+            android:layout_marginEnd="8dp"/>
+
+        <Button
+            android:id="@+id/btnEdit"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:text="CHỈNH SỬA"
+            android:backgroundTint="@color/colorPrimary"
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            app:cornerRadius="4dp"/>
+    </LinearLayout>
+</LinearLayout> 
