@@ -41,7 +41,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
         android:backgroundTint="#00C49A"
-        android:text="Log In"
+        android:text="Đăng nhập"
         android:textColor="#FFFFFF" />
 
     <Button
@@ -49,16 +49,16 @@
         android:layout_width="200dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
-        android:backgroundTint="#E8FFF4"
-        android:text="Sign Up"
-        android:textColor="#00C49A" />
+        android:backgroundTint="#00C49A"
+        android:text="Đăng ký"
+        android:textColor="#FFFFFF" />
 
     <TextView
         android:id="@+id/forgotPasswordTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:text="Forgot Password?"
+        android:text="Quên mật khẩu?"
         android:textColor="#666666"
         android:textSize="14sp" />
 

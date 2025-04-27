@@ -16,7 +16,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Create Account"
+            android:text="Tạo tài khoản"
             android:textColor="@color/black"
             android:textSize="24sp"
             android:textStyle="bold" />
@@ -46,7 +46,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
-                    android:text="Full Name"
+                    android:text="Họ và tên"
                     android:textColor="#000000"
                     android:textSize="14sp" />
 
@@ -56,7 +56,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="16dp"
                     android:background="@drawable/rounded_edittext"
-                    android:hint="example@example.com"
+                    android:hint="Nguyễn Văn A"
                     android:padding="12dp"
                     android:textColor="@color/gray_500" />
 
@@ -82,7 +82,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
-                    android:text="Mobile Number"
+                    android:text="Số điện thoại"
                     android:textColor="#000000"
                     android:textSize="14sp" />
 
@@ -92,7 +92,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="16dp"
                     android:background="@drawable/rounded_edittext"
-                    android:hint="+123 456 789"
+                    android:hint="+84 123 456 789"
                     android:inputType="phone"
                     android:padding="12dp"
                     android:textColor="@color/gray_500" />
@@ -101,7 +101,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
-                    android:text="Date of Birth"
+                    android:text="Ngày sinh"
                     android:textColor="#000000"
                     android:textSize="14sp" />
 
@@ -120,7 +120,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
-                    android:text="Password"
+                    android:text="Mật khẩu"
                     android:textColor="#000000"
                     android:textSize="14sp" />
 
@@ -152,7 +152,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
-                    android:text="Confirm Password"
+                    android:text="Xác nhận mật khẩu"
                     android:textColor="#000000"
                     android:textSize="14sp" />
 
@@ -183,7 +183,7 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="16dp"
+
                     android:gravity="center_vertical"
                     android:orientation="horizontal">
 
@@ -196,7 +196,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="By continuing, you agree to "
+                        android:text="Bằng cách tiếp tục, bạn đồng ý với "
                         android:textColor="#000000"
                         android:textSize="12sp" />
 
@@ -204,24 +204,11 @@
                         android:id="@+id/tvTerms"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Terms of Use"
+                        android:text="Điều khoản sử dụng"
                         android:textColor="#00D09E"
                         android:textSize="12sp" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text=" and "
-                        android:textColor="#000000"
-                        android:textSize="12sp" />
 
-                    <TextView
-                        android:id="@+id/tvPrivacyPolicy"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Privacy Policy"
-                        android:textColor="#00D09E"
-                        android:textSize="12sp" />
                 </LinearLayout>
 
                 <com.google.android.material.button.MaterialButton
@@ -231,7 +218,7 @@
                     android:layout_marginBottom="16dp"
                     android:backgroundTint="#00D09E"
                     android:padding="12dp"
-                    android:text="Sign Up"
+                    android:text="Đăng ký"
                     android:textColor="#FFFFFF"
                     app:cornerRadius="24dp" />
 
@@ -240,7 +227,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:text="Already have an account? Log In"
+                    android:text="Đã có tài khoản? Đăng nhập"
                     android:textColor="#00D09E"
                     android:textSize="14sp" />
             </LinearLayout>

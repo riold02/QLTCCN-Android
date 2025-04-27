@@ -18,7 +18,7 @@
             android:id="@+id/welcomeText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Hi, Welcome Back"
+            android:text="Xin chào, Chào mừng trở lại"
             android:textColor="#FFFFFF"
             android:textSize="20sp"
             android:textStyle="bold"
@@ -29,7 +29,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/welcomeText"
-            android:text="Good Morning"
+            android:text="Buổi sáng tốt lành"
             android:textColor="#FFFFFF"
             android:textSize="16sp" />
 
@@ -88,7 +88,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
-                        android:text="Total Balance"
+                        android:text="Tổng số dư"
                         android:textColor="#FFFFFF"
                         android:textSize="14sp" />
                 </LinearLayout>
@@ -126,7 +126,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Total Expense"
+                        android:text="Tổng chi tiêu"
                         android:textColor="#FFFFFF"
                         android:textSize="14sp" />
                 </LinearLayout>
@@ -200,7 +200,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:gravity="center"
-                        android:text="Savings"
+                        android:text="Tiết kiệm"
                         android:textColor="#FFFFFF"
                         android:textSize="14sp" />
 
@@ -236,7 +236,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Revenue Last Week"
+                            android:text="Thu nhập tuần trước"
                             android:textColor="#FFFFFF"
                             android:textSize="14sp" />
                     </LinearLayout>
@@ -269,7 +269,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Food Last Week"
+                            android:text="Chi tiêu ăn uống tuần trước"
                             android:textColor="#FFFFFF"
                             android:textSize="14sp" />
                     </LinearLayout>
@@ -309,7 +309,7 @@
                 android:layout_height="40dp"
                 android:layout_weight="1"
                 android:background="@android:color/transparent"
-                android:text="Daily"
+                android:text="Hàng ngày"
                 android:textColor="#333333" />
 
             <Button
@@ -318,7 +318,7 @@
                 android:layout_height="40dp"
                 android:layout_weight="1"
                 android:background="@android:color/transparent"
-                android:text="Weekly"
+                android:text="Hàng tuần"
                 android:textColor="#333333" />
 
             <Button
@@ -327,7 +327,7 @@
                 android:layout_height="40dp"
                 android:layout_weight="1"
                 android:background="@drawable/selected_tab_background"
-                android:text="Monthly"
+                android:text="Hàng tháng"
                 android:textColor="#FFFFFF" />
         </LinearLayout>
 

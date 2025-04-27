@@ -165,6 +165,7 @@ public class AuthUtils {
             // Chuẩn bị dữ liệu cho Firestore
             Map<String, Object> userData = new HashMap<>();
             userData.put("id", user.getId());
+            userData.put("uid", user.getId()); // Đảm bảo uid và id đồng nhất
             userData.put("email", user.getEmail());
             userData.put("name", user.getName());
             userData.put("phone", user.getPhone());
@@ -194,7 +195,7 @@ public class AuthUtils {
             // Thiết lập timeout để đảm bảo callback được gọi nếu có vấn đề
             final boolean[] callbackFired = {false};
             
-            // Đặt timeout 5 giây
+            // Đặt timeout 15 giây thay vì 5 giây để đảm bảo có đủ thời gian
             new android.os.Handler().postDelayed(() -> {
                 if (!callbackFired[0]) {
                     callbackFired[0] = true;
@@ -202,7 +203,7 @@ public class AuthUtils {
                     // Vẫn tiếp tục với callback thành công dù có timeout
                     callback.onSuccess(firebaseUser);
                 }
-            }, 5000);
+            }, 15000);
             
             // Lưu dữ liệu vào Firestore
             Log.d(TAG, "Bắt đầu lưu vào Firestore...");
@@ -210,29 +211,62 @@ public class AuthUtils {
                     .document(firebaseUser.getUid())
                     .set(userData)
                     .addOnSuccessListener(aVoid -> {
-                        if (!callbackFired[0]) {
-                            callbackFired[0] = true;
-                            Log.d(TAG, "Lưu dữ liệu người dùng vào Firestore thành công");
-                            callback.onSuccess(firebaseUser);
-                        }
+                        Log.d(TAG, "Lưu dữ liệu người dùng vào Firestore thành công");
+                        
+                        // Sau khi lưu thành công vào Firestore, lưu vào Realtime Database
+                        saveUserToRealtimeDatabase(firebaseUser, userData, callbackFired, callback);
                     })
                     .addOnFailureListener(e -> {
                         Log.e(TAG, "Lỗi lưu dữ liệu vào Firestore: " + e.getMessage(), e);
-                        if (!callbackFired[0]) {
-                            callbackFired[0] = true;
-                            // Nếu lỗi liên quan đến quyền, vẫn cho phép đăng ký thành công
-                            if (e.getMessage() != null && e.getMessage().contains("PERMISSION_DENIED")) {
-                                Log.w(TAG, "Lỗi quyền truy cập khi lưu dữ liệu, nhưng vẫn tiếp tục");
-                                callback.onSuccess(firebaseUser);
-                            } else {
-                                callback.onError("Lỗi lưu dữ liệu người dùng: " + e.getMessage());
-                            }
-                        }
+                        
+                        // Nếu lỗi Firestore, vẫn thử lưu vào Realtime Database
+                        saveUserToRealtimeDatabase(firebaseUser, userData, callbackFired, callback);
                     });
             
         } catch (Exception e) {
             Log.e(TAG, "Lỗi nghiêm trọng khi lưu dữ liệu người dùng: " + e.getMessage(), e);
             callback.onError("Lỗi không xác định khi lưu dữ liệu: " + e.getMessage());
+        }
+    }
+    
+    // Phương thức mới để lưu dữ liệu người dùng vào Realtime Database
+    private static void saveUserToRealtimeDatabase(FirebaseUser firebaseUser, Map<String, Object> userData, 
+                                                  final boolean[] callbackFired, final AuthCallback callback) {
+        try {
+            Log.d(TAG, "Bắt đầu lưu vào Realtime Database...");
+            
+            com.google.firebase.database.DatabaseReference dbRef = 
+                    com.google.firebase.database.FirebaseDatabase.getInstance().getReference()
+                    .child("users").child(firebaseUser.getUid());
+            
+            dbRef.setValue(userData)
+                .addOnSuccessListener(aVoid -> {
+                    Log.d(TAG, "Lưu dữ liệu người dùng vào Realtime Database thành công");
+                    if (!callbackFired[0]) {
+                        callbackFired[0] = true;
+                        callback.onSuccess(firebaseUser);
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Lỗi lưu dữ liệu vào Realtime Database: " + e.getMessage(), e);
+                    if (!callbackFired[0]) {
+                        callbackFired[0] = true;
+                        // Nếu lỗi liên quan đến quyền, vẫn cho phép đăng ký thành công
+                        if (e.getMessage() != null && e.getMessage().contains("PERMISSION_DENIED")) {
+                            Log.w(TAG, "Lỗi quyền truy cập khi lưu dữ liệu, nhưng vẫn tiếp tục");
+                            callback.onSuccess(firebaseUser);
+                        } else {
+                            callback.onError("Lỗi lưu dữ liệu người dùng: " + e.getMessage());
+                        }
+                    }
+                });
+        } catch (Exception e) {
+            Log.e(TAG, "Lỗi khi lưu vào Realtime Database: " + e.getMessage(), e);
+            if (!callbackFired[0]) {
+                callbackFired[0] = true;
+                // Vẫn tiếp tục với đăng ký, ngay cả khi lỗi Realtime DB
+                callback.onSuccess(firebaseUser);
+            }
         }
     }
     

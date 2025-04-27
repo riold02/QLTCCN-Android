@@ -18,7 +18,7 @@
         android:id="@+id/appName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Finwise"
+        android:text="FinWise"
         android:textColor="#FFFFFF"
         android:textAlignment="center"
         android:textSize="32sp"

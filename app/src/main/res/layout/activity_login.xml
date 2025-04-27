@@ -20,7 +20,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginBottom="24dp"
-            android:text="Welcome"
+            android:text="Chào mừng"
             android:textColor="@color/black"
             android:textSize="24sp"
             android:textStyle="bold" />
@@ -63,7 +63,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="8dp"
-                        android:text="Username Or Email"
+                        android:text="Tên đăng nhập hoặc Email"
                         android:textColor="@color/black"
                         android:textSize="14sp" />
 
@@ -82,7 +82,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="8dp"
-                        android:text="Password"
+                        android:text="Mật khẩu"
                         android:textColor="@color/black"
                         android:textSize="14sp" />
 
@@ -111,6 +111,16 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
+            <ProgressBar
+                android:id="@+id/progressBar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:visibility="gone"
+                android:layout_marginBottom="16dp"
+                android:indeterminate="true"
+                android:indeterminateTint="#00D09E" />
+
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnLogin"
                 android:layout_width="match_parent"
@@ -118,7 +128,7 @@
                 android:layout_marginBottom="8dp"
                 android:backgroundTint="#00D09E"
                 android:padding="12dp"
-                android:text="Log In"
+                android:text="Đăng nhập"
                 android:textColor="@color/black"
                 app:cornerRadius="24dp" />
 
@@ -128,7 +138,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginBottom="16dp"
-                android:text="Forgot Password?"
+                android:text="Quên mật khẩu?"
                 android:textColor="@color/black"
                 android:textSize="14sp" />
 
@@ -140,7 +150,7 @@
                 android:layout_marginBottom="24dp"
                 android:backgroundTint="#00D09E"
                 android:padding="12dp"
-                android:text="Sign Up"
+                android:text="Đăng ký"
                 android:textColor="@color/black"
                 app:cornerRadius="24dp" />
 
@@ -171,7 +181,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:text="Don't have an account? Sign Up"
+                android:text="Bạn chưa có tài khoản? Đăng ký"
                 android:textColor="@color/gray_500"
                 android:textSize="14sp" />
         </LinearLayout>

@@ -4,11 +4,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.text.method.PasswordTransformationMethod;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -36,6 +38,9 @@ public class SignUpActivity extends AppCompatActivity {
     private TextView tvAlreadyAccount;
     private CheckBox cbTerms;
     private ProgressBar progressBar;
+    private ImageView ivShowPassword, ivShowConfirmPassword;
+    private boolean isPasswordVisible = false;
+    private boolean isConfirmPasswordVisible = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,6 +65,8 @@ public class SignUpActivity extends AppCompatActivity {
         tvAlreadyAccount = findViewById(R.id.tvAlreadyAccount);
         cbTerms = findViewById(R.id.cbTerms);
         progressBar = findViewById(R.id.progressBar);
+        ivShowPassword = findViewById(R.id.ivShowPassword);
+        ivShowConfirmPassword = findViewById(R.id.ivShowConfirmPassword);
     }
 
     private void setClickListeners() {
@@ -74,6 +81,62 @@ public class SignUpActivity extends AppCompatActivity {
             startActivity(intent);
             finish();
         });
+        
+        // Thiết lập listener cho nút hiển thị/ẩn mật khẩu
+        if (ivShowPassword != null) {
+            ivShowPassword.setOnClickListener(v -> togglePasswordVisibility(edtPassword, ivShowPassword, isPasswordVisible));
+        } else {
+            Log.e(TAG, "ivShowPassword là null khi thiết lập listener");
+        }
+        
+        // Thiết lập listener cho nút hiển thị/ẩn xác nhận mật khẩu
+        if (ivShowConfirmPassword != null) {
+            ivShowConfirmPassword.setOnClickListener(v -> toggleConfirmPasswordVisibility());
+        } else {
+            Log.e(TAG, "ivShowConfirmPassword là null khi thiết lập listener");
+        }
+    }
+    
+    // Phương thức để chuyển đổi hiển thị/ẩn mật khẩu
+    private void togglePasswordVisibility(EditText editText, ImageView imageView, boolean isVisible) {
+        try {
+            if (editText != null && imageView != null) {
+                if (isVisible) {
+                    // Chuyển về chế độ ẩn mật khẩu
+                    editText.setTransformationMethod(PasswordTransformationMethod.getInstance());
+                    imageView.setImageResource(R.drawable.ic_visibility);
+                    if (editText == edtPassword) {
+                        isPasswordVisible = false;
+                    } else {
+                        isConfirmPasswordVisible = false;
+                    }
+                } else {
+                    // Chuyển sang chế độ hiển thị mật khẩu
+                    editText.setTransformationMethod(null);
+                    imageView.setImageResource(R.drawable.ic_visibility_off);
+                    if (editText == edtPassword) {
+                        isPasswordVisible = true;
+                    } else {
+                        isConfirmPasswordVisible = true;
+                    }
+                }
+                
+                // Đặt con trỏ về cuối văn bản
+                editText.setSelection(editText.getText().length());
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Lỗi khi chuyển đổi hiển thị mật khẩu: " + e.getMessage(), e);
+        }
+    }
+    
+    // Phương thức cho trường mật khẩu chính
+    private void togglePasswordVisibility() {
+        togglePasswordVisibility(edtPassword, ivShowPassword, isPasswordVisible);
+    }
+    
+    // Phương thức cho trường xác nhận mật khẩu
+    private void toggleConfirmPasswordVisibility() {
+        togglePasswordVisibility(edtConfirmPassword, ivShowConfirmPassword, isConfirmPasswordVisible);
     }
 
     private boolean validateInputs() {
@@ -243,14 +306,8 @@ public class SignUpActivity extends AppCompatActivity {
         try {
             hideProgressDialog();
             
-            // Thông báo đăng ký thành công
-            Toast.makeText(this, "Đăng ký thành công!", Toast.LENGTH_SHORT).show();
-            
-            // Chuyển đến màn hình chính
-            Intent mainIntent = new Intent(SignUpActivity.this, HomeActivity.class);
-            mainIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(mainIntent);
-            finish();
+            // Kiểm tra dữ liệu người dùng đã được lưu đầy đủ chưa
+            checkUserDataExistsAndNavigate(user);
             
         } catch (Exception e) {
             Log.e(TAG, "Lỗi khi hoàn tất đăng ký: " + e.getMessage(), e);
@@ -260,6 +317,101 @@ public class SignUpActivity extends AppCompatActivity {
             startActivity(loginIntent);
             finish();
         }
+    }
+    
+    // Phương thức mới để kiểm tra dữ liệu người dùng đã được lưu đầy đủ chưa
+    private void checkUserDataExistsAndNavigate(FirebaseUser user) {
+        try {
+            // Hiển thị lại loading để người dùng biết đang kiểm tra dữ liệu
+            showProgress(true);
+            
+            // Đặt timeout 10 giây để đảm bảo ứng dụng không bị treo
+            new android.os.Handler().postDelayed(() -> {
+                Log.d(TAG, "Đã hết thời gian kiểm tra dữ liệu, chuyển đến màn hình chính");
+                showProgress(false);
+                navigateToHome();
+            }, 10000);
+            
+            // Kiểm tra dữ liệu người dùng trong Firestore
+            FirebaseUtils.getUsersCollection()
+                .document(user.getUid())
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        Log.d(TAG, "Dữ liệu người dùng đã được lưu trong Firestore");
+                        
+                        // Kiểm tra dữ liệu người dùng trong Realtime Database
+                        com.google.firebase.database.FirebaseDatabase.getInstance().getReference()
+                            .child("users").child(user.getUid())
+                            .addListenerForSingleValueEvent(new com.google.firebase.database.ValueEventListener() {
+                                @Override
+                                public void onDataChange(@androidx.annotation.NonNull com.google.firebase.database.DataSnapshot snapshot) {
+                                    showProgress(false);
+                                    
+                                    if (snapshot.exists()) {
+                                        Log.d(TAG, "Dữ liệu người dùng đã được lưu trong Realtime Database");
+                                    } else {
+                                        Log.w(TAG, "Dữ liệu người dùng chưa được lưu trong Realtime Database");
+                                        Toast.makeText(SignUpActivity.this, 
+                                            "Cảnh báo: Dữ liệu người dùng chưa đồng bộ đầy đủ", 
+                                            Toast.LENGTH_SHORT).show();
+                                    }
+                                    
+                                    // Vẫn chuyển đến màn hình chính
+                                    navigateToHome();
+                                }
+                                
+                                @Override
+                                public void onCancelled(@androidx.annotation.NonNull com.google.firebase.database.DatabaseError error) {
+                                    showProgress(false);
+                                    Log.e(TAG, "Lỗi khi kiểm tra dữ liệu trong Realtime Database: " + error.getMessage());
+                                    
+                                    // Thông báo và vẫn chuyển đến màn hình chính
+                                    Toast.makeText(SignUpActivity.this, 
+                                        "Cảnh báo: Không thể kiểm tra dữ liệu người dùng", 
+                                        Toast.LENGTH_SHORT).show();
+                                    navigateToHome();
+                                }
+                            });
+                    } else {
+                        showProgress(false);
+                        Log.w(TAG, "Dữ liệu người dùng chưa được lưu trong Firestore");
+                        
+                        // Thông báo nhưng vẫn chuyển đến màn hình chính
+                        Toast.makeText(SignUpActivity.this, 
+                            "Cảnh báo: Dữ liệu người dùng chưa được lưu đầy đủ", 
+                            Toast.LENGTH_SHORT).show();
+                        navigateToHome();
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    showProgress(false);
+                    Log.e(TAG, "Lỗi khi kiểm tra dữ liệu người dùng: " + e.getMessage());
+                    
+                    // Thông báo và vẫn chuyển đến màn hình chính
+                    Toast.makeText(SignUpActivity.this, 
+                        "Lỗi kiểm tra dữ liệu: " + e.getMessage(), 
+                        Toast.LENGTH_SHORT).show();
+                    navigateToHome();
+                });
+        } catch (Exception e) {
+            showProgress(false);
+            Log.e(TAG, "Lỗi trong quá trình kiểm tra dữ liệu: " + e.getMessage(), e);
+            // Vẫn chuyển đến màn hình chính
+            navigateToHome();
+        }
+    }
+    
+    // Phương thức di chuyển đến màn hình chính
+    private void navigateToHome() {
+        // Thông báo đăng ký thành công
+        Toast.makeText(this, "Đăng ký thành công!", Toast.LENGTH_SHORT).show();
+        
+        // Chuyển đến màn hình chính
+        Intent mainIntent = new Intent(SignUpActivity.this, HomeActivity.class);
+        mainIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(mainIntent);
+        finish();
     }
     
     // Phương thức ẩn dialog tiến trình

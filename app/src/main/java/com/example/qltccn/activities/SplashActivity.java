@@ -124,7 +124,8 @@ public class SplashActivity extends AppCompatActivity {
     }
     
     private void navigateToLoginScreen() {
-        Intent intent = new Intent(SplashActivity.this, LoginActivity.class);
+        // Điều hướng đến MainActivity thay vì LoginActivity
+        Intent intent = new Intent(SplashActivity.this, MainActivity.class);
         startActivity(intent);
         finish();
     }

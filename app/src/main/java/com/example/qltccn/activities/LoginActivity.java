@@ -7,10 +7,12 @@ import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.TextUtils;
+import android.text.method.PasswordTransformationMethod;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -30,6 +32,8 @@ public class LoginActivity extends AppCompatActivity {
     private Button btnLogin;
     private TextView tvSignUp, tvForgotPassword;
     private ProgressBar progressBar;
+    private ImageView ivShowPassword;
+    private boolean isPasswordVisible = false;
 
 
     @Override
@@ -49,6 +53,7 @@ public class LoginActivity extends AppCompatActivity {
             tvSignUp = findViewById(R.id.tvSignUp);
             tvForgotPassword = findViewById(R.id.tvForgotPassword);
             progressBar = findViewById(R.id.progressBar);
+            ivShowPassword = findViewById(R.id.ivShowPassword);
             
             // Kiểm tra các view quan trọng
             if (etEmail == null || etPassword == null || btnLogin == null) {
@@ -101,8 +106,38 @@ public class LoginActivity extends AppCompatActivity {
             } else {
                 Log.e(TAG, "tvForgotPassword là null khi thiết lập listener");
             }
+            
+            // Thiết lập listener cho nút hiển thị/ẩn mật khẩu
+            if (ivShowPassword != null) {
+                ivShowPassword.setOnClickListener(v -> togglePasswordVisibility());
+            } else {
+                Log.e(TAG, "ivShowPassword là null khi thiết lập listener");
+            }
         } catch (Exception e) {
             Log.e(TAG, "Lỗi khi thiết lập listeners: " + e.getMessage(), e);
+        }
+    }
+    
+    // Phương thức để chuyển đổi hiển thị/ẩn mật khẩu
+    private void togglePasswordVisibility() {
+        try {
+            if (etPassword != null) {
+                if (isPasswordVisible) {
+                    // Chuyển về chế độ ẩn mật khẩu
+                    etPassword.setTransformationMethod(PasswordTransformationMethod.getInstance());
+                    ivShowPassword.setImageResource(R.drawable.ic_visibility);
+                } else {
+                    // Chuyển sang chế độ hiển thị mật khẩu
+                    etPassword.setTransformationMethod(null);
+                    ivShowPassword.setImageResource(R.drawable.ic_visibility_off);
+                }
+                isPasswordVisible = !isPasswordVisible;
+                
+                // Đặt con trỏ về cuối văn bản
+                etPassword.setSelection(etPassword.getText().length());
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Lỗi khi chuyển đổi hiển thị mật khẩu: " + e.getMessage(), e);
         }
     }
 
