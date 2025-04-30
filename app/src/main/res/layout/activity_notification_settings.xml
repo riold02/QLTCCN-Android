@@ -29,7 +29,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:text="Notification Settings"
+            android:text="Cài đặt thông báo"
             android:textColor="@color/black" />
 
         <ImageView
@@ -65,7 +65,7 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentStart="true"
                     android:layout_centerVertical="true"
-                    android:text="General Notification"
+                    android:text="Thông báo chung"
                     android:textColor="@color/black"
                     android:textSize="16sp" />
 
@@ -96,7 +96,7 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentStart="true"
                     android:layout_centerVertical="true"
-                    android:text="Sound"
+                    android:text="Âm thanh"
                     android:textColor="@color/black"
                     android:textSize="16sp" />
 
@@ -127,7 +127,7 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentStart="true"
                     android:layout_centerVertical="true"
-                    android:text="Silent Call"
+                    android:text="Cuộc gọi im lặng"
                     android:textColor="@color/black"
                     android:textSize="16sp" />
 
@@ -158,7 +158,7 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentStart="true"
                     android:layout_centerVertical="true"
-                    android:text="Vibrate"
+                    android:text="Rung"
                     android:textColor="@color/black"
                     android:textSize="16sp" />
 
@@ -189,7 +189,7 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentStart="true"
                     android:layout_centerVertical="true"
-                    android:text="Transaction Update"
+                    android:text="Cập nhật giao dịch"
                     android:textColor="@color/black"
                     android:textSize="16sp" />
 
@@ -220,7 +220,7 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentStart="true"
                     android:layout_centerVertical="true"
-                    android:text="Expense Reminder"
+                    android:text="Nhắc nhở chi tiêu"
                     android:textColor="@color/black"
                     android:textSize="16sp" />
 
@@ -251,7 +251,7 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentStart="true"
                     android:layout_centerVertical="true"
-                    android:text="Budget Notifications"
+                    android:text="Thông báo ngân sách"
                     android:textColor="@color/black"
                     android:textSize="16sp" />
 
@@ -282,7 +282,7 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentStart="true"
                     android:layout_centerVertical="true"
-                    android:text="Low Balance Alerts"
+                    android:text="Cảnh báo số dư thấp"
                     android:textColor="@color/black"
                     android:textSize="16sp" />
 

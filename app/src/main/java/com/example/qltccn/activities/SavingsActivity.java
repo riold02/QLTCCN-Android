@@ -37,8 +37,8 @@ public class SavingsActivity extends AppCompatActivity implements View.OnClickLi
     private String currentUserId;
 
     // UI Elements
-    private TextView tvTotalBalance, tvTotalExpense, tvProgressPercent, tvProgressTotal;
-    private ProgressBar expenseProgressBar;
+    private TextView tvTotalBalance, tvTotalSaving, tvProgressPercent, tvProgressTotal;
+    private ProgressBar savingProgressBar;
     private ImageView btnBack, btnNotification;
     private Button btnAddMoreSavingGoal;
     
@@ -54,7 +54,7 @@ public class SavingsActivity extends AppCompatActivity implements View.OnClickLi
     // Data
     private List<SavingsGoal> savingsGoals = new ArrayList<>();
     private double totalBalance = 0.0;
-    private double totalExpense = 0.0;
+    private double totalSaving = 0.0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,12 +92,12 @@ public class SavingsActivity extends AppCompatActivity implements View.OnClickLi
         
         // Balance Info
         tvTotalBalance = findViewById(R.id.tvTotalBalance);
-        tvTotalExpense = findViewById(R.id.tvTotalExpense);
+        tvTotalSaving = findViewById(R.id.tvTotalExpense);
         
         // Progress
         tvProgressPercent = findViewById(R.id.tvProgressPercent);
         tvProgressTotal = findViewById(R.id.tvProgressTotal);
-        expenseProgressBar = findViewById(R.id.expenseProgressBar);
+        savingProgressBar = findViewById(R.id.expenseProgressBar);
         
         // Goals Grid
         goalTravel = findViewById(R.id.goalTravel);
@@ -294,23 +294,20 @@ public class SavingsActivity extends AppCompatActivity implements View.OnClickLi
                     Toast.makeText(SavingsActivity.this, "Lỗi khi tải dữ liệu người dùng", Toast.LENGTH_SHORT).show();
                 });
                 
-        // Lấy tổng chi tiêu
-        db.collection("transactions")
-                .whereEqualTo("userId", currentUserId)
-                .whereEqualTo("type", "expense")
-                .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    double total = 0;
-                    for (DocumentSnapshot doc : queryDocumentSnapshots) {
-                        Transaction transaction = doc.toObject(Transaction.class);
-                        if (transaction != null) {
-                            total += transaction.getAmount();
-                        }
-                    }
-                    totalExpense = total;
-                    tvTotalExpense.setText(CurrencyUtils.formatAmount(totalExpense));
-                    updateProgressBar();
-                });
+        // Lấy tổng tiết kiệm
+        calculateTotalSaving();
+    }
+
+    private void calculateTotalSaving() {
+        double total = 0;
+        
+        for (SavingsGoal goal : savingsGoals) {
+            total += goal.getCurrentAmount();
+        }
+        
+        totalSaving = total;
+        tvTotalSaving.setText(CurrencyUtils.formatAmount(totalSaving));
+        updateProgressBar();
     }
 
     private void updateUIWithUserData(User user) {
@@ -322,11 +319,11 @@ public class SavingsActivity extends AppCompatActivity implements View.OnClickLi
 
     private void updateProgressBar() {
         if (totalBalance > 0) {
-            int percent = (int) ((totalExpense / totalBalance) * 100);
+            int percent = (int) ((totalSaving / totalBalance) * 100);
             if (percent > 100) percent = 100;
             
             tvProgressPercent.setText(percent + "%");
-            expenseProgressBar.setProgress(percent);
+            savingProgressBar.setProgress(percent);
         }
     }
 
@@ -393,6 +390,9 @@ public class SavingsActivity extends AppCompatActivity implements View.OnClickLi
         updateGoalUI("house", tvHouseAmount, tvHouseProgress);
         updateGoalUI("car", tvCarAmount, tvCarProgress);
         updateGoalUI("wedding", tvWeddingAmount, tvWeddingProgress);
+        
+        // Cập nhật tổng tiết kiệm
+        calculateTotalSaving();
     }
 
     private void updateGoalUI(String categoryType, TextView amountView, TextView progressView) {

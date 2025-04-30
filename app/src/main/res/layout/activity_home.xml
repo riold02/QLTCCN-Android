@@ -269,7 +269,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Chi tiêu ăn uống tuần trước"
+                            android:text="Chi tiêu ăn uống lần trước"
                             android:textColor="#FFFFFF"
                             android:textSize="14sp" />
                     </LinearLayout>

@@ -135,7 +135,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
-                                android:text="Edit Profile"
+                                android:text="Chỉnh sửa thông tin"
                                 android:textColor="@android:color/black"
                                 android:textSize="16sp" />
 
@@ -167,7 +167,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
-                                android:text="Security"
+                                android:text="Bảo mật"
                                 android:textColor="@android:color/black"
                                 android:textSize="16sp" />
 
@@ -200,7 +200,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
-                                android:text="Setting"
+                                android:text="Cài đặt"
                                 android:textColor="@android:color/black"
                                 android:textSize="16sp" />
 
@@ -232,7 +232,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
-                                android:text="Help"
+                                android:text="Trợ giúp "
                                 android:textColor="@android:color/black"
                                 android:textSize="16sp" />
 
@@ -264,7 +264,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
-                                android:text="Logout"
+                                android:text="Đăng xuất"
                                 android:textColor="@android:color/black"
                                 android:textSize="16sp" />
 

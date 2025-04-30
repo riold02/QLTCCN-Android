@@ -71,7 +71,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Total Balance"
+                    android:text="Tổng thu nhập "
                     android:textColor="#FFFFFF"
                     android:textSize="14sp" />
             </LinearLayout>
@@ -108,7 +108,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Total Expense"
+                    android:text="Tổng tiết kiệm "
                     android:textColor="#FFFFFF"
                     android:textSize="14sp" />
             </LinearLayout>
@@ -174,26 +174,6 @@
                 android:textSize="12sp" />
         </RelativeLayout>
 
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-
-            <CheckBox
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:buttonTint="#FFFFFF"
-                android:checked="true" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="30% Of Your Expenses, Looks Good"
-                android:textColor="#FFFFFF"
-                android:textSize="14sp" />
-        </LinearLayout>
     </LinearLayout>
 
     <!-- Main Content - White Background -->

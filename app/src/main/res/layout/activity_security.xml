@@ -29,7 +29,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:text="Security"
+            android:text="Bảo mật"
             android:textColor="@color/black" />
 
         <ImageView
@@ -57,7 +57,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Security"
+                android:text="Bảo mật"
                 android:textSize="20sp"
                 android:textStyle="bold"
                 android:textColor="@color/black"
@@ -85,7 +85,7 @@
                         android:layout_height="wrap_content"
                         android:layout_alignParentStart="true"
                         android:layout_centerVertical="true"
-                        android:text="Change Pin"
+                        android:text="Thay đổi mã PIN"
                         android:textColor="@color/black"
                         android:textSize="16sp" />
 
@@ -118,7 +118,7 @@
                         android:layout_height="wrap_content"
                         android:layout_alignParentStart="true"
                         android:layout_centerVertical="true"
-                        android:text="Fingerprint"
+                        android:text="Vân tay"
                         android:textColor="@color/black"
                         android:textSize="16sp" />
 
@@ -151,7 +151,7 @@
                         android:layout_height="wrap_content"
                         android:layout_alignParentStart="true"
                         android:layout_centerVertical="true"
-                        android:text="Terms And Conditions"
+                        android:text="Điều khoản và điều kiện"
                         android:textColor="@color/black"
                         android:textSize="16sp" />
 

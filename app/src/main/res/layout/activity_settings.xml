@@ -29,7 +29,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:text="Settings"
+            android:text="Cài đặt"
             android:textColor="@color/black" />
 
         <ImageView
@@ -86,7 +86,7 @@
                         android:layout_centerVertical="true"
                         android:layout_toEndOf="@id/imgNotification"
                         android:layout_toStartOf="@id/arrowRight1"
-                        android:text="Notification Settings"
+                        android:text="Cài đặt thông báo"
                         android:textColor="@color/black"
                         android:textSize="16sp" />
 
@@ -131,7 +131,7 @@
                         android:layout_centerVertical="true"
                         android:layout_toEndOf="@id/imgPassword"
                         android:layout_toStartOf="@id/arrowRight2"
-                        android:text="Password Settings"
+                        android:text="Cài đặt mật khẩu"
                         android:textColor="@color/black"
                         android:textSize="16sp" />
 
@@ -176,7 +176,7 @@
                         android:layout_centerVertical="true"
                         android:layout_toEndOf="@id/imgDelete"
                         android:layout_toStartOf="@id/arrowRight3"
-                        android:text="Delete Account"
+                        android:text="Xóa tài khoản"
                         android:textColor="@color/black"
                         android:textSize="16sp" />
 

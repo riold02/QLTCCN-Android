@@ -28,7 +28,7 @@
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="10dp"
-            android:text="Edit My Profile"
+            android:text="Chỉnh sửa hồ sơ"
             android:textColor="@color/black" />
             
         <ImageButton
@@ -89,7 +89,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:text="John Smith"
+                    android:text="Nguyễn Văn A"
                     android:textColor="@color/black"
                     android:textSize="18sp"
                     android:textStyle="bold" />
@@ -107,7 +107,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Account Settings"
+                android:text="Cài đặt tài khoản"
                 android:textSize="18sp"
                 android:textStyle="bold"
                 android:textColor="@color/black"
@@ -133,17 +133,17 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Username"
+                        android:layout_marginBottom="4dp"
+                        android:text="Tên người dùng"
                         android:textColor="@color/black"
-                        android:textSize="14sp"
-                        android:layout_marginBottom="4dp"/>
+                        android:textSize="14sp" />
 
                     <EditText
                         android:id="@+id/editUsername"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:background="@drawable/edit_text_background"
-                        android:hint="John Smith"
+                        android:hint="Nguyễn Văn A"
                         android:padding="12dp"
                         android:textSize="14sp"
                         android:layout_marginBottom="16dp"/>
@@ -152,7 +152,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Phone"
+                        android:text="Số điện thoại"
                         android:textColor="@color/black"
                         android:textSize="14sp"
                         android:layout_marginBottom="4dp"/>
@@ -162,7 +162,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:background="@drawable/edit_text_background"
-                        android:hint="+44 555 5555 55"
+                        android:hint="+84 123 456 789"
                         android:inputType="phone"
                         android:padding="12dp"
                         android:textSize="14sp"
@@ -172,7 +172,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Email Address"
+                        android:text="Địa chỉ email"
                         android:textColor="@color/black"
                         android:textSize="14sp"
                         android:layout_marginBottom="4dp"/>
@@ -182,7 +182,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:background="@drawable/edit_text_background"
-                        android:hint="example@example.com"
+                        android:hint="vidu@email.com"
                         android:inputType="textEmailAddress"
                         android:padding="12dp"
                         android:textSize="14sp"
@@ -199,7 +199,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Push Notifications"
+                            android:text="Thông báo đẩy"
                             android:textColor="@color/black"
                             android:textSize="16sp"/>
 
@@ -223,7 +223,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Turn Dark Theme"
+                            android:text="Bật chế độ tối"
                             android:textColor="@color/black"
                             android:textSize="16sp"/>
 
@@ -242,7 +242,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:background="#00D09E"
-                        android:text="Update Profile"
+                        android:text="Cập nhật hồ sơ"
                         android:textColor="@android:color/white"
                         android:textAllCaps="false"
                         android:padding="12dp"
