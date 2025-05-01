@@ -21,6 +21,7 @@ import com.example.qltccn.R;
 import com.example.qltccn.utils.CurrencyUtils;
 import com.example.qltccn.utils.UserUtils;
 import com.example.qltccn.utils.FirebaseUtils;
+import android.util.Log;
 
 public class CategoryActivity extends AppCompatActivity {
 
@@ -338,6 +339,11 @@ public class CategoryActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        loadUserData(); // Cập nhật dữ liệu khi quay lại màn hình này
+        
+        // Tải lại dữ liệu khi quay lại màn hình
+        loadUserData();
+        
+        // Ghi log để debug
+        Log.d("CategoryActivity", "onResume: Đã tải lại dữ liệu người dùng");
     }
 } 

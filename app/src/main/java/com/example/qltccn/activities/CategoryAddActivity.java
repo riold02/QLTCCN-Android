@@ -1,24 +1,38 @@
 package com.example.qltccn.activities;
 
 import android.app.DatePickerDialog;
+import android.app.TimePickerDialog;
+import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.TimePicker;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.qltccn.R;
 import com.example.qltccn.models.Transaction;
+import com.example.qltccn.models.Category;
+import com.example.qltccn.utils.TransactionUtils;
+import com.example.qltccn.utils.CategoryUtils;
 import com.example.qltccn.utils.CurrencyUtils;
 import com.example.qltccn.utils.FirebaseUtils;
 import com.google.firebase.Timestamp;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.ParseException;
@@ -26,6 +40,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -312,11 +327,7 @@ public class CategoryAddActivity extends AppCompatActivity {
 
     private void saveTransactionToFirestore(Transaction transaction) {
         try {
-            // Log để kiểm tra dữ liệu trước khi lưu
-            Log.d(TAG, "Bắt đầu lưu giao dịch: " + transaction.getCategory() + ", " + transaction.getAmount() + 
-                    ", thời gian: " + dateFormat.format(new Date(transaction.getDate())));
-            
-            // Tạo HashMap trực tiếp thay vì dùng phương thức toMap() có thể gây lỗi
+            // Convert transaction to map
             Map<String, Object> transactionMap = new HashMap<>();
             transactionMap.put("userId", transaction.getUserId());
             transactionMap.put("category", transaction.getCategory());
@@ -324,20 +335,12 @@ public class CategoryAddActivity extends AppCompatActivity {
             transactionMap.put("description", transaction.getDescription());
             transactionMap.put("note", transaction.getNote());
             transactionMap.put("type", transaction.getType());
+            transactionMap.put("date", transaction.getDate());
+            transactionMap.put("createdAt", transaction.getCreatedAt());
             
-            // Lưu thời gian chính xác với giờ phút
-            Date transactionDate = new Date(transaction.getDate());
-            transactionMap.put("date", new Timestamp(transactionDate));
-            transactionMap.put("createdAt", new Timestamp(new Date(transaction.getCreatedAt())));
-            transactionMap.put("updatedAt", new Timestamp(new Date()));
+            Log.d(TAG, "Lưu giao dịch với thông tin: Category=" + transaction.getCategory() + 
+                      ", Amount=" + transaction.getAmount() + ", Date=" + new Date(transaction.getDate()));
             
-            // Log dữ liệu sẽ lưu để debug
-            Log.d(TAG, "Dữ liệu chi tiêu: userId=" + transactionMap.get("userId") + 
-                  ", category=" + transactionMap.get("category") + 
-                  ", amount=" + transactionMap.get("amount") + 
-                  ", thời gian=" + dateFormat.format(transactionDate));
-            
-            // Kiểm tra collection transactions đã được khởi tạo đúng
             CollectionReference transactionsRef = FirebaseUtils.getUserTransactionsCollection();
             if (transactionsRef == null) {
                 Log.e(TAG, "Không thể lấy tham chiếu đến collection transactions");
@@ -367,18 +370,26 @@ public class CategoryAddActivity extends AppCompatActivity {
                     // Cập nhật số dư người dùng
                     updateUserBalance(transaction.getUserId(), transaction.getAmount());
                     
+                    // Gọi CategoryUtils để cập nhật danh mục
+                    refreshCategoryData();
+                    
+                    // Đặt kết quả để báo cho Activity gọi biết đã tạo thành công
+                    Intent resultIntent = new Intent();
+                    resultIntent.putExtra("REFRESH_CATEGORIES", true);
+                    setResult(RESULT_OK, resultIntent);
+                    
                     // Đóng màn hình thêm chi phí
                     finish();
                 })
                 .addOnFailureListener(e -> {
                     showLoader(false);
-                    Log.e(TAG, "Lỗi khi lưu giao dịch lên Firestore: " + e.getMessage(), e);
-                    Toast.makeText(CategoryAddActivity.this, "Không thể lưu chi tiêu: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    Log.e(TAG, "Lỗi khi lưu giao dịch: " + e.getMessage());
+                    Toast.makeText(CategoryAddActivity.this, "Lỗi khi lưu chi tiêu: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
         } catch (Exception e) {
             showLoader(false);
             Log.e(TAG, "Lỗi ngoại lệ khi lưu giao dịch: " + e.getMessage(), e);
-            Toast.makeText(this, "Đã xảy ra lỗi: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Lỗi: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -444,6 +455,28 @@ public class CategoryAddActivity extends AppCompatActivity {
         if (show) {
             Toast.makeText(this, "Đang lưu...", Toast.LENGTH_SHORT).show();
             // Không cần kiểm tra kết nối Firebase ở đây nữa
+        }
+    }
+
+    /**
+     * Làm mới dữ liệu danh mục
+     */
+    private void refreshCategoryData() {
+        try {
+            // Sử dụng phương thức khác của CategoryUtils để tránh vấn đề với interface
+            CategoryUtils.getAllCategories(new CategoryUtils.FetchCategoriesCallback() {
+                @Override
+                public void onSuccess(List<Category> categories) {
+                    Log.d(TAG, "Đã làm mới danh sách danh mục: " + categories.size() + " danh mục.");
+                }
+                
+                @Override
+                public void onError(String errorMessage) {
+                    Log.e(TAG, "Lỗi khi làm mới danh mục: " + errorMessage);
+                }
+            });
+        } catch (Exception e) {
+            Log.e(TAG, "Lỗi khi gọi làm mới danh mục: " + e.getMessage());
         }
     }
 } 

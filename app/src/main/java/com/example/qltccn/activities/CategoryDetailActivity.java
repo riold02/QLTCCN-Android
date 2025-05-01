@@ -29,6 +29,7 @@ import java.util.List;
 
 public class CategoryDetailActivity extends AppCompatActivity {
     private static final String TAG = "CategoryDetailActivity";
+    private static final int REFRESH_REQUEST_CODE = 1001;
 
     // UI components
     private ImageView btnBack;
@@ -87,21 +88,35 @@ public class CategoryDetailActivity extends AppCompatActivity {
         transactionAdapter = new TransactionAdapter(categoryTransactions, new TransactionAdapter.OnTransactionClickListener() {
             @Override
             public void onTransactionClick(Transaction transaction, int position) {
-                showTransactionDetail(transaction);
+                showTransactionDetails(transaction);
             }
         });
         recyclerViewTransactions.setAdapter(transactionAdapter);
     }
 
     private void setupListeners() {
-        btnBack.setOnClickListener(v -> finish());
-
-        btnAddExpense.setOnClickListener(v -> {
-            // Mở màn hình thêm chi phí
-            Intent intent = new Intent(this, CategoryAddActivity.class);
-            intent.putExtra("CATEGORY_NAME", categoryName);
-            startActivity(intent);
+        btnBack.setOnClickListener(v -> {
+            // Thiết lập kết quả trả về để màn hình trước biết cần cập nhật dữ liệu
+            Intent resultIntent = new Intent();
+            resultIntent.putExtra("REFRESH_CATEGORIES", true);
+            setResult(RESULT_OK, resultIntent);
+            finish();
         });
+        
+        btnAddExpense.setOnClickListener(v -> {
+            Intent intent = new Intent(CategoryDetailActivity.this, CategoryAddActivity.class);
+            intent.putExtra("CATEGORY_NAME", categoryName);
+            intent.putExtra("categoryName", categoryName);
+            intent.putExtra("categoryType", "expense");
+            
+            startActivityForResult(intent, REFRESH_REQUEST_CODE);
+        });
+        
+        if (transactionAdapter != null) {
+            transactionAdapter.setOnTransactionClickListener((transaction, position) -> {
+                showTransactionDetails(transaction);
+            });
+        }
     }
 
     private void loadData() {
@@ -263,7 +278,7 @@ public class CategoryDetailActivity extends AppCompatActivity {
         lblExpenseStatus.setText(status);
     }
 
-    private void showTransactionDetail(Transaction transaction) {
+    private void showTransactionDetails(Transaction transaction) {
         try {
             // Sử dụng dialog tùy chỉnh thay vì AlertDialog
             android.app.Dialog dialog = new android.app.Dialog(this);
@@ -337,6 +352,26 @@ public class CategoryDetailActivity extends AppCompatActivity {
         // Tải lại dữ liệu khi quay lại màn hình này
         if (FirebaseUtils.getCurrentUser() != null) {
             loadData();
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        
+        if (requestCode == REFRESH_REQUEST_CODE && resultCode == RESULT_OK) {
+            // Kiểm tra xem có cần làm mới dữ liệu không
+            boolean refreshCategories = data != null && data.getBooleanExtra("REFRESH_CATEGORIES", false);
+            
+            if (refreshCategories) {
+                Log.d(TAG, "Nhận yêu cầu làm mới danh mục từ activity con");
+                
+                // Làm mới dữ liệu giao dịch và thống kê
+                loadData();
+                
+                // Hiển thị thông báo
+                Toast.makeText(this, "Dữ liệu đã được cập nhật", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 } 

@@ -37,7 +37,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-                android:text="Transaction"
+                android:text="Giao dịch"
             android:textColor="@color/black"
             android:textSize="20sp"
             android:textStyle="bold" />
@@ -81,7 +81,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Total Balance"
+                android:text="Số dư "
                 android:textColor="@color/gray_600"
                 android:textSize="18sp"
                 android:gravity="center" />

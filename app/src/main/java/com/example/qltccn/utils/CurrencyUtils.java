@@ -70,7 +70,7 @@ public class CurrencyUtils {
      */
     public static String formatVND(double amount) {
         NumberFormat currencyFormatter = NumberFormat.getNumberInstance(LOCALE_VN);
-        return currencyFormatter.format(amount) + " đồng";
+        return currencyFormatter.format(amount) + " VND";
     }
     
     /**
