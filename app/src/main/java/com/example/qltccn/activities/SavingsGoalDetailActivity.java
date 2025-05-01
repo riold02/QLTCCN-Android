@@ -1,10 +1,15 @@
 package com.example.qltccn.activities;
 
+import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -25,7 +30,9 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class SavingsGoalDetailActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -157,9 +164,8 @@ public class SavingsGoalDetailActivity extends AppCompatActivity implements View
             intent.putExtra("GOAL_ID", goalId);
             startActivityForResult(intent, 100);
         } else if (id == R.id.btnSetGoal) {
-            // Mở màn hình cập nhật mục tiêu
-            // TODO: Thêm activity cập nhật mục tiêu
-            Toast.makeText(this, "Tính năng đang phát triển", Toast.LENGTH_SHORT).show();
+            // Mở dialog cập nhật mục tiêu
+            showUpdateGoalDialog();
         } else if (id == R.id.iconHome) {
             startActivity(new Intent(this, HomeActivity.class));
             finish();
@@ -329,5 +335,124 @@ public class SavingsGoalDetailActivity extends AppCompatActivity implements View
             loadSavingsGoal();
             loadTransactions();
         }
+    }
+
+    /**
+     * Hiển thị dialog cập nhật mục tiêu tiết kiệm
+     */
+    private void showUpdateGoalDialog() {
+        // Tạo dialog
+        Dialog dialog = new Dialog(this);
+        dialog.setContentView(R.layout.dialog_set_goal);
+        dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        dialog.setTitle("Cập nhật mục tiêu");
+        
+        // Thiết lập kích thước dialog lớn hơn
+        Window window = dialog.getWindow();
+        if (window != null) {
+            WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams();
+            layoutParams.copyFrom(window.getAttributes());
+            layoutParams.width = WindowManager.LayoutParams.MATCH_PARENT;
+            layoutParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
+            window.setAttributes(layoutParams);
+        }
+        
+        // Khởi tạo các view trong dialog
+        EditText edtGoalName = dialog.findViewById(R.id.edtGoalName);
+        EditText etAmount = dialog.findViewById(R.id.etAmount);
+        Button btnCancel = dialog.findViewById(R.id.btnCancel);
+        Button btnSave = dialog.findViewById(R.id.btnSave);
+        
+        // Hiển thị dữ liệu hiện tại
+        if (savingsGoal != null) {
+            edtGoalName.setText(savingsGoal.getTitle());
+            etAmount.setText(String.valueOf(savingsGoal.getTargetAmount()));
+        }
+        
+        // Xử lý sự kiện hủy
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
+        
+        // Xử lý sự kiện lưu
+        btnSave.setOnClickListener(v -> {
+            // Kiểm tra dữ liệu đầu vào
+            String goalName = edtGoalName.getText().toString().trim();
+            String amountStr = etAmount.getText().toString().trim();
+            
+            if (TextUtils.isEmpty(goalName)) {
+                edtGoalName.setError("Vui lòng nhập tên mục tiêu");
+                return;
+            }
+            
+            if (TextUtils.isEmpty(amountStr)) {
+                etAmount.setError("Vui lòng nhập số tiền mục tiêu");
+                return;
+            }
+            
+            try {
+                double newTargetAmount = Double.parseDouble(amountStr);
+                
+                // Kiểm tra mục tiêu mới phải lớn hơn hoặc bằng số tiền đã tiết kiệm
+                if (savingsGoal != null && newTargetAmount < savingsGoal.getCurrentAmount()) {
+                    etAmount.setError("Số tiền mục tiêu phải lớn hơn hoặc bằng số tiền đã tiết kiệm");
+                    return;
+                }
+                
+                // Tiến hành cập nhật mục tiêu
+                updateSavingsGoal(goalName, newTargetAmount);
+                dialog.dismiss();
+                
+            } catch (NumberFormatException e) {
+                etAmount.setError("Số tiền không hợp lệ");
+            }
+        });
+        
+        // Hiển thị dialog
+        dialog.show();
+    }
+    
+    /**
+     * Cập nhật thông tin mục tiêu tiết kiệm lên Firestore
+     * 
+     * @param title Tên mục tiêu mới
+     * @param targetAmount Số tiền mục tiêu mới
+     */
+    private void updateSavingsGoal(String title, double targetAmount) {
+        if (savingsGoal == null || goalId == null) {
+            Toast.makeText(this, "Không thể cập nhật mục tiêu", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        
+        // Hiển thị thông báo đang xử lý
+        Toast.makeText(this, "Đang cập nhật mục tiêu...", Toast.LENGTH_SHORT).show();
+        
+        // Chuẩn bị dữ liệu cập nhật
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("title", title);
+        updates.put("targetAmount", targetAmount);
+        
+
+        
+        // Cập nhật lên Firestore
+        db.collection("savingsGoals").document(goalId)
+            .update(updates)
+            .addOnSuccessListener(aVoid -> {
+                Toast.makeText(SavingsGoalDetailActivity.this, 
+                    "Cập nhật mục tiêu thành công", Toast.LENGTH_SHORT).show();
+                
+                // Cập nhật đối tượng savingsGoal hiện tại
+                savingsGoal.setTitle(title);
+                savingsGoal.setTargetAmount(targetAmount);
+                // Lớp SavingsGoal không có phương thức setProgressPercentage
+                // Thay vì cập nhật trực tiếp, sử dụng giá trị mới được tính toán
+                // khi gọi phương thức getProgressPercentage()
+                
+                // Cập nhật giao diện
+                updateUIWithSavingsGoal();
+            })
+            .addOnFailureListener(e -> {
+                Log.e("SavingsGoalDetail", "Lỗi khi cập nhật mục tiêu: " + e.getMessage());
+                Toast.makeText(SavingsGoalDetailActivity.this, 
+                    "Lỗi khi cập nhật mục tiêu: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            });
     }
 } 

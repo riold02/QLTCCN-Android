@@ -1,5 +1,6 @@
 package com.example.qltccn.activities;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -145,31 +146,53 @@ public class AnalysisActivity extends AppCompatActivity {
                     // Chọn tab Monthly
                     updateTabSelection(tabMonthly);
                     
-                    // Lấy thời gian bắt đầu và kết thúc của năm
+                    // Lấy thời gian bắt đầu và kết thúc của tháng hiện tại
                     Calendar calendar = Calendar.getInstance();
-                    calendar.set(Calendar.MONTH, 0); // Tháng 1
-                    calendar.set(Calendar.DAY_OF_MONTH, 1);
-                    calendar.set(Calendar.HOUR_OF_DAY, 0);
-                    calendar.set(Calendar.MINUTE, 0);
-                    calendar.set(Calendar.SECOND, 0);
+                    int currentMonth = calendar.get(Calendar.MONTH);
+                    int currentYear = calendar.get(Calendar.YEAR);
+                    
+                    // Đặt về đầu tháng
+                    calendar.set(currentYear, currentMonth, 1, 0, 0, 0);
                     calendar.set(Calendar.MILLISECOND, 0);
+                    long startOfMonth = calendar.getTimeInMillis();
                     
-                    long startOfYear = calendar.getTimeInMillis();
-                    
-                    calendar.set(Calendar.MONTH, 11); // Tháng 12
-                    calendar.set(Calendar.DAY_OF_MONTH, 31);
+                    // Đặt về cuối tháng
+                    calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH));
                     calendar.set(Calendar.HOUR_OF_DAY, 23);
                     calendar.set(Calendar.MINUTE, 59);
                     calendar.set(Calendar.SECOND, 59);
-                    
-                    long endOfYear = calendar.getTimeInMillis();
+                    long endOfMonth = calendar.getTimeInMillis();
                     
                     // Lấy ID người dùng
                     String userId = FirebaseAuth.getInstance().getCurrentUser() != null ? 
                                 FirebaseAuth.getInstance().getCurrentUser().getUid() : null;
                     
                     if (userId != null) {
+                        // Tính toán dữ liệu thu chi cho tháng hiện tại
+                        calculateMonthlyIncomeAndExpense(userId, startOfMonth, endOfMonth);
+                        
+                        // Cập nhật biểu đồ cả năm
+                        calendar.set(Calendar.MONTH, 0); // Tháng 1
+                        calendar.set(Calendar.DAY_OF_MONTH, 1);
+                        calendar.set(Calendar.HOUR_OF_DAY, 0);
+                        calendar.set(Calendar.MINUTE, 0);
+                        calendar.set(Calendar.SECOND, 0);
+                        calendar.set(Calendar.MILLISECOND, 0);
+                        
+                        long startOfYear = calendar.getTimeInMillis();
+                        
+                        calendar.set(Calendar.MONTH, 11); // Tháng 12
+                        calendar.set(Calendar.DAY_OF_MONTH, 31);
+                        calendar.set(Calendar.HOUR_OF_DAY, 23);
+                        calendar.set(Calendar.MINUTE, 59);
+                        calendar.set(Calendar.SECOND, 59);
+                        
+                        long endOfYear = calendar.getTimeInMillis();
+                        
+                        // Cập nhật biểu đồ
                         updateChartForMonthlyView(userId, startOfYear, endOfYear);
+                    } else {
+                        Toast.makeText(AnalysisActivity.this, "Bạn chưa đăng nhập", Toast.LENGTH_SHORT).show();
                     }
                 }
             });
@@ -189,6 +212,22 @@ public class AnalysisActivity extends AppCompatActivity {
                                 FirebaseAuth.getInstance().getCurrentUser().getUid() : null;
                     
                     if (userId != null) {
+                        // Lấy năm hiện tại
+                        Calendar calendar = Calendar.getInstance();
+                        int currentYear = calendar.get(Calendar.YEAR);
+                        
+                        // Đặt thời gian về đầu năm
+                        calendar.set(currentYear, Calendar.JANUARY, 1, 0, 0, 0);
+                        calendar.set(Calendar.MILLISECOND, 0);
+                        long startOfYear = calendar.getTimeInMillis();
+                        
+                        // Đặt thời gian về cuối năm
+                        calendar.set(currentYear, Calendar.DECEMBER, 31, 23, 59, 59);
+                        long endOfYear = calendar.getTimeInMillis();
+                        
+                        // Tính toán dữ liệu thu chi cho năm hiện tại
+                        calculateYearlyIncomeAndExpense(userId, startOfYear, endOfYear);
+                        
                         // Gọi phương thức cập nhật biểu đồ dữ liệu theo năm
                         updateChartForYearView(userId);
                     } else {
@@ -355,7 +394,149 @@ public class AnalysisActivity extends AppCompatActivity {
         // Đánh dấu nút Daily được chọn
         updateTabSelection(tabDaily);
         
-        // Lấy ngày bắt đầu (thứ 2) và kết thúc (chủ nhật) của tuần hiện tại
+        // Lấy ngày hôm nay
+        Calendar calendar = Calendar.getInstance();
+        
+        // Đặt về đầu ngày hiện tại
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        long startOfToday = calendar.getTimeInMillis();
+        
+        // Đặt về cuối ngày hiện tại
+        calendar.set(Calendar.HOUR_OF_DAY, 23);
+        calendar.set(Calendar.MINUTE, 59);
+        calendar.set(Calendar.SECOND, 59);
+        long endOfToday = calendar.getTimeInMillis();
+        
+        // Lấy ID người dùng hiện tại
+        String userId = FirebaseAuth.getInstance().getCurrentUser() != null ? 
+                        FirebaseAuth.getInstance().getCurrentUser().getUid() : null;
+                        
+        if (userId == null) {
+            Toast.makeText(this, "Bạn chưa đăng nhập", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        
+        // Tính toán dữ liệu thu nhập và chi tiêu cho ngày hôm nay
+        calculateDailyIncomeAndExpense(userId, startOfToday, endOfToday);
+        
+        // Lấy dữ liệu cho cả tuần để hiển thị biểu đồ
+        // Đặt thời gian về đầu ngày hiện tại
+        calendar.setTimeInMillis(startOfToday);
+        
+        // Tìm ngày đầu tuần (thứ 2)
+        while (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.MONDAY) {
+            calendar.add(Calendar.DAY_OF_MONTH, -1);
+        }
+        long startOfWeek = calendar.getTimeInMillis();
+        
+        // Tìm ngày cuối tuần (Chủ nhật)
+        calendar.add(Calendar.DAY_OF_WEEK, 6);
+        calendar.set(Calendar.HOUR_OF_DAY, 23);
+        calendar.set(Calendar.MINUTE, 59);
+        calendar.set(Calendar.SECOND, 59);
+        long endOfWeek = calendar.getTimeInMillis();
+        
+        // Hiển thị biểu đồ theo ngày trong tuần
+        updateChartForDailyView(userId, startOfWeek, endOfWeek);
+    }
+    
+    private void calculateDailyIncomeAndExpense(String userId, long startTime, long endTime) {
+        FirebaseFirestore.getInstance().collection("users").document(userId).collection("transactions")
+            .get()
+            .addOnSuccessListener(queryDocumentSnapshots -> {
+                Log.d(TAG, "Tính toán thu chi cho ngày: " + new Date(startTime));
+                
+                double dailyIncome = 0;
+                double dailyExpense = 0;
+                double dailySavings = 0;
+                
+                for (DocumentSnapshot doc : queryDocumentSnapshots) {
+                    try {
+                        String type = doc.getString("type");
+                        Double amount = doc.getDouble("amount");
+                        
+                        // Xử lý trường date có thể ở nhiều định dạng khác nhau
+                        Long date = null;
+                        
+                        // Kiểm tra các định dạng date có thể có
+                        if (doc.get("date") instanceof com.google.firebase.Timestamp) {
+                            com.google.firebase.Timestamp timestamp = doc.getTimestamp("date");
+                            if (timestamp != null) {
+                                date = timestamp.toDate().getTime();
+                            }
+                        } else if (doc.get("date") instanceof String) {
+                            try {
+                                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+                                Date parsedDate = sdf.parse(doc.getString("date"));
+                                if (parsedDate != null) {
+                                    date = parsedDate.getTime();
+                                }
+                            } catch (Exception e) {
+                                Log.e(TAG, "Lỗi khi phân tích chuỗi ngày: " + e.getMessage());
+                            }
+                        } else {
+                            try {
+                                date = doc.getLong("date");
+                            } catch (Exception e) {
+                                Log.e(TAG, "Không thể lấy date dưới dạng Long: " + e.getMessage());
+                            }
+                        }
+                        
+                        if (type == null || amount == null || date == null) {
+                            continue; // Bỏ qua giao dịch không hợp lệ
+                        }
+                        
+                        // Kiểm tra nếu giao dịch thuộc ngày hôm nay
+                        if (date >= startTime && date <= endTime) {
+                            if ("income".equals(type)) {
+                                dailyIncome += amount;
+                                Log.d(TAG, "Thu nhập hôm nay: " + amount);
+                            } else if ("expense".equals(type)) {
+                                dailyExpense += amount;
+                                Log.d(TAG, "Chi tiêu hôm nay: " + amount);
+                            } else if ("savings".equals(type)) {
+                                dailySavings += amount;
+                                Log.d(TAG, "Tiết kiệm hôm nay: " + amount);
+                            }
+                        }
+                    } catch (Exception e) {
+                        Log.e(TAG, "Lỗi khi xử lý giao dịch: " + e.getMessage());
+                    }
+                }
+                
+                // Cập nhật UI
+                if (tvIncome != null) {
+                    tvIncome.setText(CurrencyUtils.formatVND(dailyIncome));
+                    Log.d(TAG, "Cập nhật thu nhập ngày: " + CurrencyUtils.formatVND(dailyIncome));
+                }
+                
+                if (tvExpense != null) {
+                    tvExpense.setText("-" + CurrencyUtils.formatVND(dailyExpense + dailySavings));
+                    Log.d(TAG, "Cập nhật chi tiêu ngày: " + CurrencyUtils.formatVND(dailyExpense + dailySavings));
+                }
+                
+                if (tvTotalBalance != null) {
+                    tvTotalBalance.setText(CurrencyUtils.formatVND(dailyIncome - dailyExpense - dailySavings));
+                    Log.d(TAG, "Cập nhật số dư ngày: " + CurrencyUtils.formatVND(dailyIncome - dailyExpense - dailySavings));
+                }
+            })
+            .addOnFailureListener(e -> {
+                Log.e(TAG, "Lỗi khi tính toán thu chi cho ngày: " + e.getMessage());
+                
+                if (tvIncome != null) tvIncome.setText(CurrencyUtils.formatVND(0));
+                if (tvExpense != null) tvExpense.setText("-" + CurrencyUtils.formatVND(0));
+                if (tvTotalBalance != null) tvTotalBalance.setText(CurrencyUtils.formatVND(0));
+            });
+    }
+    
+    private void updateChartForWeeklyView() {
+        // Đánh dấu nút Weekly được chọn
+        updateTabSelection(tabWeekly);
+        
+        // Lấy ngày đầu tuần và cuối tuần hiện tại
         Calendar calendar = Calendar.getInstance();
         
         // Đặt về đầu ngày hiện tại
@@ -386,23 +567,13 @@ public class AnalysisActivity extends AppCompatActivity {
             return;
         }
         
-        // Gọi phương thức để hiển thị dữ liệu theo ngày trong tuần
-        updateChartForDailyView(userId, startOfWeek, endOfWeek);
-    }
-    
-    private void updateChartForWeeklyView() {
-        // Đánh dấu nút Weekly được chọn
-        updateTabSelection(tabWeekly);
+        // Tính toán dữ liệu thu nhập và chi tiêu cho tuần hiện tại
+        calculateWeeklyIncomeAndExpense(userId, startOfWeek, endOfWeek);
         
-        // Lấy ngày đầu tháng và cuối tháng của tháng hiện tại
-        Calendar calendar = Calendar.getInstance();
-        
-        // Đặt về đầu tháng
+        // Lấy dữ liệu cho biểu đồ tuần trong tháng
+        // Đặt thời gian về đầu tháng
+        calendar.setTimeInMillis(startOfWeek);
         calendar.set(Calendar.DAY_OF_MONTH, 1);
-        calendar.set(Calendar.HOUR_OF_DAY, 0);
-        calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.SECOND, 0);
-        calendar.set(Calendar.MILLISECOND, 0);
         long startOfMonth = calendar.getTimeInMillis();
         
         // Đặt về cuối tháng
@@ -412,22 +583,104 @@ public class AnalysisActivity extends AppCompatActivity {
         calendar.set(Calendar.SECOND, 59);
         long endOfMonth = calendar.getTimeInMillis();
         
-        // Lấy ID người dùng hiện tại
-        String userId = FirebaseAuth.getInstance().getCurrentUser() != null ? 
-                        FirebaseAuth.getInstance().getCurrentUser().getUid() : null;
-                        
-        if (userId == null) {
-            Toast.makeText(this, "Bạn chưa đăng nhập", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        
+        // Hiển thị biểu đồ theo tuần trong tháng
         updateChartForWeeklyView(userId, startOfMonth, endOfMonth);
+    }
+
+    private void calculateWeeklyIncomeAndExpense(String userId, long startTime, long endTime) {
+        FirebaseFirestore.getInstance().collection("users").document(userId).collection("transactions")
+            .get()
+            .addOnSuccessListener(queryDocumentSnapshots -> {
+                Log.d(TAG, "Tính toán thu chi cho tuần từ " + new Date(startTime) + " đến " + new Date(endTime));
+                
+                double weeklyIncome = 0;
+                double weeklyExpense = 0;
+                double weeklySavings = 0;
+                
+                for (DocumentSnapshot doc : queryDocumentSnapshots) {
+                    try {
+                        String type = doc.getString("type");
+                        Double amount = doc.getDouble("amount");
+                        
+                        // Xử lý trường date có thể ở nhiều định dạng khác nhau
+                        Long date = null;
+                        
+                        // Kiểm tra các định dạng date có thể có
+                        if (doc.get("date") instanceof com.google.firebase.Timestamp) {
+                            com.google.firebase.Timestamp timestamp = doc.getTimestamp("date");
+                            if (timestamp != null) {
+                                date = timestamp.toDate().getTime();
+                            }
+                        } else if (doc.get("date") instanceof String) {
+                            try {
+                                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+                                Date parsedDate = sdf.parse(doc.getString("date"));
+                                if (parsedDate != null) {
+                                    date = parsedDate.getTime();
+                                }
+                            } catch (Exception e) {
+                                Log.e(TAG, "Lỗi khi phân tích chuỗi ngày: " + e.getMessage());
+                            }
+                        } else {
+                            try {
+                                date = doc.getLong("date");
+                            } catch (Exception e) {
+                                Log.e(TAG, "Không thể lấy date dưới dạng Long: " + e.getMessage());
+                            }
+                        }
+                        
+                        if (type == null || amount == null || date == null) {
+                            continue; // Bỏ qua giao dịch không hợp lệ
+                        }
+                        
+                        // Kiểm tra nếu giao dịch thuộc tuần hiện tại
+                        if (date >= startTime && date <= endTime) {
+                            if ("income".equals(type)) {
+                                weeklyIncome += amount;
+                                Log.d(TAG, "Thu nhập tuần này: " + amount);
+                            } else if ("expense".equals(type)) {
+                                weeklyExpense += amount;
+                                Log.d(TAG, "Chi tiêu tuần này: " + amount);
+                            } else if ("savings".equals(type)) {
+                                weeklySavings += amount;
+                                Log.d(TAG, "Tiết kiệm tuần này: " + amount);
+                            }
+                        }
+                    } catch (Exception e) {
+                        Log.e(TAG, "Lỗi khi xử lý giao dịch: " + e.getMessage());
+                    }
+                }
+                
+                // Cập nhật UI
+                if (tvIncome != null) {
+                    tvIncome.setText(CurrencyUtils.formatVND(weeklyIncome));
+                    Log.d(TAG, "Cập nhật thu nhập tuần: " + CurrencyUtils.formatVND(weeklyIncome));
+                }
+                
+                if (tvExpense != null) {
+                    tvExpense.setText("-" + CurrencyUtils.formatVND(weeklyExpense + weeklySavings));
+                    Log.d(TAG, "Cập nhật chi tiêu tuần: " + CurrencyUtils.formatVND(weeklyExpense + weeklySavings));
+                }
+                
+                if (tvTotalBalance != null) {
+                    tvTotalBalance.setText(CurrencyUtils.formatVND(weeklyIncome - weeklyExpense - weeklySavings));
+                    Log.d(TAG, "Cập nhật số dư tuần: " + CurrencyUtils.formatVND(weeklyIncome - weeklyExpense - weeklySavings));
+                }
+            })
+            .addOnFailureListener(e -> {
+                Log.e(TAG, "Lỗi khi tính toán thu chi cho tuần: " + e.getMessage());
+                
+                if (tvIncome != null) tvIncome.setText(CurrencyUtils.formatVND(0));
+                if (tvExpense != null) tvExpense.setText("-" + CurrencyUtils.formatVND(0));
+                if (tvTotalBalance != null) tvTotalBalance.setText(CurrencyUtils.formatVND(0));
+            });
     }
 
     private void updateChartForWeeklyView(String userId, long startTime, long endTime) {
         // Thiết lập các khoảng thời gian cho biểu đồ theo tuần trong tháng
         ArrayList<Entry> incomeEntries = new ArrayList<>();
         ArrayList<Entry> expenseEntries = new ArrayList<>();
+        ArrayList<Entry> savingsEntries = new ArrayList<>();
         ArrayList<String> xAxisLabels = new ArrayList<>();
         
         // Danh sách các tuần trong tháng
@@ -443,6 +696,7 @@ public class AnalysisActivity extends AppCompatActivity {
             xAxisLabels.add(weekNames[i]);
             incomeEntries.add(new Entry(i, 0));
             expenseEntries.add(new Entry(i, 0));
+            savingsEntries.add(new Entry(i, 0));
         }
         
         Log.d(TAG, "Bắt đầu truy vấn giao dịch từ " + new Date(startTime) + " đến " + new Date(endTime));
@@ -453,15 +707,18 @@ public class AnalysisActivity extends AppCompatActivity {
             .addOnSuccessListener(queryDocumentSnapshots -> {
                 Log.d(TAG, "Đã tìm thấy " + queryDocumentSnapshots.size() + " giao dịch tổng cộng");
                 
-                // Tạo mảng để lưu tổng thu nhập và chi tiêu theo tuần trong tháng
+                // Tạo mảng để lưu tổng thu nhập, chi tiêu và tiết kiệm theo tuần trong tháng
                 float[] weeklyIncome = new float[maxWeeksInMonth];
                 float[] weeklyExpense = new float[maxWeeksInMonth];
+                float[] weeklySavings = new float[maxWeeksInMonth];
                 
-                // Đếm số lượng giao dịch chi tiêu và thu nhập
+                // Đếm số lượng giao dịch
                 int expenseCount = 0;
                 int incomeCount = 0;
+                int savingsCount = 0;
                 float totalWeeklyIncome = 0;
                 float totalWeeklyExpense = 0;
+                float totalWeeklySavings = 0;
                 
                 for (DocumentSnapshot doc : queryDocumentSnapshots) {
                     try {
@@ -521,11 +778,16 @@ public class AnalysisActivity extends AppCompatActivity {
                                 totalWeeklyIncome += amount.floatValue();
                                 incomeCount++;
                                 Log.d(TAG, "Giao dịch thu nhập vào " + weekNames[weekOfMonth] + ": " + amount);
-                            } else if ("expense".equals(type) || "savings".equals(type)) {
+                            } else if ("expense".equals(type)) {
                                 weeklyExpense[weekOfMonth] += amount.floatValue();
                                 totalWeeklyExpense += amount.floatValue();
                                 expenseCount++;
-                                Log.d(TAG, "Giao dịch " + type + " vào " + weekNames[weekOfMonth] + ": " + amount);
+                                Log.d(TAG, "Giao dịch chi tiêu vào " + weekNames[weekOfMonth] + ": " + amount);
+                            } else if ("savings".equals(type)) {
+                                weeklySavings[weekOfMonth] += amount.floatValue();
+                                totalWeeklySavings += amount.floatValue();
+                                savingsCount++;
+                                Log.d(TAG, "Giao dịch tiết kiệm vào " + weekNames[weekOfMonth] + ": " + amount);
                             }
                         }
                     } catch (Exception e) {
@@ -537,15 +799,38 @@ public class AnalysisActivity extends AppCompatActivity {
                 for (int i = 0; i < maxWeeksInMonth; i++) {
                     incomeEntries.set(i, new Entry(i, weeklyIncome[i]));
                     expenseEntries.set(i, new Entry(i, weeklyExpense[i]));
-                    Log.d(TAG, "Dữ liệu " + weekNames[i] + ": Thu nhập=" + weeklyIncome[i] + ", Chi tiêu=" + weeklyExpense[i]);
+                    savingsEntries.set(i, new Entry(i, weeklySavings[i]));
+                    Log.d(TAG, "Dữ liệu " + weekNames[i] + ": Thu nhập=" + weeklyIncome[i] + 
+                          ", Chi tiêu=" + weeklyExpense[i] + ", Tiết kiệm=" + weeklySavings[i]);
                 }
                 
                 // Log thông tin tổng hợp
                 Log.d(TAG, "Tổng số giao dịch thu nhập theo tuần: " + incomeCount + ", tổng: " + totalWeeklyIncome);
                 Log.d(TAG, "Tổng số giao dịch chi tiêu theo tuần: " + expenseCount + ", tổng: " + totalWeeklyExpense);
+                Log.d(TAG, "Tổng số giao dịch tiết kiệm theo tuần: " + savingsCount + ", tổng: " + totalWeeklySavings);
                 
-                // Cập nhật biểu đồ
-                updateLineChart(incomeEntries, expenseEntries, xAxisLabels);
+                // Tạo các danh sách entries cho biểu đồ
+                ArrayList<BarEntry> incomeBarEntries = new ArrayList<>();
+                ArrayList<BarEntry> expenseBarEntries = new ArrayList<>();
+                ArrayList<BarEntry> savingsBarEntries = new ArrayList<>();
+                
+                // Điền dữ liệu từ entries đã tính
+                for (int i = 0; i < xAxisLabels.size(); i++) {
+                    // Đưa dữ liệu thu nhập vào
+                    float incomeValue = (i < incomeEntries.size()) ? incomeEntries.get(i).getY() : 0f;
+                    incomeBarEntries.add(new BarEntry(i, incomeValue));
+                    
+                    // Đưa dữ liệu chi tiêu vào
+                    float expenseValue = (i < expenseEntries.size()) ? expenseEntries.get(i).getY() : 0f;
+                    expenseBarEntries.add(new BarEntry(i, expenseValue));
+                    
+                    // Đưa dữ liệu tiết kiệm vào
+                    float savingsValue = (i < savingsEntries.size()) ? savingsEntries.get(i).getY() : 0f;
+                    savingsBarEntries.add(new BarEntry(i, savingsValue));
+                }
+                
+                // Hoàn thành thiết lập biểu đồ
+                completeChartSetup(incomeBarEntries, expenseBarEntries, savingsBarEntries, xAxisLabels);
                 
                 // Cập nhật giao diện tổng thu nhập/chi tiêu
                 if (tvIncome != null) {
@@ -554,13 +839,13 @@ public class AnalysisActivity extends AppCompatActivity {
                 }
                 
                 if (tvExpense != null) {
-                    tvExpense.setText("-" + CurrencyUtils.formatVND(totalWeeklyExpense));
-                    Log.d(TAG, "Cập nhật UI tổng chi tiêu và tiết kiệm theo tuần: " + CurrencyUtils.formatVND(totalWeeklyExpense));
+                    tvExpense.setText("-" + CurrencyUtils.formatVND(totalWeeklyExpense + totalWeeklySavings));
+                    Log.d(TAG, "Cập nhật UI tổng chi tiêu và tiết kiệm theo tuần: " + CurrencyUtils.formatVND(totalWeeklyExpense + totalWeeklySavings));
                 }
                 
                 if (tvTotalBalance != null) {
-                    tvTotalBalance.setText(CurrencyUtils.formatVND(totalWeeklyIncome - totalWeeklyExpense));
-                    Log.d(TAG, "Cập nhật UI số dư theo tuần: " + CurrencyUtils.formatVND(totalWeeklyIncome - totalWeeklyExpense));
+                    tvTotalBalance.setText(CurrencyUtils.formatVND(totalWeeklyIncome - totalWeeklyExpense - totalWeeklySavings));
+                    Log.d(TAG, "Cập nhật UI số dư theo tuần: " + CurrencyUtils.formatVND(totalWeeklyIncome - totalWeeklyExpense - totalWeeklySavings));
                 }
             })
             .addOnFailureListener(e -> {
@@ -573,13 +858,18 @@ public class AnalysisActivity extends AppCompatActivity {
                 if (tvTotalBalance != null) tvTotalBalance.setText(CurrencyUtils.formatVND(0));
                 
                 // Hiển thị biểu đồ trống
-                ArrayList<Entry> emptyIncomeEntries = new ArrayList<>();
-                ArrayList<Entry> emptyExpenseEntries = new ArrayList<>();
+                ArrayList<BarEntry> emptyIncomeEntries = new ArrayList<>();
+                ArrayList<BarEntry> emptyExpenseEntries = new ArrayList<>();
+                ArrayList<BarEntry> emptySavingsEntries = new ArrayList<>();
+                
                 for (int i = 0; i < maxWeeksInMonth; i++) {
-                    emptyIncomeEntries.add(new Entry(i, 0));
-                    emptyExpenseEntries.add(new Entry(i, 0));
+                    emptyIncomeEntries.add(new BarEntry(i, 0f));
+                    emptyExpenseEntries.add(new BarEntry(i, 0f));
+                    emptySavingsEntries.add(new BarEntry(i, 0f));
                 }
-                updateLineChart(emptyIncomeEntries, emptyExpenseEntries, xAxisLabels);
+                
+                // Hiển thị biểu đồ trống
+                completeChartSetup(emptyIncomeEntries, emptyExpenseEntries, emptySavingsEntries, xAxisLabels);
             });
     }
 
@@ -891,6 +1181,7 @@ public class AnalysisActivity extends AppCompatActivity {
         }
     }
 
+    @SuppressLint("SuspiciousIndentation")
     private void updateChartForMonthlyView(String userId, long startTime, long endTime) {
         // Thiết lập các khoảng thời gian cho biểu đồ hàng tháng
         ArrayList<Entry> incomeEntries = new ArrayList<>();
@@ -1348,8 +1639,9 @@ public class AnalysisActivity extends AppCompatActivity {
                             return;
                         }
                         
-                        // Tạo mảng tạm để lưu trữ giá trị tiết kiệm 
+                        // Tạo mảng tạm để lưu trữ giá trị tiết kiệm và chi tiêu
                         float[] savingsValues = new float[xAxisLabels.size()];
+                        float[] expenseValues = new float[xAxisLabels.size()];
                         
                         // Duyệt qua các giao dịch để tính toán
                         for (DocumentSnapshot doc : queryDocumentSnapshots) {
@@ -1397,8 +1689,12 @@ public class AnalysisActivity extends AppCompatActivity {
                                 // Xử lý cho từng mục thời gian trên biểu đồ
                                 for (int i = 0; i < xAxisLabels.size(); i++) {
                                     boolean isInPeriod = isTransactionInPeriod(date, i, xAxisLabels);
-                                    if (isInPeriod && "savings".equals(type)) {
-                                        savingsValues[i] += amount.floatValue();
+                                    if (isInPeriod) {
+                                        if ("savings".equals(type)) {
+                                            savingsValues[i] += amount.floatValue();
+                                        } else if ("expense".equals(type)) {
+                                            expenseValues[i] += amount.floatValue();
+                                        }
                                     }
                                 }
                             } catch (Exception e) {
@@ -1406,9 +1702,13 @@ public class AnalysisActivity extends AppCompatActivity {
                             }
                         }
                         
-                        // Cập nhật các entries dựa trên dữ liệu đã tính toán cho tiết kiệm
+                        // Cập nhật các entries dựa trên dữ liệu đã tính toán 
                         for (int i = 0; i < xAxisLabels.size(); i++) {
+                            // Cập nhật dữ liệu cho cột tiết kiệm
                             savingsBarEntries.set(i, new BarEntry(i, savingsValues[i]));
+                            
+                            // Cập nhật lại dữ liệu cho cột chi tiêu (không bao gồm tiết kiệm)
+                            expenseBarEntries.set(i, new BarEntry(i, expenseValues[i]));
                             
                             Log.d(TAG, "Mục " + i + " - " + xAxisLabels.get(i) + ": Thu nhập=" + 
                                    incomeBarEntries.get(i).getY() + ", Chi tiêu=" + expenseBarEntries.get(i).getY() + 
@@ -1772,5 +2072,183 @@ public class AnalysisActivity extends AppCompatActivity {
         }
         
         return false; // Mặc định không thuộc khoảng thời gian này
+    }
+
+    private void calculateMonthlyIncomeAndExpense(String userId, long startTime, long endTime) {
+        FirebaseFirestore.getInstance().collection("users").document(userId).collection("transactions")
+            .get()
+            .addOnSuccessListener(queryDocumentSnapshots -> {
+                Log.d(TAG, "Tính toán thu chi cho tháng từ " + new Date(startTime) + " đến " + new Date(endTime));
+                
+                double monthlyIncome = 0;
+                double monthlyExpense = 0;
+                double monthlySavings = 0;
+                
+                for (DocumentSnapshot doc : queryDocumentSnapshots) {
+                    try {
+                        String type = doc.getString("type");
+                        Double amount = doc.getDouble("amount");
+                        
+                        // Xử lý trường date có thể ở nhiều định dạng khác nhau
+                        Long date = null;
+                        
+                        // Kiểm tra các định dạng date có thể có
+                        if (doc.get("date") instanceof com.google.firebase.Timestamp) {
+                            com.google.firebase.Timestamp timestamp = doc.getTimestamp("date");
+                            if (timestamp != null) {
+                                date = timestamp.toDate().getTime();
+                            }
+                        } else if (doc.get("date") instanceof String) {
+                            try {
+                                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+                                Date parsedDate = sdf.parse(doc.getString("date"));
+                                if (parsedDate != null) {
+                                    date = parsedDate.getTime();
+                                }
+                            } catch (Exception e) {
+                                Log.e(TAG, "Lỗi khi phân tích chuỗi ngày: " + e.getMessage());
+                            }
+                        } else {
+                            try {
+                                date = doc.getLong("date");
+                            } catch (Exception e) {
+                                Log.e(TAG, "Không thể lấy date dưới dạng Long: " + e.getMessage());
+                            }
+                        }
+                        
+                        if (type == null || amount == null || date == null) {
+                            continue; // Bỏ qua giao dịch không hợp lệ
+                        }
+                        
+                        // Kiểm tra nếu giao dịch thuộc tháng hiện tại
+                        if (date >= startTime && date <= endTime) {
+                            if ("income".equals(type)) {
+                                monthlyIncome += amount;
+                                Log.d(TAG, "Thu nhập tháng này: " + amount);
+                            } else if ("expense".equals(type)) {
+                                monthlyExpense += amount;
+                                Log.d(TAG, "Chi tiêu tháng này: " + amount);
+                            } else if ("savings".equals(type)) {
+                                monthlySavings += amount;
+                                Log.d(TAG, "Tiết kiệm tháng này: " + amount);
+                            }
+                        }
+                    } catch (Exception e) {
+                        Log.e(TAG, "Lỗi khi xử lý giao dịch: " + e.getMessage());
+                    }
+                }
+                
+                // Cập nhật UI
+                if (tvIncome != null) {
+                    tvIncome.setText(CurrencyUtils.formatVND(monthlyIncome));
+                    Log.d(TAG, "Cập nhật thu nhập tháng: " + CurrencyUtils.formatVND(monthlyIncome));
+                }
+                
+                if (tvExpense != null) {
+                    tvExpense.setText("-" + CurrencyUtils.formatVND(monthlyExpense + monthlySavings));
+                    Log.d(TAG, "Cập nhật chi tiêu tháng: " + CurrencyUtils.formatVND(monthlyExpense + monthlySavings));
+                }
+                
+                if (tvTotalBalance != null) {
+                    tvTotalBalance.setText(CurrencyUtils.formatVND(monthlyIncome - monthlyExpense - monthlySavings));
+                    Log.d(TAG, "Cập nhật số dư tháng: " + CurrencyUtils.formatVND(monthlyIncome - monthlyExpense - monthlySavings));
+                }
+            })
+            .addOnFailureListener(e -> {
+                Log.e(TAG, "Lỗi khi tính toán thu chi cho tháng: " + e.getMessage());
+                
+                if (tvIncome != null) tvIncome.setText(CurrencyUtils.formatVND(0));
+                if (tvExpense != null) tvExpense.setText("-" + CurrencyUtils.formatVND(0));
+                if (tvTotalBalance != null) tvTotalBalance.setText(CurrencyUtils.formatVND(0));
+            });
+    }
+
+    private void calculateYearlyIncomeAndExpense(String userId, long startTime, long endTime) {
+        FirebaseFirestore.getInstance().collection("users").document(userId).collection("transactions")
+            .get()
+            .addOnSuccessListener(queryDocumentSnapshots -> {
+                Log.d(TAG, "Tính toán thu chi cho năm từ " + new Date(startTime) + " đến " + new Date(endTime));
+                
+                double yearlyIncome = 0;
+                double yearlyExpense = 0;
+                double yearlySavings = 0;
+                
+                for (DocumentSnapshot doc : queryDocumentSnapshots) {
+                    try {
+                        String type = doc.getString("type");
+                        Double amount = doc.getDouble("amount");
+                        
+                        // Xử lý trường date có thể ở nhiều định dạng khác nhau
+                        Long date = null;
+                        
+                        // Kiểm tra các định dạng date có thể có
+                        if (doc.get("date") instanceof com.google.firebase.Timestamp) {
+                            com.google.firebase.Timestamp timestamp = doc.getTimestamp("date");
+                            if (timestamp != null) {
+                                date = timestamp.toDate().getTime();
+                            }
+                        } else if (doc.get("date") instanceof String) {
+                            try {
+                                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+                                Date parsedDate = sdf.parse(doc.getString("date"));
+                                if (parsedDate != null) {
+                                    date = parsedDate.getTime();
+                                }
+                            } catch (Exception e) {
+                                Log.e(TAG, "Lỗi khi phân tích chuỗi ngày: " + e.getMessage());
+                            }
+                        } else {
+                            try {
+                                date = doc.getLong("date");
+                            } catch (Exception e) {
+                                Log.e(TAG, "Không thể lấy date dưới dạng Long: " + e.getMessage());
+                            }
+                        }
+                        
+                        if (type == null || amount == null || date == null) {
+                            continue; // Bỏ qua giao dịch không hợp lệ
+                        }
+                        
+                        // Kiểm tra nếu giao dịch thuộc năm hiện tại
+                        if (date >= startTime && date <= endTime) {
+                            if ("income".equals(type)) {
+                                yearlyIncome += amount;
+                                Log.d(TAG, "Thu nhập năm nay: " + amount);
+                            } else if ("expense".equals(type)) {
+                                yearlyExpense += amount;
+                                Log.d(TAG, "Chi tiêu năm nay: " + amount);
+                            } else if ("savings".equals(type)) {
+                                yearlySavings += amount;
+                                Log.d(TAG, "Tiết kiệm năm nay: " + amount);
+                            }
+                        }
+                    } catch (Exception e) {
+                        Log.e(TAG, "Lỗi khi xử lý giao dịch: " + e.getMessage());
+                    }
+                }
+                
+                // Cập nhật UI
+                if (tvIncome != null) {
+                    tvIncome.setText(CurrencyUtils.formatVND(yearlyIncome));
+                    Log.d(TAG, "Cập nhật thu nhập năm: " + CurrencyUtils.formatVND(yearlyIncome));
+                }
+                
+                if (tvExpense != null) {
+                    tvExpense.setText("-" + CurrencyUtils.formatVND(yearlyExpense + yearlySavings));
+                    Log.d(TAG, "Cập nhật chi tiêu năm: " + CurrencyUtils.formatVND(yearlyExpense + yearlySavings));
+                }
+                
+                if (tvTotalBalance != null) {
+                    tvTotalBalance.setText(CurrencyUtils.formatVND(yearlyIncome - yearlyExpense - yearlySavings));
+                    Log.d(TAG, "Cập nhật số dư năm: " + CurrencyUtils.formatVND(yearlyIncome - yearlyExpense - yearlySavings));
+                }
+            })
+            .addOnFailureListener(e -> {
+                Log.e(TAG, "Lỗi khi tính toán thu chi cho năm: " + e.getMessage());
+                
+                if (tvIncome != null) tvIncome.setText(CurrencyUtils.formatVND(0));
+                if (tvExpense != null) tvExpense.setText("-" + CurrencyUtils.formatVND(0));
+                if (tvTotalBalance != null) tvTotalBalance.setText(CurrencyUtils.formatVND(0));
+            });
     }
 } 
