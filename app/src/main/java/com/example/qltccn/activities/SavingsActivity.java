@@ -163,10 +163,7 @@ public class SavingsActivity extends AppCompatActivity implements View.OnClickLi
             // Có thể bổ sung thêm rung nhẹ để tăng trải nghiệm người dùng
             try {
                 android.os.Vibrator vibrator = (android.os.Vibrator) getSystemService(android.content.Context.VIBRATOR_SERVICE);
-                if (vibrator != null && vibrator.hasVibrator()) {
-                    // Rung nhẹ 100ms
-                    vibrator.vibrate(100);
-                }
+
             } catch (Exception e) {
                 Log.e("SavingsActivity", "Lỗi khi tạo rung: " + e.getMessage());
             }

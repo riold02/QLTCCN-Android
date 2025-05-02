@@ -315,6 +315,9 @@ public class SearchActivity extends AppCompatActivity {
         // Thêm các danh mục mặc định
         // Danh mục thu nhập
         incomeCategories.add(new Category("1", "Lương", "income", "ic_salary"));
+        incomeCategories.add(new Category("2", "Đầu tư", "income", "ic_investment"));
+        incomeCategories.add(new Category("3", "Tiền thưởng", "income", "ic_bonus"));
+        incomeCategories.add(new Category("4", "Quà tặng", "income", "ic_gift"));
      
         // Danh mục chi tiêu
         expenseCategories.add(new Category("5", "Ăn uống", "expense", "ic_food"));
@@ -323,10 +326,15 @@ public class SearchActivity extends AppCompatActivity {
         expenseCategories.add(new Category("8", "Giải trí", "expense", "ic_entertainment"));
         expenseCategories.add(new Category("9", "Sức khỏe", "expense", "ic_health"));
         expenseCategories.add(new Category("10", "Giáo dục", "expense", "ic_education"));
+        expenseCategories.add(new Category("11", "Nhà cửa", "expense", "ic_housing"));
+        expenseCategories.add(new Category("12", "Hóa đơn", "expense", "ic_bills"));
         
         // Danh mục tiết kiệm
-        savingsCategories.add(new Category("11", "Tiết kiệm", "savings", "ic_general"));
-        
+        savingsCategories.add(new Category("13", "Tiết kiệm", "savings", "ic_general"));
+        savingsCategories.add(new Category("14", "Du lịch", "savings", "ic_travel"));
+        savingsCategories.add(new Category("15", "Mua nhà", "savings", "ic_house"));
+        savingsCategories.add(new Category("16", "Mua xe", "savings", "ic_car"));
+        savingsCategories.add(new Category("17", "Đám cưới", "savings", "ic_wedding"));
         // Tạo danh sách cho Spinner
         setupCategorySpinner();
         
@@ -515,12 +523,59 @@ public class SearchActivity extends AppCompatActivity {
                         Double amount = document.getDouble("amount");
                         String category = document.getString("category");
                         String note = document.getString("note");
+                        String description = document.getString("description");
+                        String transactionType = document.getString("transactionType");
+                        
+                        // Nếu là giao dịch tiết kiệm hoặc deposit và có mô tả, thêm vào danh mục
+                        if ((category == null || category.isEmpty()) && 
+                            (type != null && type.equals("savings") || "deposit".equals(transactionType))) {
+                            
+                            // Kiểm tra mô tả để xác định danh mục tiết kiệm
+                            if (description != null) {
+                                if (description.toLowerCase().contains("du lịch") || 
+                                    description.toLowerCase().contains("travel")) {
+                                    category = "travel";
+                                } else if (description.toLowerCase().contains("nhà") || 
+                                          description.toLowerCase().contains("house")) {
+                                    category = "house";
+                                } else if (description.toLowerCase().contains("xe") || 
+                                          description.toLowerCase().contains("car")) {
+                                    category = "car";
+                                } else if (description.toLowerCase().contains("cưới") || 
+                                          description.toLowerCase().contains("wedding")) {
+                                    category = "wedding";
+                                } else {
+                                    category = "savings";
+                                }
+                            } else if (note != null) {
+                                if (note.toLowerCase().contains("travel") || 
+                                    note.toLowerCase().contains("du lịch")) {
+                                    category = "travel";
+                                } else if (note.toLowerCase().contains("house") || 
+                                          note.toLowerCase().contains("nhà")) {
+                                    category = "house";
+                                } else if (note.toLowerCase().contains("car") || 
+                                          note.toLowerCase().contains("xe")) {
+                                    category = "car";
+                                } else if (note.toLowerCase().contains("wedding") || 
+                                          note.toLowerCase().contains("cưới")) {
+                                    category = "wedding";
+                                } else {
+                                    category = "savings";
+                                }
+                            } else {
+                                category = "savings";
+                            }
+                        }
                         
                         // Chuyển đổi sang chữ thường để so sánh không phân biệt hoa thường
                         String categoryLower = category != null ? category.toLowerCase() : "";
                         String noteLower = note != null ? note.toLowerCase() : "";
+                        String descriptionLower = description != null ? description.toLowerCase() : "";
                         
-                        Log.d(TAG, "Giao dịch: " + document.getId() + " - " + type + " - " + category);
+                        Log.d(TAG, "Giao dịch: " + document.getId() + " - " + type + " - " + category + 
+                              (description != null ? " - Desc: " + description : "") + 
+                              (transactionType != null ? " - TransType: " + transactionType : ""));
                         
                         // Xử lý ngày từ nhiều định dạng
                         Long dateValue = null;
@@ -553,7 +608,7 @@ public class SearchActivity extends AppCompatActivity {
                         // Kiểm tra xem giao dịch có thỏa mãn điều kiện tìm kiếm không
                         boolean matchesType = (searchIncome && "income".equals(type)) || 
                                             (searchExpense && "expense".equals(type)) ||
-                                            (searchSavings && "savings".equals(type));
+                                            (searchSavings && ("savings".equals(type) || "deposit".equals(transactionType)));
                         
                         boolean matchesDate = true;
                         if (dateValue != null) {
@@ -564,12 +619,21 @@ public class SearchActivity extends AppCompatActivity {
                         boolean matchesQuery = true;
                         if (!searchQuery.isEmpty()) {
                             matchesQuery = (categoryLower.contains(searchQuery)) ||
-                                          (noteLower.contains(searchQuery));
+                                          (noteLower.contains(searchQuery)) ||
+                                          (descriptionLower.contains(searchQuery));
                         }
                         
                         boolean matchesCategory = true;
                         if (!selectedCategory.isEmpty()) {
-                            matchesCategory = selectedCategory.equalsIgnoreCase(category);
+                            matchesCategory = isCategoryMatch(selectedCategory, category);
+                            
+                            // Kiểm tra thêm cho Du lịch trong mô tả
+                            if (!matchesCategory && "Du lịch".equalsIgnoreCase(selectedCategory) || "travel".equalsIgnoreCase(selectedCategory)) {
+                                matchesCategory = (descriptionLower != null && descriptionLower.contains("du lịch")) || 
+                                                 (descriptionLower != null && descriptionLower.contains("travel")) ||
+                                                 (noteLower != null && noteLower.contains("du lịch")) ||
+                                                 (noteLower != null && noteLower.contains("travel"));
+                            }
                         }
                         
                         // Debug
@@ -676,5 +740,111 @@ public class SearchActivity extends AppCompatActivity {
         } catch (Exception e) {
             Log.e(TAG, "Lỗi khi hiển thị trạng thái không có kết quả: " + e.getMessage());
         }
+    }
+
+    /**
+     * Kiểm tra xem danh mục đã chọn có khớp với danh mục của giao dịch không
+     * Xử lý cả trường hợp tên hiển thị (Ăn uống) và mã nội bộ (food)
+     */
+    private boolean isCategoryMatch(String selectedCategory, String categoryValue) {
+        if (selectedCategory == null || categoryValue == null) {
+            return false;
+        }
+        
+        // Kiểm tra trùng khớp trực tiếp (không phân biệt hoa thường)
+        if (selectedCategory.equalsIgnoreCase(categoryValue)) {
+            return true;
+        }
+        
+        // Kiểm tra các cặp tên hiển thị/mã đặc biệt
+        switch (selectedCategory.toLowerCase()) {
+            case "ăn uống":
+                return categoryValue.equalsIgnoreCase("food");
+            case "food":
+                return categoryValue.equalsIgnoreCase("Ăn uống");
+            
+            case "di chuyển":
+                return categoryValue.equalsIgnoreCase("transport");
+            case "transport":
+                return categoryValue.equalsIgnoreCase("Di chuyển");
+            
+            case "mua sắm":
+                return categoryValue.equalsIgnoreCase("shopping");
+            case "shopping":
+                return categoryValue.equalsIgnoreCase("Mua sắm");
+            
+            case "nhà cửa":
+                return categoryValue.equalsIgnoreCase("housing");
+            case "housing":
+                return categoryValue.equalsIgnoreCase("Nhà cửa");
+            
+            case "giải trí":
+                return categoryValue.equalsIgnoreCase("entertainment");
+            case "entertainment":
+                return categoryValue.equalsIgnoreCase("Giải trí");
+            
+            case "giáo dục":
+                return categoryValue.equalsIgnoreCase("education");
+            case "education":
+                return categoryValue.equalsIgnoreCase("Giáo dục");
+            
+            case "sức khỏe":
+                return categoryValue.equalsIgnoreCase("health");
+            case "health":
+                return categoryValue.equalsIgnoreCase("Sức khỏe");
+            
+            case "lương":
+                return categoryValue.equalsIgnoreCase("salary") || 
+                       categoryValue.equalsIgnoreCase("deposit");
+            case "salary":
+                return categoryValue.equalsIgnoreCase("Lương") || 
+                       categoryValue.equalsIgnoreCase("deposit");
+            case "deposit":
+                return categoryValue.equalsIgnoreCase("Lương") || 
+                       categoryValue.equalsIgnoreCase("salary");
+            
+            case "đầu tư":
+                return categoryValue.equalsIgnoreCase("investment");
+            case "investment":
+                return categoryValue.equalsIgnoreCase("Đầu tư");
+            
+            case "tiết kiệm":
+                return categoryValue.equalsIgnoreCase("savings") || 
+                       categoryValue.equalsIgnoreCase("travel") ||
+                       categoryValue.equalsIgnoreCase("house") ||
+                       categoryValue.equalsIgnoreCase("car") ||
+                       categoryValue.equalsIgnoreCase("wedding") ||
+                       categoryValue.equalsIgnoreCase("deposit");
+            case "savings":
+                return categoryValue.equalsIgnoreCase("Tiết kiệm") ||
+                       categoryValue.equalsIgnoreCase("travel") ||
+                       categoryValue.equalsIgnoreCase("house") ||
+                       categoryValue.equalsIgnoreCase("car") ||
+                       categoryValue.equalsIgnoreCase("wedding") ||
+                       categoryValue.equalsIgnoreCase("deposit");
+            case "travel":
+            case "du lịch":
+                return categoryValue.equalsIgnoreCase("Tiết kiệm") ||
+                       categoryValue.equalsIgnoreCase("savings") ||
+                       categoryValue.equalsIgnoreCase("travel") ||
+                       categoryValue.equalsIgnoreCase("deposit");
+            case "house":
+            case "mua nhà":
+                return categoryValue.equalsIgnoreCase("Tiết kiệm") ||
+                       categoryValue.equalsIgnoreCase("savings") ||
+                       categoryValue.equalsIgnoreCase("house");
+            case "car":
+            case "mua xe":
+                return categoryValue.equalsIgnoreCase("Tiết kiệm") ||
+                       categoryValue.equalsIgnoreCase("savings") ||
+                       categoryValue.equalsIgnoreCase("car");
+            case "wedding":
+            case "đám cưới":
+                return categoryValue.equalsIgnoreCase("Tiết kiệm") ||
+                       categoryValue.equalsIgnoreCase("savings") ||
+                       categoryValue.equalsIgnoreCase("wedding");
+        }
+        
+        return false;
     }
 } 
