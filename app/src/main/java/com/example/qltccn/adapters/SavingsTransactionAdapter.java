@@ -13,90 +13,115 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.qltccn.R;
 import com.example.qltccn.models.SavingsTransaction;
 import com.example.qltccn.utils.CurrencyUtils;
-import com.example.qltccn.utils.DateUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-public class SavingsTransactionAdapter extends RecyclerView.Adapter<SavingsTransactionAdapter.SavingsTransactionViewHolder> {
+public class SavingsTransactionAdapter extends RecyclerView.Adapter<SavingsTransactionAdapter.SavingsViewHolder> {
+    private Context context;
+    private List<SavingsTransaction> savingsTransactions;
+    private OnSavingsTransactionClickListener listener;
 
-    private final Context context;
-    private final List<SavingsTransaction> transactions;
-    private final SimpleDateFormat dateFormat;
+    // Interface cho sự kiện click
+    public interface OnSavingsTransactionClickListener {
+        void onSavingsTransactionClick(SavingsTransaction transaction, int position);
+    }
 
-    public SavingsTransactionAdapter(Context context, List<SavingsTransaction> transactions) {
+    // Constructor
+    public SavingsTransactionAdapter(Context context, List<SavingsTransaction> savingsTransactions) {
         this.context = context;
-        this.transactions = transactions;
-        this.dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+        this.savingsTransactions = savingsTransactions;
+    }
+
+    // Constructor với listener
+    public SavingsTransactionAdapter(Context context, List<SavingsTransaction> savingsTransactions, 
+                                     OnSavingsTransactionClickListener listener) {
+        this.context = context;
+        this.savingsTransactions = savingsTransactions;
+        this.listener = listener;
+    }
+
+    // Set click listener
+    public void setOnSavingsTransactionClickListener(OnSavingsTransactionClickListener listener) {
+        this.listener = listener;
     }
 
     @NonNull
     @Override
-    public SavingsTransactionViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public SavingsViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(context).inflate(R.layout.item_savings_transaction, parent, false);
-        return new SavingsTransactionViewHolder(view);
+        return new SavingsViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull SavingsTransactionViewHolder holder, int position) {
-        SavingsTransaction transaction = transactions.get(position);
+    public void onBindViewHolder(@NonNull SavingsViewHolder holder, int position) {
+        SavingsTransaction transaction = savingsTransactions.get(position);
         
-        // Thiết lập dữ liệu cho mỗi item
-        holder.tvDescription.setText(transaction.getDescription());
+        // Hiển thị thời gian
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
+        String dateStr = dateFormat.format(new Date(transaction.getDate()));
+        holder.dateTextView.setText(dateStr);
         
-        // Sử dụng định dạng ngày trực tiếp với SimpleDateFormat
-        Date transactionDate = new Date(transaction.getDate());
-        holder.tvDate.setText(dateFormat.format(transactionDate));
+        // Hiển thị số tiền
+        String amountStr = CurrencyUtils.formatCurrency(transaction.getAmount());
+        holder.amountTextView.setText(amountStr);
         
-        // Định dạng số tiền và phân biệt màu sắc theo loại giao dịch
-        String prefix = "";
-        int textColor;
+        // Hiển thị thông tin giao dịch
+        holder.descriptionTextView.setText(transaction.getDescription());
         
+        // Hiển thị loại giao dịch và thiết lập icon
         if ("deposit".equals(transaction.getTransactionType())) {
-            // Gửi tiền - hiển thị màu xanh
-            prefix = "+";
-            textColor = context.getResources().getColor(R.color.income_color);
-            // Sử dụng biểu tượng khác cho gửi tiền
-            holder.ivTransactionIcon.setImageResource(R.drawable.ic_money);
+            holder.typeTextView.setText("Nạp tiền");
+            holder.iconImageView.setImageResource(R.drawable.ic_income);
+            holder.amountTextView.setTextColor(context.getResources().getColor(R.color.income_green));
         } else {
-            // Rút tiền - hiển thị màu đỏ và dấu trừ
-            prefix = "-";
-            textColor = context.getResources().getColor(R.color.expense_color);
-            // Sử dụng biểu tượng khác cho rút tiền
-            holder.ivTransactionIcon.setImageResource(R.drawable.ic_expense);
+            holder.typeTextView.setText("Rút tiền");
+            holder.iconImageView.setImageResource(R.drawable.ic_expense);
+            holder.amountTextView.setTextColor(context.getResources().getColor(R.color.expense_red));
         }
         
-        // Định dạng và hiển thị số tiền với prefix
-        String formattedAmount = prefix + CurrencyUtils.formatAmount(transaction.getAmount());
-        holder.tvAmount.setText(formattedAmount);
-        holder.tvAmount.setTextColor(textColor);
+        // Hiển thị ghi chú nếu có
+        if (transaction.getNote() != null && !transaction.getNote().isEmpty()) {
+            holder.noteTextView.setVisibility(View.VISIBLE);
+            holder.noteTextView.setText(transaction.getNote());
+        } else {
+            holder.noteTextView.setVisibility(View.GONE);
+        }
+        
+        // Set sự kiện click
+        holder.itemView.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onSavingsTransactionClick(transaction, position);
+            }
+        });
     }
 
     @Override
     public int getItemCount() {
-        return transactions.size();
+        return savingsTransactions != null ? savingsTransactions.size() : 0;
+    }
+    
+    // Cập nhật dữ liệu
+    public void updateData(List<SavingsTransaction> newData) {
+        this.savingsTransactions = newData;
+        notifyDataSetChanged();
     }
 
     // ViewHolder class
-    static class SavingsTransactionViewHolder extends RecyclerView.ViewHolder {
-        ImageView ivTransactionIcon;
-        TextView tvDescription, tvAmount, tvDate;
+    public class SavingsViewHolder extends RecyclerView.ViewHolder {
+        ImageView iconImageView;
+        TextView dateTextView, amountTextView, descriptionTextView, typeTextView, noteTextView;
 
-        public SavingsTransactionViewHolder(@NonNull View itemView) {
+        public SavingsViewHolder(@NonNull View itemView) {
             super(itemView);
-            ivTransactionIcon = itemView.findViewById(R.id.ivTransactionIcon);
-            tvDescription = itemView.findViewById(R.id.tvTransactionDescription);
-            tvAmount = itemView.findViewById(R.id.tvTransactionAmount);
-            tvDate = itemView.findViewById(R.id.tvTransactionDate);
+            iconImageView = itemView.findViewById(R.id.savingsIconImageView);
+            dateTextView = itemView.findViewById(R.id.savingsDateTextView);
+            amountTextView = itemView.findViewById(R.id.savingsAmountTextView);
+            descriptionTextView = itemView.findViewById(R.id.savingsDescriptionTextView);
+            typeTextView = itemView.findViewById(R.id.savingsTypeTextView);
+            noteTextView = itemView.findViewById(R.id.savingsNoteTextView);
         }
-    }
-
-    // Phương thức cập nhật dữ liệu
-    public void updateData(List<SavingsTransaction> newTransactions) {
-        this.transactions.clear();
-        this.transactions.addAll(newTransactions);
-        notifyDataSetChanged();
     }
 } 

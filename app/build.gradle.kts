@@ -41,6 +41,9 @@ dependencies {
     // Google Play Services
     implementation("com.google.android.gms:play-services-base:18.2.0")
     
+    // Gson
+    implementation("com.google.code.gson:gson:2.10.1")
+    
     // AndroidX
     implementation(libs.appcompat)
     implementation(libs.material)

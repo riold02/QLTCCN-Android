@@ -27,6 +27,7 @@ import com.example.qltccn.utils.TransactionUtils;
 import com.example.qltccn.utils.CategoryUtils;
 import com.example.qltccn.utils.CurrencyUtils;
 import com.example.qltccn.utils.FirebaseUtils;
+import com.example.qltccn.utils.NotificationUtils;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -369,6 +370,9 @@ public class CategoryAddActivity extends AppCompatActivity {
                     
                     // Cập nhật số dư người dùng
                     updateUserBalance(transaction.getUserId(), transaction.getAmount());
+                    
+                    // Tạo thông báo chi tiêu mới
+                    NotificationUtils.addTransactionNotification(CategoryAddActivity.this, transaction);
                     
                     // Gọi CategoryUtils để cập nhật danh mục
                     refreshCategoryData();

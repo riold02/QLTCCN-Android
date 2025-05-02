@@ -1151,18 +1151,13 @@ public class HomeActivity extends AppCompatActivity {
     // Thêm phương thức chuyển đến màn hình thông báo
     private void navigateToNotification() {
         try {
-            Log.d(TAG, "Hiển thị thông báo chức năng đang phát triển");
-            // Thay vì mở NotiActivity, hiển thị thông báo tính năng đang phát triển
-            Toast.makeText(this, "Tính năng đang phát triển", Toast.LENGTH_SHORT).show();
-
-            // Có thể bổ sung thêm rung nhẹ để tăng trải nghiệm người dùng
-            android.os.Vibrator vibrator = (android.os.Vibrator) getSystemService(android.content.Context.VIBRATOR_SERVICE);
-            if (vibrator != null && vibrator.hasVibrator()) {
-                // Rung nhẹ 100ms
-
-            }
+            Log.d(TAG, "Chuyển hướng tới màn hình thông báo");
+            // Mở màn hình NotiActivity
+            Intent intent = new Intent(this, NotiActivity.class);
+            startActivity(intent);
         } catch (Exception e) {
-            Log.e(TAG, "Lỗi khi hiển thị thông báo: " + e.getMessage(), e);
+            Log.e(TAG, "Lỗi khi chuyển tới màn hình thông báo: " + e.getMessage(), e);
+            Toast.makeText(this, "Không thể mở màn hình thông báo", Toast.LENGTH_SHORT).show();
         }
     }
 

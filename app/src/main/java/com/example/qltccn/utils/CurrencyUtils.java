@@ -64,13 +64,37 @@ public class CurrencyUtils {
     private static final Locale LOCALE_VN = new Locale("vi", "VN");
     
     /**
-     * Định dạng số thành chuỗi tiền tệ Việt Nam
+     * Định dạng số tiền theo định dạng VND
      * @param amount Số tiền cần định dạng
-     * @return Chuỗi đã định dạng với đơn vị đồng
+     * @return Chuỗi đã định dạng (ví dụ: 120.000đ)
      */
     public static String formatVND(double amount) {
-        NumberFormat currencyFormatter = NumberFormat.getNumberInstance(LOCALE_VN);
-        return currencyFormatter.format(amount) + " VND";
+        NumberFormat formatter = NumberFormat.getInstance(LOCALE_VN);
+        return formatter.format(amount) + "đ";
+    }
+    
+    /**
+     * Định dạng số tiền theo định dạng VND với số lẻ 
+     * @param amount Số tiền cần định dạng
+     * @return Chuỗi đã định dạng (ví dụ: 120.000,50đ)
+     */
+    public static String formatVNDWithDecimals(double amount) {
+        NumberFormat formatter = NumberFormat.getInstance(new Locale("vi", "VN"));
+        formatter.setMinimumFractionDigits(2);
+        formatter.setMaximumFractionDigits(2);
+        return formatter.format(amount) + "đ";
+    }
+    
+    /**
+     * Định dạng số tiền theo định dạng triệu VND
+     * @param amount Số tiền cần định dạng (đơn vị đồng)
+     * @return Chuỗi đã định dạng (ví dụ: 1,2 triệu)
+     */
+    public static String formatToMillionVND(double amount) {
+        double millions = amount / 1000000.0;
+        NumberFormat formatter = NumberFormat.getInstance(new Locale("vi", "VN"));
+        formatter.setMaximumFractionDigits(1);
+        return formatter.format(millions) + " triệu";
     }
     
     /**

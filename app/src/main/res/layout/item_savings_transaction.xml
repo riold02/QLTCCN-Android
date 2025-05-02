@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="8dp"
+    android:layout_marginVertical="4dp"
     app:cardCornerRadius="8dp"
     app:cardElevation="2dp">
 
@@ -13,21 +13,15 @@
         android:orientation="horizontal"
         android:padding="12dp">
 
-        <RelativeLayout
+        <!-- Icon -->
+        <ImageView
+            android:id="@+id/savingsIconImageView"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:background="@drawable/rounded_bg1"
-            android:backgroundTint="#E6F2FF">
+            android:contentDescription="Transaction type icon"
+            android:src="@drawable/ic_income" />
 
-            <ImageView
-                android:id="@+id/ivTransactionIcon"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_centerInParent="true"
-                android:src="@drawable/ic_trans"
-                app:tint="#0066FF" />
-        </RelativeLayout>
-
+        <!-- Transaction Info -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -35,31 +29,64 @@
             android:layout_weight="1"
             android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/tvTransactionDescription"
-                android:layout_width="wrap_content"
+            <!-- Date and Amount -->
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Gửi tiền vào mục tiêu"
-                android:textColor="#333333"
-                android:textSize="16sp" />
+                android:orientation="horizontal">
 
+                <TextView
+                    android:id="@+id/savingsDateTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="24/04/2023 10:30"
+                    android:textColor="@color/blue"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:id="@+id/savingsTypeTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:background="@drawable/rounded_tag_bg"
+                    android:paddingHorizontal="6dp"
+                    android:paddingVertical="2dp"
+                    android:text="Nạp tiền"
+                    android:textColor="@color/white"
+                    android:textSize="10sp" />
+            </LinearLayout>
+
+            <!-- Description -->
             <TextView
-                android:id="@+id/tvTransactionDate"
-                android:layout_width="wrap_content"
+                android:id="@+id/savingsDescriptionTextView"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:text="24 Tháng 5, 2023"
-                android:textColor="#757575"
-                android:textSize="12sp" />
+                android:text="Tiết kiệm cho mục tiêu du lịch"
+                android:textColor="@color/black"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <!-- Note (Optional) -->
+            <TextView
+                android:id="@+id/savingsNoteTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="Ghi chú cho giao dịch này"
+                android:textColor="@color/gray"
+                android:textSize="12sp"
+                android:visibility="visible" />
         </LinearLayout>
 
+        <!-- Amount -->
         <TextView
-            android:id="@+id/tvTransactionAmount"
+            android:id="@+id/savingsAmountTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
-            android:text="+$500.00"
-            android:textColor="#00C853"
+            android:text="500,000 đ"
+            android:textColor="@color/income_green"
             android:textSize="16sp"
             android:textStyle="bold" />
     </LinearLayout>
