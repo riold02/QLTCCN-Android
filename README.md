@@ -103,3 +103,15 @@ Xem hướng dẫn sử dụng đầy đủ tại [HUONG_DAN_SU_DUNG.md](./HUONG
 - **MPAndroidChart**: Hiển thị biểu đồ thu chi và phân tích
 - **Glide**: Tải và hiển thị hình ảnh
 - **ColorPicker**: Tùy chỉnh màu sắc cho danh mục
+
+## Hướng phát triển trong tương lai
+Ứng dụng sẽ tiếp tục được phát triển với các tính năng mới:
+
+- **Tích hợp ngân hàng**: Kết nối tài khoản ngân hàng, đồng bộ giao dịch tự động
+- **Trí tuệ nhân tạo**: Phân loại giao dịch tự động, dự báo tài chính, gợi ý tiết kiệm
+- **Quản lý tài sản**: Theo dõi đầu tư, tài sản cố định và giá trị tài sản ròng
+- **Tính năng xã hội**: Nhóm chi tiêu, so sánh với cộng đồng, thách thức tiết kiệm
+- **Hỗ trợ đa nền tảng**: Phiên bản web, tích hợp thiết bị đeo, trợ lý giọng nói
+- **Tính năng cao cấp (Premium)**: Tư vấn tài chính, lập kế hoạch thuế và hưu trí
+
+Xem chi tiết đầy đủ tại [Hướng phát triển](./HUONG_DAN_SU_DUNG.md#10-hướng-phát-triển-trong-tương-lai).
