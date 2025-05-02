@@ -22,25 +22,61 @@ erDiagram
         string name
         string type
         string iconName
-        string color
         boolean isDefault
-        string userId
+        string userId FK
+        string parentId
+        long createdAt
+        long updatedAt
     }
 
     TRANSACTION {
         string id PK
         string userId FK
-        double amount
         string category FK
+        double amount
         string description
-        long date
+        string note
         string type
+        long date
+        string goalId FK
+        long createdAt
+        long updatedAt
+    }
+    
+    SAVINGS_GOAL {
+        string id PK
+        string userId FK
+        string title
+        string description
+        double targetAmount
+        double currentAmount
+        string iconName
+        long startDate
+        long endDate
+        string categoryType
+        long createdAt
+        long updatedAt
+    }
+    
+    SAVINGS_TRANSACTION {
+        string id PK
+        string userId FK
+        string goalId FK
+        double amount
+        string description
+        string note
+        string transactionType
+        long date
         long createdAt
         long updatedAt
     }
 
     USER ||--o{ TRANSACTION : "creates"
+    USER ||--o{ CATEGORY : "owns"
     CATEGORY ||--o{ TRANSACTION : "categorizes"
+    USER ||--o{ SAVINGS_GOAL : "sets"
+    SAVINGS_GOAL ||--o{ SAVINGS_TRANSACTION : "records"
+    USER ||--o{ SAVINGS_TRANSACTION : "performs"
 ```
 
 ## Mô tả các Collection
@@ -64,33 +100,68 @@ erDiagram
 - **name**: Tên danh mục
 - **type**: Loại danh mục ("income" - thu nhập hoặc "expense" - chi tiêu)
 - **iconName**: Tên biểu tượng của danh mục
-- **color**: Mã màu cho danh mục
 - **isDefault**: Cờ đánh dấu danh mục mặc định
 - **userId**: ID người dùng sở hữu danh mục (null/system cho danh mục mặc định)
+- **parentId**: ID của danh mục cha (null nếu là danh mục gốc)
+- **createdAt**: Thời điểm tạo danh mục
+- **updatedAt**: Thời điểm cập nhật danh mục
 
 ### 3. Transactions Collection
 
 - **id**: Định danh duy nhất của giao dịch
 - **userId**: ID người dùng thực hiện giao dịch (tham chiếu đến Users)
+- **category**: ID của danh mục giao dịch (tham chiếu đến Categories)
 - **amount**: Số tiền giao dịch
-- **category**: Danh mục giao dịch (tham chiếu đến Categories)
 - **description**: Mô tả chi tiết giao dịch
-- **date**: Thời gian thực hiện giao dịch (timestamp)
+- **note**: Ghi chú thêm cho giao dịch
 - **type**: Loại giao dịch ("income" - thu nhập hoặc "expense" - chi tiêu)
+- **date**: Thời gian thực hiện giao dịch (timestamp)
+- **goalId**: ID của mục tiêu tiết kiệm (nếu giao dịch liên quan đến mục tiêu)
+- **createdAt**: Thời điểm tạo giao dịch (timestamp)
+- **updatedAt**: Thời điểm cập nhật giao dịch (timestamp)
+
+### 4. SavingsGoals Collection
+
+- **id**: Định danh duy nhất của mục tiêu tiết kiệm
+- **userId**: ID người dùng sở hữu mục tiêu (tham chiếu đến Users)
+- **title**: Tiêu đề mục tiêu
+- **description**: Mô tả chi tiết mục tiêu
+- **targetAmount**: Số tiền mục tiêu cần đạt được
+- **currentAmount**: Số tiền hiện tại đã tiết kiệm
+- **iconName**: Tên biểu tượng của mục tiêu
+- **startDate**: Ngày bắt đầu mục tiêu (timestamp)
+- **endDate**: Ngày kết thúc mục tiêu (timestamp)
+- **categoryType**: Loại danh mục mục tiêu (travel, house, car, wedding, v.v.)
+- **createdAt**: Thời điểm tạo mục tiêu (timestamp)
+- **updatedAt**: Thời điểm cập nhật mục tiêu (timestamp)
+
+### 5. SavingsTransactions Collection
+
+- **id**: Định danh duy nhất của giao dịch tiết kiệm
+- **userId**: ID người dùng thực hiện giao dịch (tham chiếu đến Users)
+- **goalId**: ID của mục tiêu tiết kiệm (tham chiếu đến SavingsGoals)
+- **amount**: Số tiền giao dịch
+- **description**: Mô tả chi tiết giao dịch
+- **note**: Ghi chú thêm cho giao dịch
+- **transactionType**: Loại giao dịch ("deposit" - gửi tiền hoặc "withdraw" - rút tiền)
+- **date**: Thời gian thực hiện giao dịch (timestamp)
 - **createdAt**: Thời điểm tạo giao dịch (timestamp)
 - **updatedAt**: Thời điểm cập nhật giao dịch (timestamp)
 
 ## Các mối quan hệ
 
 1. Một User có thể có nhiều Transaction (1-n)
-2. Một Category có thể được sử dụng trong nhiều Transaction (1-n)
-3. Mỗi User có thể sở hữu nhiều Category (1-n)
+2. Một User có thể sở hữu nhiều Category (1-n)
+3. Một Category có thể được sử dụng trong nhiều Transaction (1-n)
+4. Một User có thể có nhiều SavingsGoal (1-n)
+5. Một SavingsGoal có thể có nhiều SavingsTransaction (1-n)
+6. Một User thực hiện nhiều SavingsTransaction (1-n)
 
 ## Lưu ý về Firebase Firestore
 
 Firestore là cơ sở dữ liệu NoSQL, nên không có khái niệm về khóa ngoại (foreign key) như trong cơ sở dữ liệu quan hệ. Thay vào đó, các tham chiếu được thực hiện bằng cách lưu trữ ID của document trong một collection khác.
 
-Việc quản lý tính toàn vẹn dữ liệu phải được thực hiện ở tầng ứng dụng thông qua code Java trong các lớp utility như `DataUtils`, `UserUtils`, `CategoryUtils`, và `TransactionUtils`.
+Việc quản lý tính toàn vẹn dữ liệu phải được thực hiện ở tầng ứng dụng thông qua code Java trong các lớp utility như `DataUtils`, `UserUtils`, `CategoryUtils`, `TransactionUtils`, `SavingsGoalUtils`, và `SavingsTransactionUtils`.
 
 ## Firebase Realtime Database
 
@@ -115,6 +186,17 @@ Dự án cũng sử dụng Firebase Realtime Database làm cơ sở dữ liệu 
       device: "Android"
       appVersion: "1.0"
     }
+
+/savings_goals
+  /goalId
+    id: "goalId"
+    userId: "userId"
+    title: "Tên mục tiêu"
+    currentAmount: 0.0
+    targetAmount: 5000000.0
+    startDate: timestamp
+    endDate: timestamp
+    categoryType: "travel"
 ```
 
 ## Rules và Quyền Truy Cập
@@ -128,8 +210,8 @@ service cloud.firestore {
     match /users/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
-    match /users/{userId}/transactions/{transactionId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+    match /transactions/{transactionId} {
+      allow read, write: if request.auth != null && resource.data.userId == request.auth.uid;
     }
     match /categories/{categoryId} {
       allow read: if request.auth != null;
@@ -139,6 +221,12 @@ service cloud.firestore {
         resource.data.userId == "system" || 
         resource.data.userId == request.auth.uid
       );
+    }
+    match /savings_goals/{goalId} {
+      allow read, write: if request.auth != null && resource.data.userId == request.auth.uid;
+    }
+    match /savings_transactions/{transactionId} {
+      allow read, write: if request.auth != null && resource.data.userId == request.auth.uid;
     }
   }
 }
@@ -156,6 +244,12 @@ service cloud.firestore {
         ".read": "auth != null && auth.uid == $uid",
         ".write": "auth != null && auth.uid == $uid"
       }
+    },
+    "savings_goals": {
+      "$goalId": {
+        ".read": "auth != null && data.child('userId').val() == auth.uid",
+        ".write": "auth != null && data.child('userId').val() == auth.uid"
+      }
     }
   }
 }
@@ -168,12 +262,8 @@ service cloud.firestore {
 ```java
 // Trong Application class (onCreate)
 FirebaseDatabase.getInstance().setPersistenceEnabled(true);
-```
-
-## Xử Lý Lỗi Quyền Truy Cập
-
-Đối với các trường hợp lỗi quyền truy cập (PERMISSION_DENIED), ứng dụng được thiết kế để vẫn tiếp tục vận hành bằng cách:
-
-1. Hiển thị thông báo phù hợp cho người dùng
-2. Sử dụng dữ liệu trong bộ nhớ cache nếu có
-3. Tiếp tục với chức năng chính dù có lỗi với cơ sở dữ liệu phụ 
+FirebaseFirestore.getInstance().setFirestoreSettings(
+    new FirebaseFirestoreSettings.Builder()
+        .setPersistenceEnabled(true)
+        .build());
+``` 
