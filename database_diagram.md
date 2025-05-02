@@ -267,3 +267,180 @@ FirebaseFirestore.getInstance().setFirestoreSettings(
         .setPersistenceEnabled(true)
         .build());
 ``` 
+
+# Sơ đồ Use Case - Ứng dụng Quản lý Tài chính Cá nhân
+
+```mermaid
+flowchart TB
+    %% Định nghĩa người dùng
+    User((Người dùng))
+    
+    subgraph "Quản lý tài khoản"
+        UC1[Đăng ký tài khoản]
+        UC2[Đăng nhập]
+        UC3[Quên mật khẩu]
+        UC4[Quản lý thông tin cá nhân]
+        UC5[Thay đổi mật khẩu]
+        UC6[Đăng xuất]
+    end
+    
+    subgraph "Quản lý giao dịch"
+        UC10[Xem danh sách giao dịch]
+        UC11[Thêm giao dịch mới]
+        UC12[Chỉnh sửa giao dịch]
+        UC13[Xóa giao dịch]
+        UC14[Lọc giao dịch]
+        UC15[Tìm kiếm giao dịch]
+    end
+    
+    subgraph "Quản lý danh mục"
+        UC20[Xem danh sách danh mục]
+        UC21[Thêm danh mục mới]
+        UC22[Chỉnh sửa danh mục]
+        UC23[Xóa danh mục]
+    end
+    
+    subgraph "Phân tích tài chính"
+        UC30[Xem tổng quan thu chi]
+        UC31[Xem biểu đồ thu chi theo ngày]
+        UC32[Xem biểu đồ thu chi theo tuần]
+        UC33[Xem biểu đồ thu chi theo tháng]
+        UC34[Phân tích chi tiêu theo danh mục]
+    end
+    
+    subgraph "Quản lý mục tiêu tiết kiệm"
+        UC40[Xem danh sách mục tiêu tiết kiệm]
+        UC41[Tạo mục tiêu tiết kiệm mới]
+        UC42[Thêm giao dịch tiết kiệm]
+        UC43[Rút tiền từ mục tiêu tiết kiệm]
+        UC44[Xem tiến độ mục tiêu]
+        UC45[Chỉnh sửa mục tiêu tiết kiệm]
+        UC46[Xóa mục tiêu tiết kiệm]
+    end
+    
+    subgraph "Cài đặt ứng dụng"
+        UC50[Thay đổi cài đặt chung]
+        UC51[Cài đặt bảo mật]
+        UC52[Cài đặt thông báo]
+    end
+    
+    %% Kết nối người dùng với các use case
+    User --> UC1
+    User --> UC2
+    User --> UC3
+    User --> UC4
+    User --> UC5
+    User --> UC6
+    
+    User --> UC10
+    User --> UC11
+    User --> UC12
+    User --> UC13
+    User --> UC14
+    User --> UC15
+    
+    User --> UC20
+    User --> UC21
+    User --> UC22
+    User --> UC23
+    
+    User --> UC30
+    User --> UC31
+    User --> UC32
+    User --> UC33
+    User --> UC34
+    
+    User --> UC40
+    User --> UC41
+    User --> UC42
+    User --> UC43
+    User --> UC44
+    User --> UC45
+    User --> UC46
+    
+    User --> UC50
+    User --> UC51
+    User --> UC52 
+```
+
+## Mô tả chi tiết các Use Case
+
+### Quản lý tài khoản
+1. **Đăng ký tài khoản**: Người dùng tạo tài khoản mới bằng email và mật khẩu
+2. **Đăng nhập**: Người dùng đăng nhập vào ứng dụng bằng email và mật khẩu
+3. **Quên mật khẩu**: Người dùng đặt lại mật khẩu thông qua email
+4. **Quản lý thông tin cá nhân**: Xem và cập nhật thông tin cá nhân (tên, ảnh hồ sơ, ngày sinh...)
+5. **Thay đổi mật khẩu**: Người dùng thay đổi mật khẩu đăng nhập
+6. **Đăng xuất**: Người dùng đăng xuất khỏi ứng dụng
+
+### Quản lý giao dịch
+1. **Xem danh sách giao dịch**: Hiển thị danh sách các giao dịch thu chi đã thực hiện
+2. **Thêm giao dịch mới**: Thêm một giao dịch thu/chi mới vào hệ thống
+3. **Chỉnh sửa giao dịch**: Sửa đổi thông tin giao dịch đã có
+4. **Xóa giao dịch**: Xóa một giao dịch khỏi hệ thống
+5. **Lọc giao dịch**: Lọc giao dịch theo loại (thu nhập/chi tiêu), thời gian, danh mục
+6. **Tìm kiếm giao dịch**: Tìm kiếm giao dịch theo từ khóa
+
+### Quản lý danh mục
+1. **Xem danh sách danh mục**: Hiển thị tất cả danh mục thu chi đã tạo
+2. **Thêm danh mục mới**: Thêm một danh mục thu/chi mới vào hệ thống
+3. **Chỉnh sửa danh mục**: Sửa đổi thông tin danh mục đã có
+4. **Xóa danh mục**: Xóa một danh mục khỏi hệ thống
+
+### Phân tích tài chính
+1. **Xem tổng quan thu chi**: Hiển thị tổng thu nhập, chi tiêu và số dư
+2. **Xem biểu đồ thu chi theo ngày**: Hiển thị biểu đồ thu chi theo từng ngày
+3. **Xem biểu đồ thu chi theo tuần**: Hiển thị biểu đồ thu chi theo tuần
+4. **Xem biểu đồ thu chi theo tháng**: Hiển thị biểu đồ thu chi theo tháng
+5. **Phân tích chi tiêu theo danh mục**: Hiển thị tỷ lệ chi tiêu theo từng danh mục
+
+### Quản lý mục tiêu tiết kiệm
+1. **Xem danh sách mục tiêu tiết kiệm**: Hiển thị tất cả các mục tiêu tiết kiệm
+2. **Tạo mục tiêu tiết kiệm mới**: Thêm một mục tiêu tiết kiệm mới
+3. **Thêm giao dịch tiết kiệm**: Gửi tiền vào mục tiêu tiết kiệm
+4. **Rút tiền từ mục tiêu tiết kiệm**: Rút tiền ra từ mục tiêu tiết kiệm
+5. **Xem tiến độ mục tiêu**: Xem tiến độ hoàn thành mục tiêu tiết kiệm
+6. **Chỉnh sửa mục tiêu tiết kiệm**: Thay đổi thông tin mục tiêu tiết kiệm
+7. **Xóa mục tiêu tiết kiệm**: Xóa một mục tiêu tiết kiệm khỏi hệ thống
+
+### Cài đặt ứng dụng
+1. **Thay đổi cài đặt chung**: Thay đổi các cài đặt chung của ứng dụng
+2. **Cài đặt bảo mật**: Quản lý cài đặt bảo mật
+3. **Cài đặt thông báo**: Quản lý cài đặt thông báo và nhắc nhở
+
+## Quan hệ mở rộng và bao gồm
+
+```mermaid
+flowchart TB
+    %% Định nghĩa các use case
+    UC2[Đăng nhập]
+    UC3[Quên mật khẩu]
+    UC11[Thêm giao dịch mới]
+    UC30[Xem tổng quan thu chi]
+    UC34[Phân tích chi tiêu theo danh mục]
+    UC40[Xem danh sách mục tiêu tiết kiệm]
+    UC41[Tạo mục tiêu tiết kiệm mới]
+    
+    %% Định nghĩa các use case mở rộng
+    EXT1[Đăng nhập bằng Google]
+    EXT2[Gửi email đặt lại mật khẩu]
+    EXT3[Đồng bộ dữ liệu]
+    EXT4[Xuất báo cáo PDF]
+    
+    %% Liên kết mở rộng
+    UC2 --> |<<extends>>| EXT1
+    UC3 --> |<<extends>>| EXT2
+    UC30 --> |<<extends>>| EXT3
+    UC34 --> |<<extends>>| EXT4
+    
+    %% Liên kết bao gồm
+    UC40 --> |<<includes>>| UC44[Xem tiến độ mục tiêu]
+    UC41 --> |<<includes>>| UC42[Thêm giao dịch tiết kiệm]
+```
+
+## Các ràng buộc
+
+1. Người dùng phải đăng nhập để sử dụng hầu hết các chức năng
+2. Dữ liệu được đồng bộ khi có kết nối internet
+3. Ứng dụng hỗ trợ lưu trữ offline khi không có kết nối
+4. Một số chức năng như xuất báo cáo đang được phát triển 
