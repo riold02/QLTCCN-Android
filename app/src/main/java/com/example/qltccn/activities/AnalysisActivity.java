@@ -88,6 +88,12 @@ public class AnalysisActivity extends AppCompatActivity {
             notiContainer.setOnClickListener(v -> navigateToNotification());
         }
         
+        // Thêm xử lý nút search
+        ImageView btnSearch = findViewById(R.id.btnSearch);
+        if (btnSearch != null) {
+            btnSearch.setOnClickListener(v -> navigateToSearch());
+        }
+        
         // Content
         tvTotalBalance = findViewById(R.id.tv_total_balance);
         tvIncome = findViewById(R.id.tv_income_summary);
@@ -2250,5 +2256,17 @@ public class AnalysisActivity extends AppCompatActivity {
                 if (tvExpense != null) tvExpense.setText("-" + CurrencyUtils.formatVND(0));
                 if (tvTotalBalance != null) tvTotalBalance.setText(CurrencyUtils.formatVND(0));
             });
+    }
+
+    // Thêm phương thức chuyển đến màn hình tìm kiếm
+    private void navigateToSearch() {
+        try {
+            Log.d(TAG, "Chuyển đến màn hình tìm kiếm");
+            Intent intent = new Intent(AnalysisActivity.this, SearchActivity.class);
+            startActivity(intent);
+        } catch (Exception e) {
+            Log.e(TAG, "Lỗi khi chuyển đến màn hình tìm kiếm: " + e.getMessage(), e);
+            Toast.makeText(this, "Không thể mở trang tìm kiếm", Toast.LENGTH_SHORT).show();
+        }
     }
 } 

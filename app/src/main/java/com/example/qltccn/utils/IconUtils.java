@@ -29,9 +29,9 @@ public class IconUtils {
             case "ic_entertainment":
                 return R.drawable.ic_entertainment;
             case "ic_shopping":
-                return R.drawable.ic_shopping;
+                return R.drawable.ic_groceries;
             case "ic_health":
-                return R.drawable.ic_health;
+                return R.drawable.ic_medicine;
             case "ic_education":
                 return R.drawable.ic_gifts;
             default:

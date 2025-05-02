@@ -119,6 +119,12 @@
             android:exported="false"
             android:theme="@style/Theme.QLTCCN.NoActionBar" />
 
+        <!-- Thêm SearchActivity -->
+        <activity
+            android:name=".activities.SearchActivity"
+            android:exported="false"
+            android:theme="@style/Theme.QLTCCN.NoActionBar" />
+
     </application>
 
 </manifest>

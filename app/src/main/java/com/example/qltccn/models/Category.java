@@ -25,6 +25,17 @@ public class Category {
         this.createdAt = System.currentTimeMillis();
         this.updatedAt = System.currentTimeMillis();
     }
+    
+    // Constructor đơn giản với id, name, type, iconName cho màn hình tìm kiếm
+    public Category(String id, String name, String type, String iconName) {
+        this.id = id;
+        this.name = name;
+        this.type = type;
+        this.iconName = iconName;
+        this.isDefault = false;
+        this.createdAt = System.currentTimeMillis();
+        this.updatedAt = System.currentTimeMillis();
+    }
 
     // Constructor with 6 parameters (without id)
     public Category(String name, String type, String iconName, boolean isDefault, String userId, String parentId) {

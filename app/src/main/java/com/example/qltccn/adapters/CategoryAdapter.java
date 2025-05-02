@@ -23,10 +23,16 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.Catego
     private List<Category> categories;
     private Context context;
     private OnCategoryClickListener listener;
+    private OnCategorySelectListener selectListener;
 
     public interface OnCategoryClickListener {
         void onCategoryClick(Category category, int position);
         void onCategoryLongClick(Category category, int position);
+    }
+    
+    // Interface đơn giản cho việc chọn danh mục trong màn hình tìm kiếm
+    public interface OnCategorySelectListener {
+        void onCategorySelect(Category category, int position);
     }
 
     public CategoryAdapter(Context context, List<Category> categories, OnCategoryClickListener listener) {
@@ -34,10 +40,19 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.Catego
         this.categories = categories;
         this.listener = listener;
     }
+    
+    // Constructor mới cho màn hình tìm kiếm
+    public CategoryAdapter(List<Category> categories, OnCategorySelectListener selectListener) {
+        this.categories = categories;
+        this.selectListener = selectListener;
+    }
 
     @NonNull
     @Override
     public CategoryViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        if (context == null) {
+            context = parent.getContext();
+        }
         View view = LayoutInflater.from(context).inflate(R.layout.item_category, parent, false);
         return new CategoryViewHolder(view);
     }
@@ -60,6 +75,9 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.Catego
             if (listener != null) {
                 listener.onCategoryClick(category, holder.getAdapterPosition());
             }
+            if (selectListener != null) {
+                selectListener.onCategorySelect(category, holder.getAdapterPosition());
+            }
         });
 
         holder.itemView.setOnLongClickListener(v -> {
@@ -69,6 +87,11 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.Catego
             }
             return false;
         });
+        
+        // Ẩn nút xóa nếu đang trong chế độ chọn danh mục
+        if (selectListener != null && holder.imgDeleteCategory != null) {
+            holder.imgDeleteCategory.setVisibility(View.GONE);
+        }
     }
 
     @Override

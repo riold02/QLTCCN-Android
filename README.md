@@ -9,6 +9,14 @@ FinWise là một ứng dụng Android được phát triển để giúp ngư�
 - **Phân tích tài chính**: Biểu đồ, thống kê và phân tích tình hình tài chính theo nhiều khung thời gian
 - **Quản lý mục tiêu tiết kiệm**: Thiết lập và theo dõi tiến độ các mục tiêu tiết kiệm
 
+## Hướng dẫn sử dụng
+Xem hướng dẫn sử dụng đầy đủ tại [HUONG_DAN_SU_DUNG.md](./HUONG_DAN_SU_DUNG.md) để biết chi tiết về:
+- Cài đặt và đăng ký tài khoản
+- Quản lý giao dịch thu chi
+- Phân tích tài chính
+- Quản lý mục tiêu tiết kiệm
+- Và nhiều thông tin hữu ích khác
+
 ## Cấu trúc dự án
 
 ### Backend

@@ -29,7 +29,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:text="Search"
+            android:text="Tìm kiếm"
             android:textColor="@color/black" />
 
         <ImageView
@@ -62,58 +62,44 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@drawable/rounded_edittext"
-
                 android:drawablePadding="8dp"
-                android:hint="Search..."
+                android:hint="Tìm kiếm..."
                 android:padding="12dp"
                 android:textSize="14sp"
                 android:textColor="@color/black"
                 android:textColorHint="#80000000" />
 
-            <!-- Categories -->
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentStart="true"
-                    android:layout_centerVertical="true"
-                    android:text="Categories"
-                    android:textColor="@color/black"
-                    android:textSize="16sp"
-                    android:textStyle="bold" />
-
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"
-                    android:src="@drawable/ic_arrow_right"
-                    app:tint="#80000000" />
-            </RelativeLayout>
-
+            <!-- Category Selector -->
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="Select the category"
-                android:textColor="#80000000"
-                android:textSize="14sp" />
+                android:layout_marginTop="16dp"
+                android:text="Danh mục"
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <Spinner
+                android:id="@+id/categorySpinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/edit_text_background"
+                android:padding="12dp" />
 
             <!-- Date Filter -->
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="Date"
+                android:text="Ngày"
                 android:textColor="@color/black"
                 android:textSize="16sp"
                 android:textStyle="bold" />
 
             <RelativeLayout
+                android:id="@+id/datePickerLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
@@ -121,6 +107,7 @@
                 android:padding="12dp">
 
                 <TextView
+                    android:id="@+id/dateTextView"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentStart="true"
@@ -143,7 +130,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="Report"
+                android:text="Loại giao dịch"
                 android:textColor="@color/black"
                 android:textSize="16sp"
                 android:textStyle="bold" />
@@ -152,20 +139,20 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:orientation="horizontal">
+                android:orientation="vertical">
 
                 <!-- Income Option -->
                 <LinearLayout
-                    android:layout_width="0dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
                     android:orientation="horizontal"
-                    android:gravity="center_vertical">
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="8dp">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Income"
+                        android:text="Thu nhập"
                         android:textColor="@color/black"
                         android:textSize="14sp" />
 
@@ -174,28 +161,52 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="8dp"
-                        android:checked="false"
-                        app:thumbTint="#FFFFFF"
+                        android:checked="true"
+                        app:thumbTint="#00D09E"
                         app:trackTint="#80D9D9D9" />
                 </LinearLayout>
 
                 <!-- Expense Option -->
                 <LinearLayout
-                    android:layout_width="0dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="8dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Chi tiêu   "
+                        android:textColor="@color/black"
+                        android:textSize="14sp" />
+
+                    <androidx.appcompat.widget.SwitchCompat
+                        android:id="@+id/switchExpense"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_marginStart="8dp"
+                        android:checked="true"
+                        app:thumbTint="#00D09E"
+                        app:trackTint="#80D9D9D9" />
+                </LinearLayout>
+                
+                <!-- Savings Option -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Expense"
+                        android:text="Tiết kiệm"
                         android:textColor="@color/black"
                         android:textSize="14sp" />
 
                     <androidx.appcompat.widget.SwitchCompat
-                        android:id="@+id/switchExpense"
+                        android:id="@+id/switchSavings"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="8dp"
@@ -210,13 +221,49 @@
                 android:id="@+id/btnSearch"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="32dp"
+                android:layout_marginTop="16dp"
                 android:background="@drawable/button_save_bg"
                 android:paddingVertical="12dp"
-                android:text="Search Now"
+                android:text="Tìm kiếm ngay"
                 android:textAllCaps="false"
                 android:textColor="@android:color/white"
                 android:textSize="16sp" />
+
+            <!-- Tiêu đề kết quả tìm kiếm -->
+            <TextView
+                android:id="@+id/searchResultsTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Kết quả tìm kiếm"
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:visibility="gone" />
+
+            <!-- RecyclerView để hiển thị kết quả tìm kiếm -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/searchResultsRecyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:layout_marginTop="8dp"
+                android:padding="4dp"
+                android:clipToPadding="false"
+                android:scrollbars="vertical"
+                android:visibility="gone" />
+
+            <!-- Thông báo không có kết quả -->
+            <TextView
+                android:id="@+id/noResultsTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:gravity="center"
+                android:text="Không tìm thấy giao dịch nào"
+                android:textColor="#80000000"
+                android:textSize="16sp"
+                android:visibility="gone" />
 
         </LinearLayout>
     </FrameLayout>
