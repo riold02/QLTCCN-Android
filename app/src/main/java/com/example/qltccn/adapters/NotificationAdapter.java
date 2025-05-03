@@ -73,7 +73,7 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
 
             default:
                 // Mặc định
-                holder.iconImageView.setImageResource(R.drawable.ic_noti);
+                holder.iconImageView.setImageResource(R.drawable.ic_money);
                 
                 break;
         }

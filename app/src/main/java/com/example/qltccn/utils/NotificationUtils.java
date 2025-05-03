@@ -315,7 +315,7 @@ public class NotificationUtils {
         
         // Thêm ghi chú vào thông báo nếu có
         if (note != null && !note.isEmpty()) {
-            message += " (" + note + ")";
+            message += " : Nội dung: " + note ;
         }
         
         // Thêm thông báo
