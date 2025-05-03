@@ -144,10 +144,7 @@ public class SavingsGoalDetailActivity extends AppCompatActivity implements View
         if (id == R.id.btnBack) {
             onBackPressed();
         } else if (id == R.id.btnNotification) {
-            // Hiển thị thông báo tính năng đang phát triển thay vì mở NotiActivity
-            Toast.makeText(this, "Tính năng đang phát triển", Toast.LENGTH_SHORT).show();
-            
-            // Có thể bổ sung thêm rung nhẹ để tăng trải nghiệm người dùng
+            navigateToNotification();
             try {
                 android.os.Vibrator vibrator = (android.os.Vibrator) getSystemService(android.content.Context.VIBRATOR_SERVICE);
                 if (vibrator != null && vibrator.hasVibrator()) {
@@ -183,7 +180,15 @@ public class SavingsGoalDetailActivity extends AppCompatActivity implements View
             finish();
         }
     }
+    private void navigateToNotification() {
+        try {
+            Intent intent = new Intent(this, NotiActivity.class);
+            startActivity(intent);
+        } catch (Exception e) {
 
+            Toast.makeText(this, "Không thể mở thông báo", Toast.LENGTH_SHORT).show();
+        }
+    }
     private void loadSavingsGoal() {
         db.collection("savingsGoals").document(goalId)
                 .get()

@@ -97,6 +97,12 @@ public class TranActivity extends AppCompatActivity {
         backButton = findViewById(R.id.backButton);
         titleText = findViewById(R.id.titleText);
         
+        // Thêm xử lý nút notification
+        View notiContainer = findViewById(R.id.notiContainer);
+        if (notiContainer != null) {
+            notiContainer.setOnClickListener(v -> navigateToNotification());
+        }
+        
         // Summary elements - thêm các ID tương ứng trong layout
         totalBalanceText = findViewById(R.id.totalBalanceText);
         incomeText = findViewById(R.id.incomeText);
@@ -838,6 +844,17 @@ public class TranActivity extends AppCompatActivity {
         } catch (Exception e) {
             Log.e(TAG, "Lỗi khi mở CategoryAddActivity: " + e.getMessage());
             Toast.makeText(this, "Không thể mở màn hình thêm chi tiêu: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    // Thêm phương thức chuyển đến màn hình thông báo
+    private void navigateToNotification() {
+        try {
+            Intent intent = new Intent(this, NotiActivity.class);
+            startActivity(intent);
+        } catch (Exception e) {
+            Log.e(TAG, "Lỗi khi mở màn hình thông báo: " + e.getMessage(), e);
+            Toast.makeText(this, "Không thể mở thông báo", Toast.LENGTH_SHORT).show();
         }
     }
 }

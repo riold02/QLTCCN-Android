@@ -21,6 +21,7 @@ import com.example.qltccn.models.SavingsGoal;
 import com.example.qltccn.models.SavingsTransaction;
 import com.example.qltccn.utils.CurrencyUtils;
 import com.example.qltccn.utils.FirebaseUtils;
+import com.example.qltccn.utils.NotificationUtils;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
@@ -404,6 +405,16 @@ public class SavingsAddActivity extends AppCompatActivity {
                         .addOnSuccessListener(aVoid -> {
                             showLoader(false);
                             Toast.makeText(SavingsAddActivity.this, message, Toast.LENGTH_SHORT).show();
+                            
+                            // Tạo thông báo cho giao dịch tiết kiệm
+                            boolean isDeposit = amount > 0; // amount > 0: gửi tiền, amount < 0: rút tiền
+                            NotificationUtils.addSavingsNotification(
+                                SavingsAddActivity.this, 
+                                Math.abs(amount), 
+                                savingsGoal.getTitle(), 
+                                isDeposit
+                            );
+                            
                             setResult(RESULT_OK);
                             finish();
                         })

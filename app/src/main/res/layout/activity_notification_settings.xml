@@ -12,25 +12,26 @@
     <RelativeLayout
         android:id="@+id/toolbarRL"
         android:layout_width="match_parent"
-        android:layout_height="50dp">
+        android:layout_height="50dp"
+        android:background="#00D09E">
 
-        <ImageButton
+        <ImageView
             android:id="@+id/toolbarBackBtn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
             android:layout_alignParentStart="true"
             android:layout_centerVertical="true"
-            android:background="@android:color/transparent"
-            android:padding="10dp"
+            android:layout_marginStart="16dp"
             android:src="@drawable/back_white" />
 
         <TextView
-            style="@style/TextAppearance.Material3.TitleMedium"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:text="Cài đặt thông báo"
-            android:textColor="@color/black" />
+            android:text="Hồ sơ"
+            android:textColor="@android:color/white"
+            android:textSize="18sp"
+            android:textStyle="bold" />
 
         <ImageView
             android:id="@+id/idNoti"
@@ -41,6 +42,24 @@
             android:layout_marginEnd="16dp"
             android:src="@drawable/ic_noti" />
     </RelativeLayout>
+
+    <!-- Nút kiểm tra thông báo -->
+    <LinearLayout
+        android:id="@+id/tabs"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <Button
+            android:id="@+id/testNotificationBtn"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:background="@drawable/rounded_button"
+            android:text="Kiểm tra thông báo"
+            android:textColor="@android:color/white"
+            android:textSize="16sp" />
+    </LinearLayout>
 
     <!-- Phần Nội dung chính -->
     <FrameLayout
@@ -352,7 +371,7 @@
                 android:layout_width="0dp"
                 android:layout_height="28dp"
                 android:layout_weight="1"
-                android:src="@drawable/ic_profile_black" />
+                android:src="@drawable/ic_profile_back1" />
         </LinearLayout>
 
     </FrameLayout>

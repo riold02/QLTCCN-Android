@@ -53,28 +53,28 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
             case "transaction":
                 // Giao dịch mới
                 holder.iconImageView.setImageResource(R.drawable.ic_trans);
-                holder.iconImageView.setBackgroundTintList(context.getColorStateList(R.color.blue_500));
+               
                 break;
             case "warning":
                 // Cảnh báo
                 holder.iconImageView.setImageResource(R.drawable.ic_reminder);
-                holder.iconImageView.setBackgroundTintList(context.getColorStateList(R.color.expense_red));
+               
                 break;    
             case "reminder":
                 // Nhắc nhở
                 holder.iconImageView.setImageResource(R.drawable.ic_reminder);
-                holder.iconImageView.setBackgroundTintList(context.getColorStateList(R.color.colorPrimary));
+         
                 break;
             case "savings":
                 // Tiết kiệm
                 holder.iconImageView.setImageResource(R.drawable.ic_savings);
-                holder.iconImageView.setBackgroundTintList(context.getColorStateList(R.color.savings_yellow));
+              
                 break;
 
             default:
                 // Mặc định
                 holder.iconImageView.setImageResource(R.drawable.ic_noti);
-                holder.iconImageView.setBackgroundTintList(context.getColorStateList(R.color.gray));
+                
                 break;
         }
         

@@ -11,17 +11,18 @@
         android:id="@+id/header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp">
+        android:layout_marginTop="10dp"
+        android:padding="8dp">
 
         <!-- Nút Quay Lại -->
         <ImageView
             android:id="@+id/backButton"
-            android:layout_width="23dp"
-            android:layout_height="23dp"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
             android:layout_alignParentStart="true"
             android:layout_centerVertical="true"
             android:src="@drawable/ic_back"
-            app:tint="#FFFFFF" />
+            android:tint="@color/white" />
 
         <!-- Tiêu đề Trung Tâm -->
         <TextView
@@ -30,7 +31,7 @@
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
             android:text="Thông báo"
-            android:textColor="#000000"
+            android:textColor="@color/black"
             android:textSize="20sp"
             android:textStyle="bold" />
 
@@ -61,6 +62,25 @@
         android:orientation="horizontal"
         android:weightSum="3"
         android:gravity="center">
+
+        <!-- Nút xóa tất cả thông báo -->
+        <Button
+            android:id="@+id/clearAllButton"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:layout_gravity="center"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:background="@drawable/rounded_button"
+            android:text="Xóa tất cả"
+            android:textColor="@android:color/white"
+            android:textSize="14sp"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:drawableStart="@drawable/ic_delete"
+            android:drawablePadding="8dp"
+            android:drawableTint="@android:color/white" />
+            
     </LinearLayout>
 
     <RelativeLayout
@@ -68,7 +88,7 @@
         android:layout_height="match_parent"
         android:layout_below="@id/tabs"
         android:layout_marginTop="10dp"
-        android:background="@drawable/rounded_bg1">
+        android:background="@drawable/rounded_front">
 
         <!-- Thông báo trống nếu không có thông báo -->
         <TextView

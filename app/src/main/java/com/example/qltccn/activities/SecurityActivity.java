@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -17,7 +16,7 @@ public class SecurityActivity extends AppCompatActivity {
     private static final String TAG = "SecurityActivity";
 
     // UI elements
-    private ImageButton toolbarBackBtn;
+    private ImageView toolbarBackBtn;
     private ImageView notificationIcon;
     private ImageView iconHome, iconChart, iconTrans, iconCategory, iconUser;
     private CardView cardChangePin, cardFingerprint, cardTermsConditions;
@@ -56,6 +55,11 @@ public class SecurityActivity extends AppCompatActivity {
             iconTrans = findViewById(R.id.iconTrans);
             iconCategory = findViewById(R.id.iconCategory);
             iconUser = findViewById(R.id.iconUser);
+            
+            // Đặt biểu tượng User là đã được chọn vì đây là phần của màn hình hồ sơ
+            if (iconUser != null) {
+                iconUser.setImageResource(R.drawable.ic_profile_back1);
+            }
         } catch (Exception e) {
             Log.e(TAG, "Lỗi khởi tạo UI: " + e.getMessage());
         }

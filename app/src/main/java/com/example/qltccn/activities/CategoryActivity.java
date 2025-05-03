@@ -22,6 +22,7 @@ import com.example.qltccn.utils.CurrencyUtils;
 import com.example.qltccn.utils.UserUtils;
 import com.example.qltccn.utils.FirebaseUtils;
 import android.util.Log;
+import com.example.qltccn.utils.NotificationUtils;
 
 public class CategoryActivity extends AppCompatActivity {
 
@@ -65,6 +66,12 @@ public class CategoryActivity extends AppCompatActivity {
         txtTotalBalance = findViewById(R.id.txtTotalBalance);
         txtTotalExpense = findViewById(R.id.txtTotalExpense);
         btnAddMoney = findViewById(R.id.btnAddMoney);
+        
+        // Thêm xử lý nút notification
+        View notiContainer = findViewById(R.id.notiContainer);
+        if (notiContainer != null) {
+            notiContainer.setOnClickListener(v -> navigateToNotification());
+        }
         
         // Footer
         iconHome = findViewById(R.id.iconHome);
@@ -218,7 +225,7 @@ public class CategoryActivity extends AppCompatActivity {
         Toast.makeText(this, "Đang nạp tiền...", Toast.LENGTH_SHORT).show();
         
         try {
-            // Gọi hàm nạp tiền từ Firebase Utils
+            // Gọi hàm nạp tiền từ Firebase Utils với context của activity
             FirebaseUtils.addFundsToAccount(amount, note, selectedTime, new FirebaseUtils.FirebaseConnectionCallback() {
                 @Override
                 public void onConnected() {
@@ -227,6 +234,9 @@ public class CategoryActivity extends AppCompatActivity {
                         Toast.makeText(CategoryActivity.this, 
                                 "Đã nạp " + CurrencyUtils.formatVND(amount) + " thành công", 
                                 Toast.LENGTH_SHORT).show();
+                        
+                        // Tạo thông báo nạp tiền thành công
+                        NotificationUtils.addDepositNotification(CategoryActivity.this, amount, note);
                         
                         // Tải lại dữ liệu người dùng
                         loadUserData();
@@ -345,5 +355,16 @@ public class CategoryActivity extends AppCompatActivity {
         
         // Ghi log để debug
         Log.d("CategoryActivity", "onResume: Đã tải lại dữ liệu người dùng");
+    }
+
+    // Thêm phương thức chuyển đến màn hình thông báo
+    private void navigateToNotification() {
+        try {
+            Intent intent = new Intent(this, NotiActivity.class);
+            startActivity(intent);
+        } catch (Exception e) {
+            Log.e("CategoryActivity", "Lỗi khi mở màn hình thông báo: " + e.getMessage(), e);
+            Toast.makeText(this, "Không thể mở thông báo", Toast.LENGTH_SHORT).show();
+        }
     }
 } 

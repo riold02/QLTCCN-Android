@@ -12,25 +12,26 @@
     <RelativeLayout
         android:id="@+id/toolbarRL"
         android:layout_width="match_parent"
-        android:layout_height="50dp">
+        android:layout_height="50dp"
+        android:background="#00D09E">
 
-        <ImageButton
+        <ImageView
             android:id="@+id/toolbarBackBtn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
             android:layout_alignParentStart="true"
             android:layout_centerVertical="true"
-            android:background="@android:color/transparent"
-            android:padding="10dp"
+            android:layout_marginStart="16dp"
             android:src="@drawable/back_white" />
 
         <TextView
-            style="@style/TextAppearance.Material3.TitleMedium"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:text="Bảo mật"
-            android:textColor="@color/black" />
+            android:text="Hồ sơ"
+            android:textColor="@android:color/white"
+            android:textSize="18sp"
+            android:textStyle="bold" />
 
         <ImageView
             android:id="@+id/notificationIcon"
@@ -175,12 +176,17 @@
         android:elevation="8dp">
 
         <LinearLayout
+            android:id="@+id/footer"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="horizontal"
-            android:paddingTop="8dp"
+            android:layout_height="60dp"
+            android:layout_gravity="bottom"
+            android:layout_marginBottom="0dp"
             android:background="@drawable/rounded_frontend"
-            android:paddingBottom="8dp">
+            android:elevation="8dp"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:padding="16dp"
+            android:weightSum="5">
 
             <ImageView
                 android:id="@+id/iconHome"
@@ -215,7 +221,7 @@
                 android:layout_width="0dp"
                 android:layout_height="28dp"
                 android:layout_weight="1"
-                android:src="@drawable/ic_profile_black" />
+                android:src="@drawable/ic_profile_back1" />
         </LinearLayout>
     </FrameLayout>
 </LinearLayout>

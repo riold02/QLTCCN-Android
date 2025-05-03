@@ -24,7 +24,7 @@ public class ProfileActivity extends AppCompatActivity {
     private static final String TAG = "ProfileActivity";
     
     // Toolbar
-    private ImageButton toolbarBackBtn;
+    private ImageView toolbarBackBtn;
     
     // Profile section
     private ImageView profileImage;

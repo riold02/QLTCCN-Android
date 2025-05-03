@@ -12,6 +12,7 @@
         android:id="@+id/header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
         android:padding="16dp">
 
         <TextView
@@ -29,24 +30,24 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/welcomeText"
-            android:text="Buổi sáng tốt lành"
+            android:text="Ngày mới tốt lành"
             android:textColor="#FFFFFF"
             android:textSize="16sp" />
 
+        <!-- Nút Thông Báo có nền tròn -->
         <RelativeLayout
             android:id="@+id/notiContainer"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
-            android:clickable="true"
-            android:focusable="true"
-            android:background="?attr/selectableItemBackgroundBorderless">
-            
+            android:background="@drawable/circle_bg">
+
             <ImageView
                 android:id="@+id/notiIcon"
-                android:layout_width="29dp"
-                android:layout_height="wrap_content"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_centerInParent="true"
                 android:src="@drawable/ic_noti" />
         </RelativeLayout>
     </RelativeLayout>

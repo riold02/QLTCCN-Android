@@ -13,20 +13,23 @@
 
         <!-- Header -->
         <RelativeLayout
+            android:id="@+id/header"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
             android:layout_marginBottom="16dp">
 
             <ImageView
                 android:id="@+id/btnBack"
-                android:layout_width="28dp"
-                android:layout_height="28dp"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
                 android:layout_alignParentStart="true"
                 android:layout_centerVertical="true"
                 android:src="@drawable/ic_back"
                 android:tint="@color/white"/>
 
             <TextView
+                android:id="@+id/titleText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
@@ -35,13 +38,22 @@
                 android:textSize="20sp"
                 android:textStyle="bold"/>
 
-            <ImageView
-                android:id="@+id/btnNotification"
-                android:layout_width="28dp"
-                android:layout_height="28dp"
+            <!-- Nút Thông Báo có nền tròn -->
+            <RelativeLayout
+                android:id="@+id/notiContainer"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
-                android:src="@drawable/ic_noti"/>
+                android:background="@drawable/circle_bg">
+
+                <ImageView
+                    android:id="@+id/notiIcon"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_centerInParent="true"
+                    android:src="@drawable/ic_noti"/>
+            </RelativeLayout>
         </RelativeLayout>
 
     </RelativeLayout>

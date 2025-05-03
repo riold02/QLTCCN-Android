@@ -1,12 +1,17 @@
 package com.example.qltccn.activities;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.RelativeLayout;
+import android.widget.ImageButton;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.ItemTouchHelper;
@@ -28,6 +33,9 @@ public class NotiActivity extends AppCompatActivity {
     private ImageView backButton;
     private TextView titleText;
     private TextView emptyNotificationsText;
+    private ImageView notiIcon;
+    private RelativeLayout notiContainer;
+    private Button clearAllButton;
     
     // RecyclerView
     private RecyclerView notificationsRecyclerView;
@@ -58,6 +66,16 @@ public class NotiActivity extends AppCompatActivity {
         // Header
         backButton = findViewById(R.id.backButton);
         titleText = findViewById(R.id.titleText);
+        notiContainer = findViewById(R.id.notiContainer);
+        notiIcon = findViewById(R.id.notiIcon);
+        
+        // Ẩn nút thông báo vì đang ở trong trang thông báo
+        if (notiContainer != null) {
+            notiContainer.setVisibility(View.GONE);
+        }
+        
+        // Nút xóa tất cả thông báo
+        clearAllButton = findViewById(R.id.clearAllButton);
         
         // Thông báo trống
         emptyNotificationsText = findViewById(R.id.emptyNotificationsText);
@@ -170,9 +188,11 @@ public class NotiActivity extends AppCompatActivity {
         if (notificationList.isEmpty()) {
             emptyNotificationsText.setVisibility(View.VISIBLE);
             notificationsRecyclerView.setVisibility(View.GONE);
+            clearAllButton.setVisibility(View.GONE);
         } else {
             emptyNotificationsText.setVisibility(View.GONE);
             notificationsRecyclerView.setVisibility(View.VISIBLE);
+            clearAllButton.setVisibility(View.VISIBLE);
         }
     }
     
@@ -219,5 +239,53 @@ public class NotiActivity extends AppCompatActivity {
                 finish();
             }
         });
+        
+        // Sự kiện click nút xóa tất cả thông báo
+        clearAllButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showClearAllConfirmDialog();
+            }
+        });
+    }
+    
+    /**
+     * Hiển thị dialog xác nhận xóa tất cả thông báo
+     */
+    private void showClearAllConfirmDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Xóa tất cả thông báo");
+        builder.setMessage("Bạn có chắc chắn muốn xóa tất cả thông báo không?");
+        
+        // Nút xác nhận xóa
+        builder.setPositiveButton("Xóa tất cả", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                clearAllNotifications();
+            }
+        });
+        
+        // Nút hủy
+        builder.setNegativeButton("Hủy", null);
+        
+        builder.show();
+    }
+    
+    /**
+     * Xóa tất cả thông báo
+     */
+    private void clearAllNotifications() {
+        // Xóa tất cả thông báo
+        NotificationUtils.clearAllNotifications(this);
+        
+        // Cập nhật danh sách
+        notificationList.clear();
+        notificationAdapter.notifyDataSetChanged();
+        
+        // Cập nhật UI
+        updateUI();
+        
+        // Thông báo cho người dùng
+        Toast.makeText(this, "Đã xóa tất cả thông báo", Toast.LENGTH_SHORT).show();
     }
 } 

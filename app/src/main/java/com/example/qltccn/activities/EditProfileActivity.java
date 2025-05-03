@@ -33,7 +33,7 @@ public class EditProfileActivity extends AppCompatActivity {
     private static final String TAG = "EditProfileActivity";
     private static final int PICK_IMAGE_REQUEST = 1;
 
-    private ImageButton ivBack;
+    private ImageView toolbarBackBtn;
     private ImageView profileImage;
     private ImageView changePhotoBtn;
     private TextView profileName;
@@ -63,7 +63,7 @@ public class EditProfileActivity extends AppCompatActivity {
     }
 
     private void initViews() {
-        ivBack = findViewById(R.id.toolbarBackBtn);
+        toolbarBackBtn = findViewById(R.id.toolbarBackBtn);
         profileImage = findViewById(R.id.profileImage);
         changePhotoBtn = findViewById(R.id.changePhotoBtn);
         profileName = findViewById(R.id.profileName);
@@ -82,7 +82,7 @@ public class EditProfileActivity extends AppCompatActivity {
     }
 
     private void setupListeners() {
-        ivBack.setOnClickListener(v -> finish());
+        toolbarBackBtn.setOnClickListener(v -> finish());
 
         changePhotoBtn.setOnClickListener(v -> {
             Intent intent = new Intent();

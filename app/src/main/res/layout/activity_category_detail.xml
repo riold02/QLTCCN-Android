@@ -13,7 +13,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="#00D09E"
-        android:padding="16dp">
+        android:paddingTop  ="10dp"
+        android:padding="8dp">
 
         <ImageView
             android:id="@+id/btnBack"
@@ -30,9 +31,26 @@
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
             android:text="Chi tiết danh mục"
-            android:textColor="#FFFFFF"
-            android:textSize="18sp"
+            android:textColor="@color/black"
+            android:textSize="20sp"
             android:textStyle="bold" />
+
+        <!-- Nút Thông Báo có nền tròn -->
+        <RelativeLayout
+            android:id="@+id/notiContainer"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:background="@drawable/circle_bg">
+
+            <ImageView
+                android:id="@+id/notiIcon"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_centerInParent="true"
+                android:src="@drawable/ic_noti"/>
+        </RelativeLayout>
     </RelativeLayout>
 
     <!-- Thẻ tổng quan -->
