@@ -19,9 +19,14 @@ import com.example.qltccn.utils.AuthUtils;
 import com.example.qltccn.utils.UserUtils;
 import com.google.firebase.auth.FirebaseUser;
 
+import androidx.annotation.Nullable;
+
 public class ProfileActivity extends AppCompatActivity {
     // Khai báo biến TAG để sử dụng trong Log
     private static final String TAG = "ProfileActivity";
+    
+    // Request code cho EditProfileActivity
+    private static final int REQUEST_EDIT_PROFILE = 100;
     
     // Toolbar
     private ImageView toolbarBackBtn;
@@ -120,7 +125,11 @@ public class ProfileActivity extends AppCompatActivity {
     private void navigateTo(Class<?> destinationClass) {
         try {
             Intent intent = new Intent(this, destinationClass);
-            startActivity(intent);
+            if (destinationClass == EditProfileActivity.class) {
+                startActivityForResult(intent, REQUEST_EDIT_PROFILE);
+            } else {
+                startActivity(intent);
+            }
         } catch (Exception e) {
             Log.e(TAG, "Lỗi khi chuyển đến " + destinationClass.getSimpleName() + ": " + e.getMessage());
             Toast.makeText(this, "Không thể mở màn hình " + destinationClass.getSimpleName(), Toast.LENGTH_SHORT).show();
@@ -409,6 +418,29 @@ public class ProfileActivity extends AppCompatActivity {
         } catch (Exception e) {
             Log.e(TAG, "Lỗi khi hiển thị dialog trợ giúp: " + e.getMessage());
             Toast.makeText(this, "Không thể hiển thị thông tin trợ giúp", Toast.LENGTH_SHORT).show();
+        }
+    }
+    
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Reload dữ liệu người dùng mỗi khi quay lại màn hình này
+        // (ví dụ: sau khi cập nhật profile từ EditProfileActivity)
+        loadUserProfile();
+        Log.d(TAG, "onResume: Đã tải lại dữ liệu người dùng");
+    }
+    
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        
+        if (requestCode == REQUEST_EDIT_PROFILE) {
+            if (resultCode == EditProfileActivity.RESULT_PROFILE_UPDATED) {
+                // Thông tin người dùng đã được cập nhật, tải lại dữ liệu
+                loadUserProfile();
+                Log.d(TAG, "onActivityResult: Nhận được thông báo cập nhật profile thành công, đang tải lại dữ liệu");
+                Toast.makeText(this, "Thông tin cá nhân đã được cập nhật", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 } 

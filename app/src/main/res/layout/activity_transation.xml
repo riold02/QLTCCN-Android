@@ -138,7 +138,7 @@
                     android:id="@+id/incomeTitleText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Income"
+                    android:text="Thu nhập"
                     android:textColor="@color/black"
                     android:textSize="16sp"
                     android:layout_marginTop="4dp" />
@@ -185,7 +185,7 @@
                     android:id="@+id/expenseTitleText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Expense"
+                    android:text="Chi tiêu"
                     android:textColor="@color/black"
                     android:textSize="16sp"
                     android:layout_marginTop="4dp" />

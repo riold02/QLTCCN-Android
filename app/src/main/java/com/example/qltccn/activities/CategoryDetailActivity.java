@@ -359,11 +359,13 @@ public class CategoryDetailActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         
-        if (requestCode == REFRESH_REQUEST_CODE && resultCode == RESULT_OK) {
-            // Kiểm tra xem có cần làm mới dữ liệu không
-            boolean refreshCategories = data != null && data.getBooleanExtra("REFRESH_CATEGORIES", false);
+        if (requestCode == REFRESH_REQUEST_CODE) {
+            // Luôn đặt kết quả là cần làm mới cho activity cha (CategoryActivity)
+            Intent resultIntent = new Intent();
+            resultIntent.putExtra("REFRESH_CATEGORIES", true);
+            setResult(RESULT_OK, resultIntent);
             
-            if (refreshCategories) {
+            if (resultCode == RESULT_OK) {
                 Log.d(TAG, "Nhận yêu cầu làm mới danh mục từ activity con");
                 
                 // Làm mới dữ liệu giao dịch và thống kê
@@ -373,5 +375,14 @@ public class CategoryDetailActivity extends AppCompatActivity {
                 Toast.makeText(this, "Dữ liệu đã được cập nhật", Toast.LENGTH_SHORT).show();
             }
         }
+    }
+    
+    @Override
+    public void onBackPressed() {
+        // Thiết lập kết quả trả về để màn hình trước biết cần cập nhật dữ liệu
+        Intent resultIntent = new Intent();
+        resultIntent.putExtra("REFRESH_CATEGORIES", true);
+        setResult(RESULT_OK, resultIntent);
+        super.onBackPressed();
     }
 } 

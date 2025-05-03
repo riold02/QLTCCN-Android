@@ -32,6 +32,8 @@ import java.util.Map;
 public class EditProfileActivity extends AppCompatActivity {
     private static final String TAG = "EditProfileActivity";
     private static final int PICK_IMAGE_REQUEST = 1;
+    // Mã kết quả để xác định đã cập nhật thành công
+    public static final int RESULT_PROFILE_UPDATED = 1001;
 
     private ImageView toolbarBackBtn;
     private ImageView profileImage;
@@ -351,6 +353,9 @@ public class EditProfileActivity extends AppCompatActivity {
                 btnUpdateProfile.setEnabled(true);
                 showProgress(false);
                 Toast.makeText(EditProfileActivity.this, "Cập nhật thông tin thành công", Toast.LENGTH_SHORT).show();
+                
+                // Đặt kết quả là đã cập nhật thành công
+                setResult(RESULT_PROFILE_UPDATED);
                 
                 // Đóng màn hình và quay lại ProfileActivity
                 finish();

@@ -31,6 +31,10 @@ public class CategoryActivity extends AppCompatActivity {
     private TextView txtTotalBalance;
     private TextView txtTotalExpense;
     private Button btnAddMoney;
+    private View expenseLoadingIndicator; // Indicator khi đang tải tổng chi tiêu
+    
+    // Request code cho CategoryDetailActivity
+    private static final int REQUEST_CATEGORY_DETAIL = 200;
     
     // Footer navigation
     private ImageView iconHome;
@@ -95,6 +99,8 @@ public class CategoryActivity extends AppCompatActivity {
         savingsCategory = findViewById(R.id.savingsCategory);
         entertainmentCategory = findViewById(R.id.entertainmentCategory);
         moreCategory = findViewById(R.id.moreCategory);
+        
+        // Indicator khi đang tải tổng chi tiêu
     }
     
     private void setupListeners() {
@@ -303,7 +309,7 @@ public class CategoryActivity extends AppCompatActivity {
                 // Mở màn hình chi tiết danh mục
                 Intent intent = new Intent(this, CategoryDetailActivity.class);
                 intent.putExtra("CATEGORY_NAME", categoryName);
-                startActivity(intent);
+                startActivityForResult(intent, REQUEST_CATEGORY_DETAIL);
             }
         };
         
@@ -327,15 +333,8 @@ public class CategoryActivity extends AppCompatActivity {
                 if (user != null) {
                     txtTotalBalance.setText(CurrencyUtils.formatVND(user.getBalance()));
                     
-                    // Nếu là tài khoản mới tạo, hiển thị chi tiêu là 0
-                    if (FirebaseUtils.isNewAccount()) {
-                        txtTotalExpense.setText("-" + CurrencyUtils.formatVND(0));
-                    } else {
-                        // Lấy tổng chi tiêu từ SharedPreferences (có thể được lưu ở HomeActivity)
-                        android.content.SharedPreferences prefs = getSharedPreferences("UserData", MODE_PRIVATE);
-                        float totalExpense = prefs.getFloat("total_expense", 0f);
-                        txtTotalExpense.setText("-" + CurrencyUtils.formatVND(totalExpense));
-                    }
+                    // Tính toán lại tổng chi tiêu từ Firestore thay vì chỉ đọc từ SharedPreferences
+                    calculateAndUpdateExpense(user.getId());
                 }
             }
             
@@ -344,6 +343,53 @@ public class CategoryActivity extends AppCompatActivity {
                 Toast.makeText(CategoryActivity.this, "Không thể tải thông tin người dùng", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+    
+    /**
+     * Tính toán lại tổng chi tiêu từ Firestore và cập nhật lên UI
+     * @param userId ID của người dùng
+     */
+    private void calculateAndUpdateExpense(String userId) {
+        // Hiển thị giá trị từ SharedPreferences trước để người dùng không phải đợi
+        android.content.SharedPreferences prefs = getSharedPreferences("UserData", MODE_PRIVATE);
+        float cachedTotalExpense = prefs.getFloat("total_expense", 0f);
+        txtTotalExpense.setText("-" + CurrencyUtils.formatVND(cachedTotalExpense));
+        
+        // Lấy tham chiếu đến collection giao dịch
+        com.google.firebase.firestore.CollectionReference transactionsRef = FirebaseUtils.getUserTransactionsCollection();
+        if (transactionsRef == null) {
+            Log.e("CategoryActivity", "Không thể lấy tham chiếu đến collection giao dịch");
+            return;
+        }
+        
+        // Truy vấn tất cả các giao dịch chi tiêu
+        transactionsRef
+            .whereEqualTo("userId", userId)
+            .whereEqualTo("type", "expense")
+            .get()
+            .addOnSuccessListener(queryDocumentSnapshots -> {
+                double totalExpense = 0;
+                
+                // Tính tổng chi tiêu
+                for (com.google.firebase.firestore.DocumentSnapshot doc : queryDocumentSnapshots) {
+                    if (doc.contains("amount") && doc.get("amount") instanceof Number) {
+                        totalExpense += ((Number) doc.get("amount")).doubleValue();
+                    }
+                }
+                
+                // Cập nhật UI
+                txtTotalExpense.setText("-" + CurrencyUtils.formatVND(totalExpense));
+                
+                // Lưu vào SharedPreferences để dùng cho các lần sau
+                android.content.SharedPreferences.Editor editor = prefs.edit();
+                editor.putFloat("total_expense", (float) totalExpense);
+                editor.apply();
+                
+                Log.d("CategoryActivity", "Đã cập nhật tổng chi tiêu mới: " + totalExpense);
+            })
+            .addOnFailureListener(e -> {
+                Log.e("CategoryActivity", "Lỗi khi truy vấn giao dịch: " + e.getMessage());
+            });
     }
     
     @Override
@@ -365,6 +411,46 @@ public class CategoryActivity extends AppCompatActivity {
         } catch (Exception e) {
             Log.e("CategoryActivity", "Lỗi khi mở màn hình thông báo: " + e.getMessage(), e);
             Toast.makeText(this, "Không thể mở thông báo", Toast.LENGTH_SHORT).show();
+        }
+    }
+    
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, android.content.Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        
+        if (requestCode == REQUEST_CATEGORY_DETAIL && resultCode == RESULT_OK) {
+            // Kiểm tra xem có cần làm mới dữ liệu không
+            boolean refreshCategories = data != null && data.getBooleanExtra("REFRESH_CATEGORIES", false);
+            
+            if (refreshCategories) {
+                Log.d("CategoryActivity", "Nhận yêu cầu làm mới từ CategoryDetailActivity");
+                
+                // Tải lại thông tin người dùng (bao gồm số dư)
+                UserUtils.getCurrentUser(new UserUtils.FetchUserCallback() {
+                    @Override
+                    public void onSuccess(com.example.qltccn.models.User user) {
+                        if (user != null) {
+                            // Cập nhật số dư
+                            txtTotalBalance.setText(CurrencyUtils.formatVND(user.getBalance()));
+                            
+                            // Tính toán lại tổng chi tiêu trực tiếp từ Firestore
+                            calculateAndUpdateExpense(user.getId());
+                            
+                            // Hiển thị thông báo
+                            Toast.makeText(CategoryActivity.this, "Dữ liệu đã được cập nhật", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                    
+                    @Override
+                    public void onError(String errorMessage) {
+                        // Nếu không lấy được thông tin người dùng, chỉ cập nhật lại dữ liệu cũ
+                        loadUserData();
+                        Toast.makeText(CategoryActivity.this, 
+                            "Không thể tải thông tin mới nhất: " + errorMessage, 
+                            Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
         }
     }
 } 

@@ -34,7 +34,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
-                android:text="Categories"
+                android:text="Danh mục"
                 android:textColor="@color/black"
                 android:textSize="20sp"
                 android:textStyle="bold"/>
@@ -79,9 +79,9 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Total Balance"
+                        android:text="Số dư"
                         android:textColor="@color/white"
-                        android:textSize="14sp"/>
+                        android:textSize="20sp"/>
 
                     <TextView
                         android:id="@+id/txtTotalBalance"
@@ -89,7 +89,7 @@
                         android:layout_height="wrap_content"
                         android:text="$7,783.00"
                         android:textColor="@color/white"
-                        android:textSize="24sp"
+                        android:textSize="20sp"
                         android:textStyle="bold"/>
                 </LinearLayout>
 
@@ -102,18 +102,33 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Total Expense"
+                        android:text="Tổng chi tiêu"
                         android:textColor="@color/white"
-                        android:textSize="14sp"/>
+                        android:textSize="20sp"/>
 
-                    <TextView
-                        android:id="@+id/txtTotalExpense"
+                    <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="-$1,187.40"
-                        android:textColor="#FF0000"
-                        android:textSize="24sp"
-                        android:textStyle="bold"/>
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+                        
+                        <TextView
+                            android:id="@+id/txtTotalExpense"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="-$1,187.40"
+                            android:textColor="#FF0000"
+                            android:textSize="20sp"
+                            android:textStyle="bold"/>
+                            
+                        <ProgressBar
+                            android:id="@+id/expenseLoadingIndicator"
+                            android:layout_width="18dp"
+                            android:layout_height="18dp"
+                            android:layout_marginStart="8dp"
+                            android:indeterminateTint="#FFFFFF"
+                            android:visibility="gone"/>
+                    </LinearLayout>
                 </LinearLayout>
             </LinearLayout>
 

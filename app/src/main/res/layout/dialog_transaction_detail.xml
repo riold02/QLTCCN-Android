@@ -104,6 +104,18 @@
         android:paddingBottom="16dp">
 
         <Button
+            android:id="@+id/btnDelete"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:text="XÓA"
+            android:backgroundTint="#FF4D4F"
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            app:cornerRadius="4dp"
+            android:layout_marginEnd="8dp"/>
+
+        <Button
             android:id="@+id/btnClose"
             android:layout_width="0dp"
             android:layout_height="48dp"
@@ -120,7 +132,7 @@
             android:layout_width="0dp"
             android:layout_height="48dp"
             android:layout_weight="1"
-            android:text="CHỈNH SỬA"
+            android:text="SỬA"
             android:backgroundTint="@color/colorPrimary"
             android:textColor="@color/white"
             android:textSize="14sp"

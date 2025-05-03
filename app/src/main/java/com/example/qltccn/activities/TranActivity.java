@@ -1,15 +1,20 @@
 package com.example.qltccn.activities;
 
+import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -257,22 +262,85 @@ public class TranActivity extends AppCompatActivity {
     private void updateUserBalance(double newBalance) {
         try {
             // Chỉ cập nhật nếu userId hợp lệ
-            if (userId == null || userId.isEmpty()) return;
+            if (userId == null || userId.isEmpty()) {
+                Log.e(TAG, "updateUserBalance: userId là null hoặc rỗng");
+                return;
+            }
             
-            // Cập nhật số dư trong database
-            mDatabase.child("users").child(userId).child("balance").setValue(newBalance)
+            if (currentUser == null) {
+                Log.e(TAG, "updateUserBalance: currentUser là null");
+                return;
+            }
+            
+            // Hiển thị ProgressDialog
+            android.app.ProgressDialog progressDialog = new android.app.ProgressDialog(this);
+            progressDialog.setMessage("Đang cập nhật số dư...");
+            progressDialog.setCancelable(false);
+            progressDialog.show();
+            
+            // Cập nhật currentUser
+            currentUser.setBalance(newBalance);
+            
+            // Cập nhật vào Firestore
+            FirebaseFirestore.getInstance()
+                .collection("users")
+                .document(userId)
+                .update("balance", newBalance)
                 .addOnSuccessListener(aVoid -> {
-                    // Cập nhật thành công
-                    if (totalBalanceText != null) {
-                        totalBalanceText.setText(com.example.qltccn.utils.CurrencyUtils.formatVND(newBalance));
-                    }
-                    Log.d("TranActivity", "Cập nhật số dư thành công: " + newBalance);
+                    Log.d(TAG, "Cập nhật số dư vào Firestore thành công: " + newBalance);
+                    
+                    // Sau khi cập nhật Firestore, cập nhật Realtime DB
+                    mDatabase.child("users").child(userId).child("balance").setValue(newBalance)
+                        .addOnSuccessListener(aVoid2 -> {
+                            // Cập nhật thành công cả 2 cơ sở dữ liệu
+                            progressDialog.dismiss();
+                            
+                            // Cập nhật UI
+                            if (totalBalanceText != null) {
+                                totalBalanceText.setText(com.example.qltccn.utils.CurrencyUtils.formatVND(newBalance));
+                            }
+                            
+                            Log.d(TAG, "Cập nhật số dư thành công trên cả Firestore và Realtime DB: " + newBalance);
+                            Toast.makeText(TranActivity.this, "Số dư đã được cập nhật: " + com.example.qltccn.utils.CurrencyUtils.formatVND(newBalance), Toast.LENGTH_SHORT).show();
+                        })
+                        .addOnFailureListener(e -> {
+                            progressDialog.dismiss();
+                            
+                            Log.e(TAG, "Lỗi cập nhật số dư vào Realtime DB: " + e.getMessage());
+                            
+                            // Dù có lỗi ở Realtime DB, vẫn cập nhật UI vì Firestore đã thành công
+                            if (totalBalanceText != null) {
+                                totalBalanceText.setText(com.example.qltccn.utils.CurrencyUtils.formatVND(newBalance));
+                            }
+                            
+                            Toast.makeText(TranActivity.this, "Số dư đã được cập nhật một phần", Toast.LENGTH_SHORT).show();
+                        });
                 })
                 .addOnFailureListener(e -> {
-                    Log.e("TranActivity", "Lỗi cập nhật số dư: " + e.getMessage());
+                    Log.e(TAG, "Lỗi cập nhật số dư vào Firestore: " + e.getMessage());
+                    
+                    // Thử cập nhật Realtime DB nếu Firestore thất bại
+                    mDatabase.child("users").child(userId).child("balance").setValue(newBalance)
+                        .addOnSuccessListener(aVoid -> {
+                            progressDialog.dismiss();
+                            
+                            // Cập nhật UI
+                            if (totalBalanceText != null) {
+                                totalBalanceText.setText(com.example.qltccn.utils.CurrencyUtils.formatVND(newBalance));
+                            }
+                            
+                            Log.d(TAG, "Cập nhật số dư thành công trên Realtime DB: " + newBalance);
+                            Toast.makeText(TranActivity.this, "Số dư đã được cập nhật: " + com.example.qltccn.utils.CurrencyUtils.formatVND(newBalance), Toast.LENGTH_SHORT).show();
+                        })
+                        .addOnFailureListener(e2 -> {
+                            progressDialog.dismiss();
+                            Log.e(TAG, "Lỗi cập nhật số dư: " + e.getMessage() + ", " + e2.getMessage());
+                            Toast.makeText(TranActivity.this, "Không thể cập nhật số dư", Toast.LENGTH_SHORT).show();
+                        });
                 });
         } catch (Exception e) {
-            Log.e("TranActivity", "Lỗi cập nhật số dư: " + e.getMessage());
+            Log.e(TAG, "Lỗi cập nhật số dư: " + e.getMessage(), e);
+            Toast.makeText(this, "Lỗi: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
     
@@ -690,6 +758,7 @@ public class TranActivity extends AppCompatActivity {
             TextView tvType = dialog.findViewById(R.id.tvDetailType);
             Button btnClose = dialog.findViewById(R.id.btnClose);
             Button btnEdit = dialog.findViewById(R.id.btnEdit);
+            Button btnDelete = dialog.findViewById(R.id.btnDelete);
             
             // Thiết lập dữ liệu
             if (tvCategory != null) tvCategory.setText("Danh mục: " + transaction.getCategory());
@@ -727,11 +796,16 @@ public class TranActivity extends AppCompatActivity {
             // Xử lý nút Chỉnh sửa
             if (btnEdit != null) {
                 btnEdit.setOnClickListener(v -> {
-                   /* // Mở activity chỉnh sửa giao dịch
-                    Intent intent = new Intent(TranActivity.this, TransactionEditActivity.class);
-                    intent.putExtra("TRANSACTION_ID", transaction.getId());
-                    startActivity(intent);
-                    dialog.dismiss();*/
+                    dialog.dismiss();
+                    showEditTransactionDialog(transaction);
+                });
+            }
+            
+            // Xử lý nút Xóa (nếu có)
+            if (btnDelete != null) {
+                btnDelete.setOnClickListener(v -> {
+                    dialog.dismiss();
+                    showDeleteConfirmationDialog(transaction);
                 });
             }
 
@@ -855,6 +929,466 @@ public class TranActivity extends AppCompatActivity {
         } catch (Exception e) {
             Log.e(TAG, "Lỗi khi mở màn hình thông báo: " + e.getMessage(), e);
             Toast.makeText(this, "Không thể mở thông báo", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /**
+     * Hiển thị dialog xác nhận xóa giao dịch
+     * @param transaction Giao dịch cần xóa
+     */
+    private void showDeleteConfirmationDialog(Transaction transaction) {
+        try {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle("Xác nhận xóa");
+            builder.setMessage("Bạn có chắc chắn muốn xóa giao dịch này không?");
+            
+            // Nút xác nhận xóa
+            builder.setPositiveButton("Xóa", (dialog, which) -> {
+                deleteTransaction(transaction);
+            });
+            
+            // Nút hủy
+            builder.setNegativeButton("Hủy", (dialog, which) -> {
+                dialog.dismiss();
+            });
+            
+            AlertDialog dialog = builder.create();
+            dialog.show();
+        } catch (Exception e) {
+            Log.e(TAG, "Lỗi hiển thị dialog xác nhận xóa: " + e.getMessage(), e);
+            Toast.makeText(this, "Không thể hiển thị dialog xác nhận", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /**
+     * Xóa giao dịch từ cơ sở dữ liệu
+     * @param transaction Giao dịch cần xóa
+     */
+    private void deleteTransaction(Transaction transaction) {
+        try {
+            Log.d(TAG, "Bắt đầu xóa giao dịch ID: " + transaction.getId());
+            
+            // Kiểm tra giao dịch có ID hợp lệ không
+            if (transaction.getId() == null || transaction.getId().isEmpty()) {
+                Toast.makeText(this, "Không thể xóa: ID giao dịch không hợp lệ", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            
+            // Hiển thị ProgressDialog
+            android.app.ProgressDialog progressDialog = new android.app.ProgressDialog(this);
+            progressDialog.setMessage("Đang xóa giao dịch...");
+            progressDialog.setCancelable(false);
+            progressDialog.show();
+            
+            // Sao lưu thông tin giao dịch để cập nhật số dư sau khi xóa
+            final Transaction transactionBackup = transaction;
+            
+            // Thực hiện xóa từ Firestore trước
+            FirebaseFirestore.getInstance()
+                .collection("users")
+                .document(userId)
+                .collection("transactions")
+                .document(transaction.getId())
+                .delete()
+                .addOnSuccessListener(aVoid -> {
+                    Log.d(TAG, "Xóa thành công từ Firestore");
+                    
+                    // Sau khi xóa khỏi Firestore, cũng xóa từ Realtime Database để đảm bảo dữ liệu nhất quán
+                    mDatabase.child("transactions").child(transaction.getId()).removeValue()
+                        .addOnCompleteListener(task -> {
+                            progressDialog.dismiss();
+                            
+                            if (task.isSuccessful()) {
+                                Log.d(TAG, "Xóa thành công từ Realtime Database");
+                                Toast.makeText(TranActivity.this, "Đã xóa giao dịch thành công", Toast.LENGTH_SHORT).show();
+                            } else {
+                                Log.w(TAG, "Lỗi khi xóa từ Realtime Database: " + task.getException());
+                                
+                                // Vẫn thông báo thành công vì đã xóa từ Firestore
+                                Toast.makeText(TranActivity.this, "Đã xóa giao dịch một phần", Toast.LENGTH_SHORT).show();
+                            }
+                            
+                            // Cập nhật số dư sau khi xóa giao dịch
+                            updateBalanceAfterDelete(transactionBackup);
+                            
+                            // Tải lại danh sách giao dịch
+                            loadTransactions();
+                        });
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Lỗi khi xóa từ Firestore: " + e.getMessage(), e);
+                    
+                    // Thử xóa từ Realtime Database nếu Firestore thất bại
+                    mDatabase.child("transactions").child(transaction.getId()).removeValue()
+                        .addOnCompleteListener(task -> {
+                            progressDialog.dismiss();
+                            
+                            if (task.isSuccessful()) {
+                                Toast.makeText(TranActivity.this, "Đã xóa giao dịch thành công", Toast.LENGTH_SHORT).show();
+                                
+                                // Cập nhật số dư sau khi xóa
+                                updateBalanceAfterDelete(transactionBackup);
+                                
+                                // Tải lại danh sách giao dịch
+                                loadTransactions();
+                            } else {
+                                Toast.makeText(TranActivity.this, "Không thể xóa giao dịch: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                });
+        } catch (Exception e) {
+            Log.e(TAG, "Lỗi xử lý xóa giao dịch: " + e.getMessage(), e);
+            Toast.makeText(this, "Lỗi: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /**
+     * Cập nhật số dư sau khi xóa giao dịch
+     * @param transaction Giao dịch đã xóa
+     */
+    private void updateBalanceAfterDelete(Transaction transaction) {
+        try {
+            if (currentUser == null) {
+                Log.e(TAG, "updateBalanceAfterDelete: currentUser là null");
+                return;
+            }
+            
+            double currentBalance = currentUser.getBalance();
+            double transactionAmount = transaction.getAmount();
+            double newBalance = currentBalance;
+            
+            // Nếu xóa giao dịch thu nhập (income), trừ tiền khỏi số dư hiện tại
+            if ("income".equals(transaction.getType())) {
+                newBalance = currentBalance - transactionAmount;
+                Log.d(TAG, "Xóa khoản thu: giảm số dư từ " + currentBalance + " xuống " + newBalance);
+            } 
+            // Nếu xóa giao dịch chi tiêu (expense), cộng tiền vào số dư
+            else if ("expense".equals(transaction.getType())) {
+                newBalance = currentBalance + transactionAmount;
+                Log.d(TAG, "Xóa khoản chi: tăng số dư từ " + currentBalance + " lên " + newBalance);
+            }
+            
+            // Cập nhật số dư
+            updateUserBalance(newBalance);
+        } catch (Exception e) {
+            Log.e(TAG, "Lỗi cập nhật số dư sau khi xóa: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Hiển thị dialog chỉnh sửa giao dịch
+     * @param transaction Giao dịch cần chỉnh sửa
+     */
+    private void showEditTransactionDialog(Transaction transaction) {
+        try {
+            // Tạo dialog tùy chỉnh
+            android.app.Dialog dialog = new android.app.Dialog(this);
+            dialog.requestWindowFeature(android.view.Window.FEATURE_NO_TITLE);
+            dialog.setContentView(R.layout.dialog_edit_transaction);
+            dialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+            dialog.getWindow().setLayout(
+                android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+                android.view.ViewGroup.LayoutParams.WRAP_CONTENT
+            );
+            
+            // Khởi tạo các thành phần UI
+            EditText edtAmount = dialog.findViewById(R.id.edtAmount);
+            EditText edtDescription = dialog.findViewById(R.id.edtDescription);
+            EditText edtCategory = dialog.findViewById(R.id.edtCategory);
+            TextView tvDate = dialog.findViewById(R.id.tvDate);
+            TextView tvTypeLabel = dialog.findViewById(R.id.tvTypeLabel);
+            TextView tvTransactionType = dialog.findViewById(R.id.tvTransactionType);
+            
+            Button btnSave = dialog.findViewById(R.id.btnSave);
+            Button btnCancel = dialog.findViewById(R.id.btnCancel);
+            
+            // Thiết lập dữ liệu ban đầu
+            edtAmount.setText(String.valueOf(transaction.getAmount()));
+            edtDescription.setText(transaction.getDescription());
+            edtCategory.setText(transaction.getCategory());
+            
+            // Thiết lập loại giao dịch (thu nhập/chi tiêu) - chỉ đọc
+            String transactionType = transaction.getType();
+            if ("income".equals(transactionType)) {
+                tvTransactionType.setText("Thu nhập");
+                tvTransactionType.setTextColor(getResources().getColor(R.color.colorPrimary));
+                tvTypeLabel.setText("Đang sửa khoản thu nhập");
+                tvTypeLabel.setTextColor(getResources().getColor(R.color.colorPrimary));
+            } else {
+                tvTransactionType.setText("Chi tiêu");
+                tvTransactionType.setTextColor(getResources().getColor(R.color.red_500));
+                tvTypeLabel.setText("Đang sửa khoản chi tiêu");
+                tvTypeLabel.setTextColor(getResources().getColor(R.color.red_500));
+            }
+            
+            // Hiển thị ngày tháng
+            SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+            final Calendar calendar = Calendar.getInstance();
+            calendar.setTimeInMillis(transaction.getDate());
+            tvDate.setText(dateFormat.format(calendar.getTime()));
+            
+            // Xử lý khi click vào ngày để chọn lại
+            tvDate.setOnClickListener(v -> {
+                showDatePickerDialog(calendar, tvDate);
+            });
+            
+            // Xử lý nút Lưu
+            btnSave.setOnClickListener(v -> {
+                // Kiểm tra và lấy dữ liệu đã nhập
+                if (edtAmount.getText().toString().trim().isEmpty()) {
+                    Toast.makeText(this, "Vui lòng nhập số tiền", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                
+                double newAmount;
+                try {
+                    newAmount = Double.parseDouble(edtAmount.getText().toString().trim());
+                    if (newAmount <= 0) {
+                        Toast.makeText(this, "Số tiền phải lớn hơn 0", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                } catch (NumberFormatException e) {
+                    Toast.makeText(this, "Số tiền không hợp lệ", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                
+                String newDescription = edtDescription.getText().toString().trim();
+                String newCategory = edtCategory.getText().toString().trim();
+                
+                if (newCategory.isEmpty()) {
+                    Toast.makeText(this, "Vui lòng nhập danh mục", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                
+                // Giữ nguyên loại giao dịch - không cho phép thay đổi
+                String newType = transaction.getType();
+                
+                // Cập nhật giao dịch với dữ liệu mới
+                Transaction updatedTransaction = new Transaction();
+                updatedTransaction.setId(transaction.getId());
+                updatedTransaction.setUserId(transaction.getUserId());
+                updatedTransaction.setAmount(newAmount);
+                updatedTransaction.setDescription(newDescription);
+                updatedTransaction.setCategory(newCategory);
+                updatedTransaction.setType(newType); // Giữ nguyên loại giao dịch
+                updatedTransaction.setDate(calendar.getTimeInMillis());
+                updatedTransaction.setCreatedAt(transaction.getCreatedAt());
+                updatedTransaction.setUpdatedAt(System.currentTimeMillis());
+                updatedTransaction.setGoalId(transaction.getGoalId()); // Giữ nguyên goalId nếu có
+                
+                // Kiểm tra xem có thay đổi gì không
+                boolean hasChanges = newAmount != transaction.getAmount() || 
+                                   !newCategory.equals(transaction.getCategory()) ||
+                                   !newDescription.equals(transaction.getDescription()) ||
+                                   calendar.getTimeInMillis() != transaction.getDate();
+                
+                if (!hasChanges) {
+                    Toast.makeText(this, "Không có thay đổi nào được thực hiện", Toast.LENGTH_SHORT).show();
+                    dialog.dismiss();
+                    return;
+                }
+                    
+                // Lưu thay đổi
+                updateTransaction(transaction, updatedTransaction);
+                
+                // Đóng dialog
+                dialog.dismiss();
+            });
+            
+            // Xử lý nút Hủy
+            btnCancel.setOnClickListener(v -> dialog.dismiss());
+            
+            // Hiển thị dialog
+            dialog.show();
+        } catch (Exception e) {
+            Log.e(TAG, "Lỗi hiển thị dialog chỉnh sửa: " + e.getMessage(), e);
+            Toast.makeText(this, "Không thể mở chức năng chỉnh sửa", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /**
+     * Hiển thị DatePicker để chọn ngày
+     */
+    private void showDatePickerDialog(Calendar calendar, TextView tvDate) {
+        try {
+            int year = calendar.get(Calendar.YEAR);
+            int month = calendar.get(Calendar.MONTH);
+            int day = calendar.get(Calendar.DAY_OF_MONTH);
+            
+            DatePickerDialog datePickerDialog = new DatePickerDialog(
+                this,
+                (view, selectedYear, selectedMonth, selectedDay) -> {
+                    calendar.set(Calendar.YEAR, selectedYear);
+                    calendar.set(Calendar.MONTH, selectedMonth);
+                    calendar.set(Calendar.DAY_OF_MONTH, selectedDay);
+                    
+                    SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+                    tvDate.setText(dateFormat.format(calendar.getTime()));
+                },
+                year, month, day
+            );
+            
+            datePickerDialog.show();
+        } catch (Exception e) {
+            Log.e(TAG, "Lỗi hiển thị DatePicker: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Cập nhật giao dịch vào cơ sở dữ liệu
+     * @param oldTransaction Giao dịch cũ
+     * @param newTransaction Giao dịch mới với thông tin đã cập nhật
+     */
+    private void updateTransaction(Transaction oldTransaction, Transaction newTransaction) {
+        try {
+            // Hiển thị ProgressDialog
+            android.app.ProgressDialog progressDialog = new android.app.ProgressDialog(this);
+            progressDialog.setMessage("Đang cập nhật giao dịch...");
+            progressDialog.setCancelable(false);
+            progressDialog.show();
+            
+            // Đảm bảo ID giao dịch hợp lệ
+            if (newTransaction.getId() == null || newTransaction.getId().isEmpty()) {
+                progressDialog.dismiss();
+                Toast.makeText(this, "ID giao dịch không hợp lệ, không thể cập nhật", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            
+            // Thiết lập thời gian cập nhật
+            newTransaction.setUpdatedAt(System.currentTimeMillis());
+            
+            // Cập nhật vào Firestore trước
+            FirebaseFirestore db = FirebaseFirestore.getInstance();
+            db.collection("users")
+                .document(userId)
+                .collection("transactions")
+                .document(newTransaction.getId())
+                .set(newTransaction.toMap())
+                .addOnSuccessListener(aVoid -> {
+                    // Log thành công
+                    Log.d(TAG, "Cập nhật thành công vào Firestore");
+                    
+                    // Sau khi cập nhật Firestore thành công, cập nhật Realtime Database
+                    mDatabase.child("transactions").child(newTransaction.getId()).setValue(newTransaction)
+                        .addOnCompleteListener(task -> {
+                            progressDialog.dismiss();
+                            
+                            if (task.isSuccessful()) {
+                                Log.d(TAG, "Cập nhật thành công vào Realtime Database");
+                                Toast.makeText(TranActivity.this, "Đã cập nhật giao dịch thành công", Toast.LENGTH_SHORT).show();
+                                
+                                // Cập nhật số dư
+                                updateBalanceAfterEdit(oldTransaction, newTransaction);
+                                
+                                // Tải lại danh sách giao dịch
+                                loadTransactions();
+                            } else {
+                                Log.w(TAG, "Lỗi khi cập nhật Realtime Database: " + task.getException());
+                                
+                                // Vẫn thông báo thành công vì đã cập nhật Firestore
+                                Toast.makeText(TranActivity.this, "Đã cập nhật giao dịch một phần", Toast.LENGTH_SHORT).show();
+                                
+                                // Vẫn cập nhật số dư và tải lại giao dịch
+                                updateBalanceAfterEdit(oldTransaction, newTransaction);
+                                loadTransactions();
+                            }
+                        });
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Lỗi khi cập nhật Firestore: " + e.getMessage(), e);
+                    
+                    // Thử cập nhật Realtime Database nếu Firestore thất bại
+                    mDatabase.child("transactions").child(newTransaction.getId()).setValue(newTransaction)
+                        .addOnCompleteListener(task -> {
+                            progressDialog.dismiss();
+                            
+                            if (task.isSuccessful()) {
+                                Toast.makeText(TranActivity.this, "Đã cập nhật giao dịch thành công", Toast.LENGTH_SHORT).show();
+                                
+                                // Cập nhật số dư
+                                updateBalanceAfterEdit(oldTransaction, newTransaction);
+                                
+                                // Tải lại danh sách giao dịch
+                                loadTransactions();
+                            } else {
+                                Toast.makeText(TranActivity.this, "Không thể cập nhật giao dịch: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                });
+        } catch (Exception e) {
+            Log.e(TAG, "Lỗi xử lý cập nhật giao dịch: " + e.getMessage(), e);
+            Toast.makeText(this, "Lỗi: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /**
+     * Cập nhật số dư sau khi chỉnh sửa giao dịch
+     * @param oldTransaction Giao dịch cũ
+     * @param newTransaction Giao dịch mới
+     */
+    private void updateBalanceAfterEdit(Transaction oldTransaction, Transaction newTransaction) {
+        try {
+            if (currentUser == null) {
+                Log.e(TAG, "updateBalanceAfterEdit: currentUser là null");
+                return;
+            }
+            
+            double currentBalance = currentUser.getBalance();
+            double oldAmount = oldTransaction.getAmount();
+            double newAmount = newTransaction.getAmount();
+            double newBalance = currentBalance;
+            
+            // Lưu lại số dư gốc để log
+            double originalBalance = currentBalance;
+            
+            // Trường hợp 1: Loại giao dịch không thay đổi (vẫn là income hoặc expense)
+            if (oldTransaction.getType().equals(newTransaction.getType())) {
+                if ("income".equals(oldTransaction.getType())) {
+                    // Thu nhập: Nếu tiền mới > tiền cũ thì cộng thêm phần chênh lệch
+                    // Nếu tiền mới < tiền cũ thì trừ đi phần chênh lệch
+                    double difference = newAmount - oldAmount;
+                    newBalance = currentBalance + difference;
+                    
+                    Log.d(TAG, "Sửa khoản thu: " + oldAmount + " -> " + newAmount 
+                          + ", chênh lệch: " + difference 
+                          + ", số dư: " + currentBalance + " -> " + newBalance);
+                } 
+                else if ("expense".equals(oldTransaction.getType())) {
+                    // Chi tiêu: Nếu tiền mới > tiền cũ thì giảm thêm phần chênh lệch
+                    // Nếu tiền mới < tiền cũ thì tăng lại phần chênh lệch
+                    double difference = newAmount - oldAmount;
+                    newBalance = currentBalance - difference;
+                    
+                    Log.d(TAG, "Sửa khoản chi: " + oldAmount + " -> " + newAmount 
+                          + ", chênh lệch: " + difference 
+                          + ", số dư: " + currentBalance + " -> " + newBalance);
+                }
+            }
+            // Trường hợp 2: Thay đổi từ thu nhập -> chi tiêu
+            else if ("income".equals(oldTransaction.getType()) && "expense".equals(newTransaction.getType())) {
+                // Trừ tiền thu nhập cũ (vì đã xóa khoản thu)
+                newBalance = currentBalance - oldAmount;
+                // Trừ tiền chi tiêu mới (vì thêm khoản chi)
+                newBalance = newBalance - newAmount;
+                
+                Log.d(TAG, "Chuyển từ thu nhập -> chi tiêu: " + oldAmount + " -> " + newAmount 
+                      + ", số dư: " + currentBalance + " -> " + newBalance);
+            }
+            // Trường hợp 3: Thay đổi từ chi tiêu -> thu nhập
+            else if ("expense".equals(oldTransaction.getType()) && "income".equals(newTransaction.getType())) {
+                // Cộng lại tiền chi tiêu cũ (vì đã xóa khoản chi)
+                newBalance = currentBalance + oldAmount;
+                // Cộng tiền thu nhập mới (vì thêm khoản thu)
+                newBalance = newBalance + newAmount;
+                
+                Log.d(TAG, "Chuyển từ chi tiêu -> thu nhập: " + oldAmount + " -> " + newAmount 
+                      + ", số dư: " + currentBalance + " -> " + newBalance);
+            }
+            
+            // Cập nhật số dư
+            updateUserBalance(newBalance);
+        } catch (Exception e) {
+            Log.e(TAG, "Lỗi cập nhật số dư sau khi chỉnh sửa: " + e.getMessage(), e);
         }
     }
 }
