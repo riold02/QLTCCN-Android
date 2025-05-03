@@ -28,7 +28,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:text="Hồ sơ"
+            android:text="Cài đặt thông báo"
             android:textColor="@android:color/white"
             android:textSize="18sp"
             android:textStyle="bold" />
@@ -56,7 +56,7 @@
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:background="@drawable/rounded_button"
-            android:text="Kiểm tra thông báo"
+            android:text="Kiểm tra thông báo ngay"
             android:textColor="@android:color/white"
             android:textSize="16sp" />
     </LinearLayout>

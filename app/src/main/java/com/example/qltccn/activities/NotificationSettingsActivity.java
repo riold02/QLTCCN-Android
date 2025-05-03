@@ -4,6 +4,7 @@ import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -66,6 +67,12 @@ public class NotificationSettingsActivity extends AppCompatActivity {
         
         // Đăng ký channel thông báo
         NotificationUtils.createNotificationChannel(this);
+        
+        // Cập nhật định dạng thời gian cho tất cả thông báo
+        NotificationUtils.updateNotificationsTimeFormat(this);
+        
+        // Thêm Toast thông báo đã mở màn hình cài đặt
+        Toast.makeText(this, "Đã mở màn hình cài đặt thông báo", Toast.LENGTH_SHORT).show();
     }
 
     private void initUI() {
@@ -108,7 +115,11 @@ public class NotificationSettingsActivity extends AppCompatActivity {
 
     private void setClickListeners() {
         // Toolbar actions
-        toolbarBackBtn.setOnClickListener(v -> finish());
+        toolbarBackBtn.setOnClickListener(v -> {
+            Toast.makeText(this, "Quay lại", Toast.LENGTH_SHORT).show();
+            finish();
+        });
+        
         idNoti.setOnClickListener(v -> {
             // Mở màn hình danh sách thông báo
             startActivity(new Intent(NotificationSettingsActivity.this, NotiActivity.class));
@@ -116,6 +127,7 @@ public class NotificationSettingsActivity extends AppCompatActivity {
         
         // Nút kiểm tra thông báo
         testNotificationBtn.setOnClickListener(v -> {
+            Toast.makeText(this, "Đang gửi thông báo kiểm tra...", Toast.LENGTH_SHORT).show();
             sendTestNotification();
         });
 
@@ -127,12 +139,6 @@ public class NotificationSettingsActivity extends AppCompatActivity {
             // Gửi thông báo thử nghiệm nếu bật
             if (isChecked) {
                 Toast.makeText(this, "Đã bật thông báo", Toast.LENGTH_SHORT).show();
-                try {
-                    // Gửi thông báo trực tiếp để kiểm tra
-                    sendTestNotification();
-                } catch (Exception e) {
-                    Toast.makeText(this, "Lỗi: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                }
             } else {
                 Toast.makeText(this, "Đã tắt thông báo", Toast.LENGTH_SHORT).show();
             }
@@ -324,8 +330,14 @@ public class NotificationSettingsActivity extends AppCompatActivity {
      */
     private void sendTestNotification() {
         try {
-            // Hiển thị Toast thông báo
+            // Hiển thị Toast thông báo chi tiết
             Toast.makeText(this, "Đang gửi thông báo kiểm tra...", Toast.LENGTH_SHORT).show();
+            
+            // Đảm bảo kênh thông báo đã được tạo
+            NotificationUtils.createNotificationChannel(this);
+            
+            // Log trước khi gửi
+            Log.d("NotificationSettingsActivity", "Bắt đầu gửi thông báo kiểm tra");
             
             // Gọi phương thức gửi thông báo kiểm tra trực tiếp
             NotificationUtils.sendTestNotification(this);
@@ -337,13 +349,21 @@ public class NotificationSettingsActivity extends AppCompatActivity {
                 "Đây là thông báo kiểm tra. Nếu bạn thấy thông báo này, hệ thống thông báo đang hoạt động.",
                 "reminder"
             );
+            
+            // Toast thành công
+            Toast.makeText(this, "Đã gửi thông báo kiểm tra!", Toast.LENGTH_SHORT).show();
+            
         } catch (Exception e) {
+            Log.e("NotificationSettingsActivity", "Lỗi gửi thông báo: " + e.getMessage(), e);
+            
             // Hiển thị thông báo lỗi đầy đủ
             new AlertDialog.Builder(this)
                 .setTitle("Lỗi gửi thông báo")
-                .setMessage("Chi tiết lỗi: " + e.getMessage())
+                .setMessage("Chi tiết lỗi: " + e.getMessage() + "\n\nNếu bạn không nhận được thông báo, hãy kiểm tra quyền thông báo trong cài đặt của thiết bị.")
                 .setPositiveButton("Đóng", null)
                 .show();
+            
+            Toast.makeText(this, "Không thể gửi thông báo: " + e.getMessage(), Toast.LENGTH_LONG).show();
         }
     }
 } 

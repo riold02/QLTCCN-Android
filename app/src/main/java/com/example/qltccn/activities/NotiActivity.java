@@ -55,6 +55,9 @@ public class NotiActivity extends AppCompatActivity {
         // Thiết lập sự kiện click cho các nút
         setupClickListeners();
         
+        // Cập nhật định dạng thời gian cho tất cả thông báo cũ
+        NotificationUtils.updateNotificationsTimeFormat(this);
+        
         // Tải thông báo từ SharedPreferences
         loadNotifications();
         
@@ -126,6 +129,10 @@ public class NotiActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        
+        // Cập nhật định dạng thời gian khi quay lại màn hình
+        NotificationUtils.updateNotificationsTimeFormat(this);
+        
         // Tải lại thông báo khi trở lại màn hình
         loadNotifications();
         

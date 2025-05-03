@@ -55,8 +55,12 @@ public class NotificationUtils {
      */
     public static void addNotification(Context context, String title, String message, String type) {
         try {
-            // Định dạng thời gian
-            String timeStr = "Vừa xong";
+            // Lấy thời gian hiện tại
+            long currentTimeMillis = System.currentTimeMillis();
+            
+            // Định dạng thời gian thành ngày giờ
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
+            String timeStr = sdf.format(new Date(currentTimeMillis));
             
             // Tạo thông báo mới
             Notification notification = new Notification(
@@ -66,7 +70,7 @@ public class NotificationUtils {
                     timeStr,
                     type,
                     false,
-                    System.currentTimeMillis()
+                    currentTimeMillis
             );
             
             // Lấy danh sách thông báo hiện tại
@@ -78,7 +82,7 @@ public class NotificationUtils {
             // Lưu danh sách vào SharedPreferences
             saveNotifications(context, notifications);
             
-            Log.d(TAG, "Đã thêm thông báo: " + title);
+            Log.d(TAG, "Đã thêm thông báo: " + title + " lúc " + timeStr);
             
             // Hiển thị thông báo dạng push
             showPushNotification(context, title, message, type);
@@ -153,21 +157,45 @@ public class NotificationUtils {
         // Chỉ cần thực hiện trên Android 8.0+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             try {
-                NotificationChannel channel = new NotificationChannel(
-                        CHANNEL_ID,
-                        CHANNEL_NAME,
-                        NotificationManager.IMPORTANCE_HIGH // Tăng mức độ ưu tiên
-                );
-                channel.setDescription(CHANNEL_DESC);
-                channel.enableVibration(true);
-                channel.enableLights(true);
-                
-                // Đăng ký channel với hệ thống
                 NotificationManager notificationManager = 
-                        context.getSystemService(NotificationManager.class);
+                        (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+                
+                // Kiểm tra xem channel đã tồn tại chưa
                 if (notificationManager != null) {
+                    NotificationChannel existingChannel = notificationManager.getNotificationChannel(CHANNEL_ID);
+                    if (existingChannel != null) {
+                        Log.d(TAG, "Channel đã tồn tại, cập nhật thiết lập");
+                        
+                        // Xóa channel cũ để tạo lại với cài đặt mới (một số thiết lập không thể thay đổi sau khi đã tạo)
+                        notificationManager.deleteNotificationChannel(CHANNEL_ID);
+                    }
+                    
+                    // Tạo channel với độ ưu tiên cao nhất
+                    NotificationChannel channel = new NotificationChannel(
+                            CHANNEL_ID,
+                            CHANNEL_NAME,
+                            NotificationManager.IMPORTANCE_HIGH // Đặt mức độ quan trọng cao nhất
+                    );
+                    
+                    // Thiết lập các tùy chọn khác
+                    channel.setDescription(CHANNEL_DESC);
+                    channel.enableVibration(true);
+                    channel.enableLights(true);
+                    channel.setLockscreenVisibility(NotificationCompat.VISIBILITY_PUBLIC);
+                    channel.setBypassDnd(true); // Vượt qua chế độ Không làm phiền
+                    channel.setShowBadge(true); // Hiển thị biểu tượng thông báo
+                    
+                    // Cài đặt âm thanh mặc định
+                    channel.setSound(android.provider.Settings.System.DEFAULT_NOTIFICATION_URI, 
+                            new android.media.AudioAttributes.Builder()
+                                .setUsage(android.media.AudioAttributes.USAGE_NOTIFICATION)
+                                .setContentType(android.media.AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                                .build()
+                    );
+                    
+                    // Đăng ký channel với hệ thống
                     notificationManager.createNotificationChannel(channel);
-                    Log.d(TAG, "Đã tạo notification channel thành công");
+                    Log.d(TAG, "Đã tạo notification channel với mức độ ưu tiên cao");
                 } else {
                     Log.e(TAG, "NotificationManager là null khi tạo channel");
                 }
@@ -547,14 +575,14 @@ public class NotificationUtils {
     }
     
     /**
-     * Gửi thông báo kiểm tra trực tiếp
+     * Gửi thông báo kiểm tra trực tiếp với độ ưu tiên cao nhất
      * @param context Context
      */
     public static void sendTestNotification(Context context) {
         try {
             Log.d(TAG, "Gửi thông báo kiểm tra trực tiếp");
             
-            // Tạo notification channel
+            // Tạo notification channel với độ ưu tiên cao nhất
             createNotificationChannel(context);
             
             // Intent khi nhấn vào thông báo
@@ -562,36 +590,114 @@ public class NotificationUtils {
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             
             // Tạo PendingIntent
+            int flags = PendingIntent.FLAG_UPDATE_CURRENT;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                flags |= PendingIntent.FLAG_IMMUTABLE;
+            }
+            
             PendingIntent pendingIntent = PendingIntent.getActivity(
                     context, 
-                    123456, // Request code cố định
+                    999, // Request code
                     intent, 
-                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+                    flags
             );
             
-            // Tạo builder thông báo
+            // Tạo builder thông báo với cấu hình đặc biệt
             NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
                     .setSmallIcon(R.drawable.ic_noti)
-                    .setContentTitle("Thông báo kiểm tra")
-                    .setContentText("Nếu bạn nhìn thấy thông báo này, hệ thống thông báo đã hoạt động!")
-                    .setPriority(NotificationCompat.PRIORITY_MAX)
+                    .setContentTitle("KIỂM TRA THÔNG BÁO")
+                    .setContentText("ĐÂY LÀ THÔNG BÁO KIỂM TRA. NẾU BẠN NHẬN ĐƯỢC, HỆ THỐNG ĐANG HOẠT ĐỘNG!")
+                    .setPriority(NotificationCompat.PRIORITY_MAX) // Đặt độ ưu tiên cao nhất
+                    .setCategory(NotificationCompat.CATEGORY_ALARM) // Đặt danh mục báo động
+                    .setVisibility(NotificationCompat.VISIBILITY_PUBLIC) // Hiển thị trên màn hình khóa
                     .setContentIntent(pendingIntent)
                     .setAutoCancel(true)
-                    .setDefaults(NotificationCompat.DEFAULT_ALL);
+                    .setDefaults(NotificationCompat.DEFAULT_ALL); // Sử dụng cài đặt mặc định
+
+            // Làm cho thông báo dạng đầy đủ khi hiển thị
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                builder.setFullScreenIntent(pendingIntent, true);
+            }
             
             // Lấy NotificationManager
             NotificationManager notificationManager = 
                     (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
             
-            // Gửi thông báo
+            // Gửi thông báo với ID cố định
             if (notificationManager != null) {
+                // Đặt độ ưu tiên cao nhất cho kênh thông báo
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    NotificationChannel channel = notificationManager.getNotificationChannel(CHANNEL_ID);
+                    if (channel != null) {
+                        channel.setImportance(NotificationManager.IMPORTANCE_HIGH);
+                        notificationManager.createNotificationChannel(channel);
+                    }
+                }
+                
+                // Gửi thông báo
                 notificationManager.notify(999, builder.build());
-                Log.d(TAG, "Đã gửi thông báo kiểm tra trực tiếp");
+                Log.d(TAG, "Đã gửi thông báo kiểm tra trực tiếp với ID: 999");
+                
+                // Yêu cầu lưu ý người dùng với thiết bị chạy Android 13+
+                if (Build.VERSION.SDK_INT >= 33) {
+                    try {
+                        // Sử dụng reflection để truy cập API REQUEST_POST_NOTIFICATIONS 
+                        Class<?> activityClass = Class.forName("android.app.Activity");
+                        Class<?> permClass = Class.forName("android.Manifest$permission");
+                        java.lang.reflect.Field field = permClass.getField("POST_NOTIFICATIONS");
+                        String permName = (String) field.get(null);
+                        
+                        Log.d(TAG, "Kiểm tra quyền thông báo trên Android 13+");
+                    } catch (Exception e) {
+                        Log.e(TAG, "Lỗi kiểm tra quyền thông báo: " + e.getMessage());
+                    }
+                }
             } else {
                 Log.e(TAG, "NotificationManager là null trong sendTestNotification");
             }
         } catch (Exception e) {
             Log.e(TAG, "Lỗi gửi thông báo kiểm tra: " + e.getMessage(), e);
+        }
+    }
+    
+    /**
+     * Cập nhật định dạng thời gian cho tất cả thông báo
+     * @param context Context
+     */
+    public static void updateNotificationsTimeFormat(Context context) {
+        try {
+            // Lấy danh sách thông báo hiện tại
+            List<Notification> notifications = getNotifications(context);
+            boolean hasChanges = false;
+            
+            // Duyệt qua từng thông báo và cập nhật thời gian
+            for (Notification notification : notifications) {
+                // Nếu thời gian là "Vừa xong" hoặc định dạng cũ, cập nhật sang định dạng mới
+                if (notification.getTime().equals("Vừa xong") || !notification.getTime().contains("/")) {
+                    // Lấy timestamp từ thông báo hoặc sử dụng thời gian hiện tại nếu không có
+                    long timestamp = notification.getTimestamp();
+                    if (timestamp == 0) {
+                        timestamp = System.currentTimeMillis();
+                        notification.setTimestamp(timestamp);
+                    }
+                    
+                    // Định dạng lại thời gian
+                    SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
+                    String newTimeStr = sdf.format(new Date(timestamp));
+                    
+                    // Cập nhật thời gian
+                    notification.setTime(newTimeStr);
+                    hasChanges = true;
+                }
+            }
+            
+            // Lưu lại nếu có thay đổi
+            if (hasChanges) {
+                saveNotifications(context, notifications);
+                Log.d(TAG, "Đã cập nhật định dạng thời gian cho tất cả thông báo");
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Lỗi cập nhật định dạng thời gian: " + e.getMessage());
         }
     }
 } 
