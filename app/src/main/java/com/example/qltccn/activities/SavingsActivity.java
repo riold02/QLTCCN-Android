@@ -96,8 +96,7 @@ public class SavingsActivity extends AppCompatActivity implements View.OnClickLi
         
         // Progress
         tvProgressPercent = findViewById(R.id.tvProgressPercent);
-        tvProgressTotal = findViewById(R.id.tvProgressTotal);
-        savingProgressBar = findViewById(R.id.expenseProgressBar);
+
         
         // Goals Grid
         goalTravel = findViewById(R.id.goalTravel);

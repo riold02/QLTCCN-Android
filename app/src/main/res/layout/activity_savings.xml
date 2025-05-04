@@ -132,49 +132,7 @@
         android:layout_below="@id/balanceInfo"
         android:orientation="vertical"
         android:paddingHorizontal="16dp"
-        android:paddingBottom="8dp">
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/rounded_black_bg"
-            android:padding="8dp">
-
-            <TextView
-                android:id="@+id/tvProgressPercent"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
-                android:layout_centerVertical="true"
-                android:layout_marginStart="8dp"
-                android:text="30%"
-                android:textColor="#FFFFFF"
-                android:textSize="12sp" />
-
-            <ProgressBar
-                android:id="@+id/expenseProgressBar"
-                style="?android:attr/progressBarStyleHorizontal"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:layout_marginStart="50dp"
-                android:layout_marginEnd="80dp"
-                android:progress="30"
-                android:progressTint="#FFFFFF" />
-
-            <TextView
-                android:id="@+id/tvProgressTotal"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:layout_marginEnd="8dp"
-                android:text="$20,000.00"
-                android:textColor="#FFFFFF"
-                android:textSize="12sp" />
-        </RelativeLayout>
-
-    </LinearLayout>
+        android:paddingBottom="8dp"/>
 
     <!-- Main Content - White Background -->
     <RelativeLayout
