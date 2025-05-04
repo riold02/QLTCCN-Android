@@ -91,7 +91,7 @@
                             android:layout_height="30dp"
                             android:layout_centerInParent="true"
                             android:src="@drawable/ic_travel"
-                             />
+                            />
                     </RelativeLayout>
 
                     <LinearLayout
@@ -246,7 +246,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical">
-                    
+
                     <TextView
                         android:id="@+id/transactionsHeader"
                         android:layout_width="wrap_content"
@@ -255,7 +255,7 @@
                         android:textColor="#333333"
                         android:textSize="18sp"
                         android:textStyle="bold" />
-                        
+
                     <View
                         android:layout_width="0dp"
                         android:layout_height="1dp"
@@ -271,21 +271,21 @@
                     android:orientation="vertical"
                     android:gravity="center"
                     android:visibility="gone">
-                    
+
                     <ImageView
                         android:layout_width="100dp"
                         android:layout_height="100dp"
                         android:src="@drawable/ic_expense"
                         android:alpha="0.3"
                         android:layout_marginBottom="16dp" />
-                        
+
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Chưa có giao dịch nào"
                         android:textColor="#757575"
                         android:textSize="16sp" />
-                        
+
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"

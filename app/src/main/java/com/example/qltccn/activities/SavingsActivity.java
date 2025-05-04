@@ -7,7 +7,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -36,13 +35,11 @@ public class SavingsActivity extends AppCompatActivity implements View.OnClickLi
     private FirebaseFirestore db;
     private String currentUserId;
 
-    // UI Elements
-    private TextView tvTotalBalance, tvTotalSaving, tvProgressPercent, tvProgressTotal;
-    private ProgressBar savingProgressBar;
+    // UI Components
+    private TextView tvTotalBalance, tvTotalSaving;
     private ImageView btnBack, btnNotification;
-    private Button btnAddMoreSavingGoal;
     
-    // Savings Goal Elements
+    // Savings Goal UI
     private LinearLayout goalTravel, goalHouse, goalCar, goalWedding;
     private TextView tvTravelTitle, tvHouseTitle, tvCarTitle, tvWeddingTitle;
     private TextView tvTravelAmount, tvHouseAmount, tvCarAmount, tvWeddingAmount;
@@ -94,10 +91,6 @@ public class SavingsActivity extends AppCompatActivity implements View.OnClickLi
         tvTotalBalance = findViewById(R.id.tvTotalBalance);
         tvTotalSaving = findViewById(R.id.tvTotalExpense);
         
-        // Progress
-        tvProgressPercent = findViewById(R.id.tvProgressPercent);
-
-        
         // Goals Grid
         goalTravel = findViewById(R.id.goalTravel);
         goalHouse = findViewById(R.id.goalHouse);
@@ -119,9 +112,6 @@ public class SavingsActivity extends AppCompatActivity implements View.OnClickLi
         tvCarProgress = findViewById(R.id.tvCarProgress);
         tvWeddingProgress = findViewById(R.id.tvWeddingProgress);
         
-        // Button
-        btnAddMoreSavingGoal = findViewById(R.id.btnAddMoreSavingGoal);
-        
         // Footer
         iconHome = findViewById(R.id.iconHome);
         iconAnalysis = findViewById(R.id.iconAnalysis);
@@ -133,7 +123,6 @@ public class SavingsActivity extends AppCompatActivity implements View.OnClickLi
     private void setClickListeners() {
         btnBack.setOnClickListener(this);
         btnNotification.setOnClickListener(this);
-        btnAddMoreSavingGoal.setOnClickListener(this);
         
         // Goals click listeners
         goalTravel.setOnClickListener(this);
@@ -166,9 +155,6 @@ public class SavingsActivity extends AppCompatActivity implements View.OnClickLi
             } catch (Exception e) {
                 Log.e("SavingsActivity", "Lỗi khi tạo rung: " + e.getMessage());
             }
-        } else if (id == R.id.btnAddMoreSavingGoal) {
-            // Tạo 4 mục tiêu mặc định nếu chưa có
-            createDefaultSavingsGoals();
         } else if (id == R.id.goalTravel) {
             openSavingsGoalDetail("travel");
         } else if (id == R.id.goalHouse) {
@@ -303,24 +289,11 @@ public class SavingsActivity extends AppCompatActivity implements View.OnClickLi
         
         totalSaving = total;
         tvTotalSaving.setText(CurrencyUtils.formatAmount(totalSaving));
-        updateProgressBar();
     }
 
     private void updateUIWithUserData(User user) {
         totalBalance = user.getBalance();
         tvTotalBalance.setText(CurrencyUtils.formatAmount(totalBalance));
-        tvProgressTotal.setText(CurrencyUtils.formatAmount(totalBalance));
-        updateProgressBar();
-    }
-
-    private void updateProgressBar() {
-        if (totalBalance > 0) {
-            int percent = (int) ((totalSaving / totalBalance) * 100);
-            if (percent > 100) percent = 100;
-            
-            tvProgressPercent.setText(percent + "%");
-            savingProgressBar.setProgress(percent);
-        }
     }
 
     private void loadSavingsGoals() {

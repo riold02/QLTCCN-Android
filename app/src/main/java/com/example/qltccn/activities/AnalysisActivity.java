@@ -1797,8 +1797,11 @@ public class AnalysisActivity extends AppCompatActivity {
                 totalExpense += entry.getY();
             }
 
-            for (BarEntry entry : savingsBarEntries) {
-                totalSavings += entry.getY();
+            // Chỉ tính tổng tiết kiệm nếu mảng savingsBarEntries không null và không rỗng
+            if (savingsBarEntries != null && !savingsBarEntries.isEmpty()) {
+                for (BarEntry entry : savingsBarEntries) {
+                    totalSavings += entry.getY();
+                }
             }
 
             // Cập nhật UI với tổng hợp từ biểu đồ
@@ -1817,21 +1820,12 @@ public class AnalysisActivity extends AppCompatActivity {
                 Log.d(TAG, "Cập nhật UI số dư từ biểu đồ: " + CurrencyUtils.formatVND(totalIncome - totalExpense - totalSavings));
             }
 
-            // In log các giá trị để kiểm tra
-            for (int i = 0; i < Math.min(incomeBarEntries.size(), xAxisLabels.size()); i++) {
-                Log.d(TAG, "Giá trị ban đầu - " + xAxisLabels.get(i) +
-                        ": Thu nhập=" + incomeBarEntries.get(i).getY() +
-                        ", Chi tiêu=" + expenseBarEntries.get(i).getY() +
-                        ", Tiết kiệm=" + savingsBarEntries.get(i).getY());
-            }
-
             // Tìm giá trị lớn nhất để thiết lập trục Y phù hợp
             float maxValue = 0.1f; // Giá trị tối thiểu để tránh chia cho 0
             for (int i = 0; i < incomeBarEntries.size(); i++) {
                 float income = incomeBarEntries.get(i).getY();
                 float expense = expenseBarEntries.get(i).getY();
-                float savings = savingsBarEntries.get(i).getY();
-                float currentMax = Math.max(income, Math.max(expense, savings));
+                float currentMax = Math.max(income, expense);
                 if (currentMax > maxValue) {
                     maxValue = currentMax;
                 }
@@ -1882,24 +1876,16 @@ public class AnalysisActivity extends AppCompatActivity {
             expenseBarDataSet.setValueTextSize(10f);
             expenseBarDataSet.setValueTextColor(getResources().getColor(R.color.expense_red));
 
-            // Tạo dataset tiết kiệm với màu xanh dương
-            BarDataSet savingsBarDataSet = new BarDataSet(savingsBarEntries, "Tiết kiệm");
-            savingsBarDataSet.setColor(getResources().getColor(R.color.savings_blue));
-            savingsBarDataSet.setValueTextSize(10f);
-            savingsBarDataSet.setValueTextColor(getResources().getColor(R.color.savings_blue));
-
             // Hiển thị giá trị trên cột khi giá trị đáng kể
             for (int i = 0; i < incomeBarEntries.size(); i++) {
                 boolean hasSignificantValue = false;
                 if (incomeBarEntries.get(i).getY() >= maxValue * 0.1f) hasSignificantValue = true;
                 if (expenseBarEntries.get(i).getY() >= maxValue * 0.1f) hasSignificantValue = true;
-                if (savingsBarEntries.get(i).getY() >= maxValue * 0.1f) hasSignificantValue = true;
 
                 // Hiển thị giá trị nếu có ít nhất một cột có giá trị đáng kể
                 if (hasSignificantValue) {
                     incomeBarDataSet.setDrawValues(true);
                     expenseBarDataSet.setDrawValues(true);
-                    savingsBarDataSet.setDrawValues(true);
                     break;
                 }
             }
@@ -1908,20 +1894,18 @@ public class AnalysisActivity extends AppCompatActivity {
             float borderWidth = 0.5f;
             incomeBarDataSet.setBarBorderWidth(borderWidth);
             expenseBarDataSet.setBarBorderWidth(borderWidth);
-            savingsBarDataSet.setBarBorderWidth(borderWidth);
 
             int borderColor = getResources().getColor(android.R.color.darker_gray);
             incomeBarDataSet.setBarBorderColor(borderColor);
             expenseBarDataSet.setBarBorderColor(borderColor);
-            savingsBarDataSet.setBarBorderColor(borderColor);
 
-            // Đảm bảo hiển thị cả ba bộ dữ liệu
-            BarData barData = new BarData(incomeBarDataSet, expenseBarDataSet, savingsBarDataSet);
+            // Chỉ hiển thị hai bộ dữ liệu (bỏ savingsBarDataSet)
+            BarData barData = new BarData(incomeBarDataSet, expenseBarDataSet);
 
             // Thiết lập các thuộc tính của barData
-            float groupSpace = 0.3f; // Khoảng cách giữa các nhóm
-            float barSpace = 0.03f;  // Khoảng cách giữa các cột trong nhóm
-            float barWidth = 0.2f;  // Độ rộng của cột
+            float groupSpace = 0.4f; // Khoảng cách giữa các nhóm
+            float barSpace = 0.05f;  // Khoảng cách giữa các cột trong nhóm
+            float barWidth = 0.25f;  // Độ rộng của cột
 
             // Đặt độ rộng cột cho tất cả các dataset
             barData.setBarWidth(barWidth);
@@ -1948,7 +1932,6 @@ public class AnalysisActivity extends AppCompatActivity {
             // Đảm bảo tất cả các cột có cùng kích thước
             incomeBarDataSet.setBarShadowColor(android.graphics.Color.TRANSPARENT);
             expenseBarDataSet.setBarShadowColor(android.graphics.Color.TRANSPARENT);
-            savingsBarDataSet.setBarShadowColor(android.graphics.Color.TRANSPARENT);
 
             // Cập nhật dữ liệu cho biểu đồ
             barChart.setData(barData);
@@ -1997,13 +1980,11 @@ public class AnalysisActivity extends AppCompatActivity {
                             String label = xAxisLabels.get(index);
                             float incomeValue = incomeBarEntries.get(index).getY();
                             float expenseValue = expenseBarEntries.get(index).getY();
-                            float savingsValue = savingsBarEntries.get(index).getY();
 
-                            // Hiển thị giá trị chi tiết tại đây
+                            // Hiển thị giá trị chi tiết tại đây (loại bỏ thông tin tiết kiệm)
                             String message = label + ": " +
                                     "\nThu nhập: " + CurrencyUtils.formatVND(incomeValue) +
-                                    "\nChi tiêu: " + CurrencyUtils.formatVND(expenseValue) +
-                                    "\nTiết kiệm: " + CurrencyUtils.formatVND(savingsValue);
+                                    "\nChi tiêu: " + CurrencyUtils.formatVND(expenseValue);
 
                             Toast.makeText(
                                     AnalysisActivity.this,
@@ -2030,8 +2011,7 @@ public class AnalysisActivity extends AppCompatActivity {
                 if (i < xAxisLabels.size()) {
                     Log.d(TAG, "Cột cuối cùng " + xAxisLabels.get(i) +
                             ": Thu nhập=" + incomeBarEntries.get(i).getY() +
-                            ", Chi tiêu=" + expenseBarEntries.get(i).getY() +
-                            ", Tiết kiệm=" + savingsBarEntries.get(i).getY());
+                            ", Chi tiêu=" + expenseBarEntries.get(i).getY());
                 }
             }
         } catch (Exception e) {
