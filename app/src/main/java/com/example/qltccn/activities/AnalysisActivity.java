@@ -1510,8 +1510,8 @@ public class AnalysisActivity extends AppCompatActivity {
                             xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
                             xAxis.setGranularity(1f);
                             
-                            // Cập nhật biểu đồ
-                            barChart.setData(lineData);
+                            // Cập nhật biểu đồ - KHÔNG setData vì không tương thích
+                            // barChart.setData(lineData); // Lỗi: incompatible types: LineData cannot be converted to BarData
                             barChart.invalidate();
                             
                             Log.d(TAG, "Cập nhật biểu đồ thành công với LineData");

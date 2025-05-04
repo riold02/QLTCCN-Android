@@ -1,7 +1,7 @@
 # Ứng dụng Quản lý Tài chính Cá nhân (FinWise)
 
 ## Tổng quan
-FinWise là một ứng dụng Android được phát triển để giúp người dùng quản lý tài chính cá nhân một cách hiệu quả và trực quan. Ứng dụng cung cấp nhiều chức năng hỗ trợ người dùng theo dõi và kiểm soát nguồn tài chính của mình.
+FinWise là một ứng dụng Android được phát triển để giúp người dùng quản lý tài chính cá nhân một cách hiệu quả và trực quan. Ứng dụng cung cấp đầy đủ các công cụ và tính năng hiện đại giúp người dùng theo dõi, phân tích và kiểm soát nguồn tài chính của mình, từ đó đưa ra các quyết định tài chính thông minh hơn.
 
 ## Chức năng chính
 - **Quản lý giao dịch thu chi**: Theo dõi chi tiết các khoản thu nhập và chi tiêu
@@ -24,12 +24,15 @@ Xem hướng dẫn sử dụng đầy đủ tại [HUONG_DAN_SU_DUNG.md](./HUONG
   - **Firestore Database**: Lưu trữ dữ liệu người dùng, giao dịch, danh mục...
   - **Firebase Authentication**: Quản lý đăng nhập, đăng ký, xác thực người dùng
   - **Firebase Storage**: Lưu trữ hình ảnh hồ sơ, biên lai giao dịch...
+  - **Firebase Cloud Messaging**: Gửi thông báo và nhắc nhở tới người dùng
 
 ### Cấu trúc mã nguồn
 - **models**: Chứa các lớp mô hình dữ liệu (User, Transaction, Category, SavingsGoal...)
 - **activities**: Chứa các màn hình chính của ứng dụng
 - **adapters**: Chứa các adapter cho RecyclerView để hiển thị danh sách
 - **utils**: Chứa các tiện ích xử lý dữ liệu, tương tác với Firebase, định dạng tiền tệ và ngày tháng...
+- **services**: Chứa các dịch vụ nền và quản lý thông báo
+- **fragments**: Chứa các fragment được sử dụng trong các activity
 
 ### Mô hình dữ liệu
 - **User**: Thông tin người dùng (id, tên, email, số dư...)
@@ -54,7 +57,7 @@ Xem hướng dẫn sử dụng đầy đủ tại [HUONG_DAN_SU_DUNG.md](./HUONG
 
 ### Phân tích tài chính
 - **AnalysisActivity**: Cung cấp các biểu đồ và thống kê tài chính
-  - Biểu đồ thu chi theo ngày, tuần, tháng
+  - Biểu đồ thu chi theo ngày, tuần, tháng, quý, năm
   - Tính toán tổng thu nhập, chi tiêu và số dư
   - So sánh tỷ lệ chi tiêu theo các danh mục
   - Phân tích xu hướng tài chính theo thời gian
