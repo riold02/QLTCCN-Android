@@ -1364,146 +1364,216 @@ public class AnalysisActivity extends AppCompatActivity {
             expenseEntries.add(new Entry(i, 0));
         }
 
-        Log.d(TAG, "Bắt đầu truy vấn giao dịch cho biểu đồ năm");
+        Log.d(TAG, "Bắt đầu truy vấn giao dịch cho biểu đồ năm - UserId: " + userId);
 
-        // Truy cập subcollection transactions của người dùng
-        FirebaseFirestore.getInstance().collection("users").document(userId).collection("transactions")
-                .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    Log.d(TAG, "Đã tìm thấy " + queryDocumentSnapshots.size() + " giao dịch tổng cộng");
+        try {
+            // Truy cập subcollection transactions của người dùng
+            FirebaseFirestore.getInstance().collection("users").document(userId).collection("transactions")
+                    .get()
+                    .addOnSuccessListener(queryDocumentSnapshots -> {
+                        Log.d(TAG, "Truy vấn giao dịch thành công! Đã tìm thấy " + queryDocumentSnapshots.size() + " giao dịch tổng cộng");
 
-                    // Tạo mảng để lưu tổng thu nhập và chi tiêu theo năm
-                    float[] yearlyIncome = new float[years.length];
-                    float[] yearlyExpense = new float[years.length];
+                        // Tạo mảng để lưu tổng thu nhập và chi tiêu theo năm
+                        float[] yearlyIncome = new float[years.length];
+                        float[] yearlyExpense = new float[years.length];
 
-                    // Đếm số lượng giao dịch chi tiêu và thu nhập
-                    int expenseCount = 0;
-                    int incomeCount = 0;
-                    float totalYearlyIncome = 0;
-                    float totalYearlyExpense = 0;
+                        // Đếm số lượng giao dịch chi tiêu và thu nhập
+                        int expenseCount = 0;
+                        int incomeCount = 0;
+                        float totalYearlyIncome = 0;
+                        float totalYearlyExpense = 0;
 
-                    for (DocumentSnapshot doc : queryDocumentSnapshots) {
-                        try {
-                            String type = doc.getString("type");
-                            Double amount = doc.getDouble("amount");
+                        for (DocumentSnapshot doc : queryDocumentSnapshots) {
+                            try {
+                                String type = doc.getString("type");
+                                Double amount = doc.getDouble("amount");
+                                Log.d(TAG, "Xử lý giao dịch ID=" + doc.getId() + ", type=" + type + ", amount=" + amount);
 
-                            // Xử lý trường date có thể ở nhiều định dạng khác nhau
-                            Long date = null;
+                                // Xử lý trường date có thể ở nhiều định dạng khác nhau
+                                Long date = null;
 
-                            // Kiểm tra nếu date là kiểu Timestamp của Firestore
-                            if (doc.get("date") instanceof com.google.firebase.Timestamp) {
-                                com.google.firebase.Timestamp timestamp = doc.getTimestamp("date");
-                                if (timestamp != null) {
-                                    date = timestamp.toDate().getTime();
-                                }
-                            }
-                            // Kiểm tra nếu date là String (định dạng ngày)
-                            else if (doc.get("date") instanceof String) {
-                                String dateStr = doc.getString("date");
-                                try {
-                                    SimpleDateFormat sdfParse = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
-                                    Date parsedDate = sdfParse.parse(dateStr);
-                                    if (parsedDate != null) {
-                                        date = parsedDate.getTime();
+                                // Kiểm tra nếu date là kiểu Timestamp của Firestore
+                                if (doc.get("date") instanceof com.google.firebase.Timestamp) {
+                                    com.google.firebase.Timestamp timestamp = doc.getTimestamp("date");
+                                    if (timestamp != null) {
+                                        date = timestamp.toDate().getTime();
+                                        Log.d(TAG, "Date lấy từ timestamp: " + new Date(date));
                                     }
-                                } catch (Exception e) {
-                                    Log.e(TAG, "Lỗi khi chuyển đổi chuỗi ngày: " + e.getMessage());
                                 }
+                                // Kiểm tra nếu date là String (định dạng ngày)
+                                else if (doc.get("date") instanceof String) {
+                                    String dateStr = doc.getString("date");
+                                    try {
+                                        SimpleDateFormat sdfParse = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+                                        Date parsedDate = sdfParse.parse(dateStr);
+                                        if (parsedDate != null) {
+                                            date = parsedDate.getTime();
+                                            Log.d(TAG, "Date lấy từ String: " + dateStr + " -> " + new Date(date));
+                                        }
+                                    } catch (Exception e) {
+                                        Log.e(TAG, "Lỗi khi chuyển đổi chuỗi ngày: " + e.getMessage());
+                                    }
+                                }
+                                // Thử lấy trực tiếp từ Long
+                                else {
+                                    try {
+                                        date = doc.getLong("date");
+                                        Log.d(TAG, "Date lấy từ Long: " + new Date(date));
+                                    } catch (Exception e) {
+                                        Log.e(TAG, "Không thể lấy date dưới dạng Long: " + e.getMessage());
+                                    }
+                                }
+
+                                if (type == null || amount == null || date == null) {
+                                    Log.d(TAG, "Bỏ qua giao dịch không hợp lệ: ID=" + doc.getId() + 
+                                            ", type=" + type + ", amount=" + amount + ", date=" + date);
+                                    continue; // Bỏ qua giao dịch không hợp lệ
+                                }
+
+                                // Xác định năm của giao dịch
+                                Calendar transactionCal = Calendar.getInstance();
+                                transactionCal.setTimeInMillis(date);
+                                int transactionYear = transactionCal.get(Calendar.YEAR);
+                                Log.d(TAG, "Giao dịch năm: " + transactionYear);
+
+                                // Tìm index của năm trong mảng
+                                int yearIndex = -1;
+                                for (int i = 0; i < years.length; i++) {
+                                    if (years[i] == transactionYear) {
+                                        yearIndex = i;
+                                        break;
+                                    }
+                                }
+
+                                if (yearIndex >= 0) {
+                                    if ("income".equals(type)) {
+                                        yearlyIncome[yearIndex] += amount.floatValue();
+                                        totalYearlyIncome += amount.floatValue();
+                                        incomeCount++;
+                                        Log.d(TAG, "Giao dịch thu nhập năm " + transactionYear + 
+                                                " (index " + yearIndex + "): " + amount + 
+                                                ", tổng thu nhập năm này: " + yearlyIncome[yearIndex]);
+                                    } else if ("expense".equals(type) || "savings".equals(type)) {
+                                        yearlyExpense[yearIndex] += amount.floatValue();
+                                        totalYearlyExpense += amount.floatValue();
+                                        expenseCount++;
+                                        Log.d(TAG, "Giao dịch " + type + " năm " + transactionYear + 
+                                                " (index " + yearIndex + "): " + amount + 
+                                                ", tổng chi tiêu năm này: " + yearlyExpense[yearIndex]);
+                                    }
+                                } else {
+                                    Log.d(TAG, "Năm giao dịch " + transactionYear + " nằm ngoài phạm vi biểu đồ");
+                                }
+                            } catch (Exception e) {
+                                Log.e(TAG, "Lỗi khi xử lý giao dịch: " + e.getMessage() + ", ID=" + doc.getId(), e);
                             }
-                            // Thử lấy trực tiếp từ Long
-                            else {
-                                try {
-                                    date = doc.getLong("date");
-                                } catch (Exception e) {
-                                    Log.e(TAG, "Không thể lấy date dưới dạng Long: " + e.getMessage());
-                                }
+                        }
+
+                        // Cập nhật entries từ dữ liệu đã tính toán
+                        for (int i = 0; i < years.length; i++) {
+                            incomeEntries.set(i, new Entry(i, yearlyIncome[i]));
+                            expenseEntries.set(i, new Entry(i, yearlyExpense[i]));
+                            Log.d(TAG, "Dữ liệu năm " + years[i] + " (index " + i + "): Thu nhập=" + 
+                                    yearlyIncome[i] + ", Chi tiêu=" + yearlyExpense[i]);
+                        }
+
+                        // Log thông tin tổng hợp
+                        Log.d(TAG, "Tổng số giao dịch thu nhập: " + incomeCount + ", tổng: " + totalYearlyIncome);
+                        Log.d(TAG, "Tổng số giao dịch chi tiêu và tiết kiệm: " + expenseCount + ", tổng: " + totalYearlyExpense);
+
+                        // Cập nhật biểu đồ
+                        Log.d(TAG, "Bắt đầu cập nhật biểu đồ từ dữ liệu");
+                        try {
+                            // Tạo LineDataSet cho biểu đồ đường
+                            LineDataSet incomeDataSet = new LineDataSet(incomeEntries, "Thu nhập");
+                            incomeDataSet.setColor(getResources().getColor(R.color.income_green));
+                            incomeDataSet.setCircleColor(getResources().getColor(R.color.income_green));
+                            incomeDataSet.setLineWidth(2f);
+                            incomeDataSet.setCircleRadius(4f);
+                            incomeDataSet.setDrawValues(true);
+                            
+                            LineDataSet expenseDataSet = new LineDataSet(expenseEntries, "Chi tiêu");
+                            expenseDataSet.setColor(getResources().getColor(R.color.expense_red));
+                            expenseDataSet.setCircleColor(getResources().getColor(R.color.expense_red)); 
+                            expenseDataSet.setLineWidth(2f);
+                            expenseDataSet.setCircleRadius(4f);
+                            expenseDataSet.setDrawValues(true);
+                            
+                            LineData lineData = new LineData(incomeDataSet, expenseDataSet);
+                            
+                            // Xóa dữ liệu cũ
+                            barChart.clear();
+                            
+                            // Thiết lập trục X
+                            XAxis xAxis = barChart.getXAxis();
+                            xAxis.setValueFormatter(new IndexAxisValueFormatter(xAxisLabels));
+                            xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
+                            xAxis.setGranularity(1f);
+                            
+                            // Cập nhật biểu đồ
+                            barChart.setData(lineData);
+                            barChart.invalidate();
+                            
+                            Log.d(TAG, "Cập nhật biểu đồ thành công với LineData");
+                            
+                            updateLineChart(incomeEntries, expenseEntries, xAxisLabels);
+                        } catch (Exception e) {
+                            Log.e(TAG, "Lỗi khi cập nhật biểu đồ: " + e.getMessage(), e);
+                            // Thử hiển thị biểu đồ trống trong trường hợp lỗi
+                            showEmptyChart(xAxisLabels);
+                        }
+
+                        // Cập nhật giao diện tổng thu nhập/chi tiêu
+                        try {
+                            if (tvIncome != null) {
+                                tvIncome.setText(CurrencyUtils.formatVND(totalYearlyIncome));
+                                Log.d(TAG, "Cập nhật UI tổng thu nhập: " + CurrencyUtils.formatVND(totalYearlyIncome));
                             }
 
-                            if (type == null || amount == null || date == null) {
-                                Log.d(TAG, "Bỏ qua giao dịch không hợp lệ: ID=" + doc.getId());
-                                continue; // Bỏ qua giao dịch không hợp lệ
+                            if (tvExpense != null) {
+                                tvExpense.setText("-" + CurrencyUtils.formatVND(totalYearlyExpense));
+                                Log.d(TAG, "Cập nhật UI tổng chi tiêu và tiết kiệm: " + CurrencyUtils.formatVND(totalYearlyExpense));
                             }
 
-                            // Xác định năm của giao dịch
-                            Calendar transactionCal = Calendar.getInstance();
-                            transactionCal.setTimeInMillis(date);
-                            int transactionYear = transactionCal.get(Calendar.YEAR);
-
-                            // Tìm index của năm trong mảng
-                            int yearIndex = -1;
-                            for (int i = 0; i < years.length; i++) {
-                                if (years[i] == transactionYear) {
-                                    yearIndex = i;
-                                    break;
-                                }
-                            }
-
-                            if (yearIndex >= 0) {
-                                if ("income".equals(type)) {
-                                    yearlyIncome[yearIndex] += amount.floatValue();
-                                    totalYearlyIncome += amount.floatValue();
-                                    incomeCount++;
-                                    Log.d(TAG, "Giao dịch thu nhập năm " + transactionYear + ": " + amount);
-                                } else if ("expense".equals(type) || "savings".equals(type)) {
-                                    yearlyExpense[yearIndex] += amount.floatValue();
-                                    totalYearlyExpense += amount.floatValue();
-                                    expenseCount++;
-                                    Log.d(TAG, "Giao dịch " + type + " năm " + transactionYear + ": " + amount);
-                                }
+                            if (tvTotalBalance != null) {
+                                tvTotalBalance.setText(CurrencyUtils.formatVND(totalYearlyIncome - totalYearlyExpense));
+                                Log.d(TAG, "Cập nhật UI số dư: " + CurrencyUtils.formatVND(totalYearlyIncome - totalYearlyExpense));
                             }
                         } catch (Exception e) {
-                            Log.e(TAG, "Lỗi khi xử lý giao dịch: " + e.getMessage() + ", ID=" + doc.getId());
+                            Log.e(TAG, "Lỗi khi cập nhật UI: " + e.getMessage(), e);
                         }
-                    }
+                    })
+                    .addOnFailureListener(e -> {
+                        Log.e(TAG, "Lỗi khi truy vấn giao dịch cho biểu đồ năm: " + e.getMessage(), e);
+                        Toast.makeText(AnalysisActivity.this, "Lỗi tải dữ liệu: " + e.getMessage(), Toast.LENGTH_SHORT).show();
 
-                    // Cập nhật entries từ dữ liệu đã tính toán
-                    for (int i = 0; i < years.length; i++) {
-                        incomeEntries.set(i, new Entry(i, yearlyIncome[i]));
-                        expenseEntries.set(i, new Entry(i, yearlyExpense[i]));
-                        Log.d(TAG, "Dữ liệu năm " + years[i] + ": Thu nhập=" + yearlyIncome[i] + ", Chi tiêu=" + yearlyExpense[i]);
-                    }
+                        // Set giá trị mặc định để tránh hiển thị rỗng
+                        if (tvIncome != null) tvIncome.setText(CurrencyUtils.formatVND(0));
+                        if (tvExpense != null) tvExpense.setText("-" + CurrencyUtils.formatVND(0));
+                        if (tvTotalBalance != null) tvTotalBalance.setText(CurrencyUtils.formatVND(0));
 
-                    // Log thông tin tổng hợp
-                    Log.d(TAG, "Tổng số giao dịch thu nhập: " + incomeCount + ", tổng: " + totalYearlyIncome);
-                    Log.d(TAG, "Tổng số giao dịch chi tiêu và tiết kiệm: " + expenseCount + ", tổng: " + totalYearlyExpense);
-
-                    // Cập nhật biểu đồ
-                    updateLineChart(incomeEntries, expenseEntries, xAxisLabels);
-
-                    // Cập nhật giao diện tổng thu nhập/chi tiêu
-                    if (tvIncome != null) {
-                        tvIncome.setText(CurrencyUtils.formatVND(totalYearlyIncome));
-                        Log.d(TAG, "Cập nhật UI tổng thu nhập: " + CurrencyUtils.formatVND(totalYearlyIncome));
-                    }
-
-                    if (tvExpense != null) {
-                        tvExpense.setText("-" + CurrencyUtils.formatVND(totalYearlyExpense));
-                        Log.d(TAG, "Cập nhật UI tổng chi tiêu và tiết kiệm: " + CurrencyUtils.formatVND(totalYearlyExpense));
-                    }
-
-                    if (tvTotalBalance != null) {
-                        tvTotalBalance.setText(CurrencyUtils.formatVND(totalYearlyIncome - totalYearlyExpense));
-                        Log.d(TAG, "Cập nhật UI số dư: " + CurrencyUtils.formatVND(totalYearlyIncome - totalYearlyExpense));
-                    }
-                })
-                .addOnFailureListener(e -> {
-                    Log.e(TAG, "Lỗi khi truy vấn giao dịch cho biểu đồ năm: " + e.getMessage(), e);
-                    Toast.makeText(AnalysisActivity.this, "Lỗi tải dữ liệu: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-
-                    // Set giá trị mặc định để tránh hiển thị rỗng
-                    if (tvIncome != null) tvIncome.setText(CurrencyUtils.formatVND(0));
-                    if (tvExpense != null) tvExpense.setText("-" + CurrencyUtils.formatVND(0));
-                    if (tvTotalBalance != null) tvTotalBalance.setText(CurrencyUtils.formatVND(0));
-
-                    // Hiển thị biểu đồ trống
-                    ArrayList<Entry> emptyIncomeEntries = new ArrayList<>();
-                    ArrayList<Entry> emptyExpenseEntries = new ArrayList<>();
-                    for (int i = 0; i < years.length; i++) {
-                        emptyIncomeEntries.add(new Entry(i, 0));
-                        emptyExpenseEntries.add(new Entry(i, 0));
-                    }
-                    updateLineChart(emptyIncomeEntries, emptyExpenseEntries, xAxisLabels);
-                });
+                        // Hiển thị biểu đồ trống
+                        ArrayList<Entry> emptyIncomeEntries = new ArrayList<>();
+                        ArrayList<Entry> emptyExpenseEntries = new ArrayList<>();
+                        for (int i = 0; i < years.length; i++) {
+                            emptyIncomeEntries.add(new Entry(i, 0));
+                            emptyExpenseEntries.add(new Entry(i, 0));
+                        }
+                        updateLineChart(emptyIncomeEntries, emptyExpenseEntries, xAxisLabels);
+                    });
+        } catch (Exception e) {
+            Log.e(TAG, "Lỗi khi tạo truy vấn Firestore: " + e.getMessage(), e);
+            Toast.makeText(AnalysisActivity.this, "Lỗi kết nối đến cơ sở dữ liệu: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            
+            // Hiển thị biểu đồ trống trong trường hợp lỗi
+            ArrayList<Entry> emptyIncomeEntries = new ArrayList<>();
+            ArrayList<Entry> emptyExpenseEntries = new ArrayList<>();
+            for (int i = 0; i < years.length; i++) {
+                emptyIncomeEntries.add(new Entry(i, 0));
+                emptyExpenseEntries.add(new Entry(i, 0));
+            }
+            updateLineChart(emptyIncomeEntries, emptyExpenseEntries, xAxisLabels);
+        }
     }
 
     /**
@@ -1797,11 +1867,8 @@ public class AnalysisActivity extends AppCompatActivity {
                 totalExpense += entry.getY();
             }
 
-            // Chỉ tính tổng tiết kiệm nếu mảng savingsBarEntries không null và không rỗng
-            if (savingsBarEntries != null && !savingsBarEntries.isEmpty()) {
-                for (BarEntry entry : savingsBarEntries) {
-                    totalSavings += entry.getY();
-                }
+            for (BarEntry entry : savingsBarEntries) {
+                totalSavings += entry.getY();
             }
 
             // Cập nhật UI với tổng hợp từ biểu đồ
@@ -1820,12 +1887,21 @@ public class AnalysisActivity extends AppCompatActivity {
                 Log.d(TAG, "Cập nhật UI số dư từ biểu đồ: " + CurrencyUtils.formatVND(totalIncome - totalExpense - totalSavings));
             }
 
+            // In log các giá trị để kiểm tra
+            for (int i = 0; i < Math.min(incomeBarEntries.size(), xAxisLabels.size()); i++) {
+                Log.d(TAG, "Giá trị ban đầu - " + xAxisLabels.get(i) +
+                        ": Thu nhập=" + incomeBarEntries.get(i).getY() +
+                        ", Chi tiêu=" + expenseBarEntries.get(i).getY() +
+                        ", Tiết kiệm=" + savingsBarEntries.get(i).getY());
+            }
+
             // Tìm giá trị lớn nhất để thiết lập trục Y phù hợp
             float maxValue = 0.1f; // Giá trị tối thiểu để tránh chia cho 0
             for (int i = 0; i < incomeBarEntries.size(); i++) {
                 float income = incomeBarEntries.get(i).getY();
                 float expense = expenseBarEntries.get(i).getY();
-                float currentMax = Math.max(income, expense);
+                float savings = savingsBarEntries.get(i).getY();
+                float currentMax = Math.max(income, Math.max(expense, savings));
                 if (currentMax > maxValue) {
                     maxValue = currentMax;
                 }
@@ -1876,16 +1952,24 @@ public class AnalysisActivity extends AppCompatActivity {
             expenseBarDataSet.setValueTextSize(10f);
             expenseBarDataSet.setValueTextColor(getResources().getColor(R.color.expense_red));
 
+            // Tạo dataset tiết kiệm với màu xanh dương
+            BarDataSet savingsBarDataSet = new BarDataSet(savingsBarEntries, "Tiết kiệm");
+            savingsBarDataSet.setColor(getResources().getColor(R.color.savings_blue));
+            savingsBarDataSet.setValueTextSize(10f);
+            savingsBarDataSet.setValueTextColor(getResources().getColor(R.color.savings_blue));
+
             // Hiển thị giá trị trên cột khi giá trị đáng kể
             for (int i = 0; i < incomeBarEntries.size(); i++) {
                 boolean hasSignificantValue = false;
                 if (incomeBarEntries.get(i).getY() >= maxValue * 0.1f) hasSignificantValue = true;
                 if (expenseBarEntries.get(i).getY() >= maxValue * 0.1f) hasSignificantValue = true;
+                if (savingsBarEntries.get(i).getY() >= maxValue * 0.1f) hasSignificantValue = true;
 
                 // Hiển thị giá trị nếu có ít nhất một cột có giá trị đáng kể
                 if (hasSignificantValue) {
                     incomeBarDataSet.setDrawValues(true);
                     expenseBarDataSet.setDrawValues(true);
+                    savingsBarDataSet.setDrawValues(true);
                     break;
                 }
             }
@@ -1894,18 +1978,20 @@ public class AnalysisActivity extends AppCompatActivity {
             float borderWidth = 0.5f;
             incomeBarDataSet.setBarBorderWidth(borderWidth);
             expenseBarDataSet.setBarBorderWidth(borderWidth);
+            savingsBarDataSet.setBarBorderWidth(borderWidth);
 
             int borderColor = getResources().getColor(android.R.color.darker_gray);
             incomeBarDataSet.setBarBorderColor(borderColor);
             expenseBarDataSet.setBarBorderColor(borderColor);
+            savingsBarDataSet.setBarBorderColor(borderColor);
 
-            // Chỉ hiển thị hai bộ dữ liệu (bỏ savingsBarDataSet)
-            BarData barData = new BarData(incomeBarDataSet, expenseBarDataSet);
+            // Đảm bảo hiển thị cả ba bộ dữ liệu
+            BarData barData = new BarData(incomeBarDataSet, expenseBarDataSet, savingsBarDataSet);
 
             // Thiết lập các thuộc tính của barData
-            float groupSpace = 0.4f; // Khoảng cách giữa các nhóm
-            float barSpace = 0.05f;  // Khoảng cách giữa các cột trong nhóm
-            float barWidth = 0.25f;  // Độ rộng của cột
+            float groupSpace = 0.3f; // Khoảng cách giữa các nhóm
+            float barSpace = 0.03f;  // Khoảng cách giữa các cột trong nhóm
+            float barWidth = 0.2f;  // Độ rộng của cột
 
             // Đặt độ rộng cột cho tất cả các dataset
             barData.setBarWidth(barWidth);
@@ -1932,6 +2018,7 @@ public class AnalysisActivity extends AppCompatActivity {
             // Đảm bảo tất cả các cột có cùng kích thước
             incomeBarDataSet.setBarShadowColor(android.graphics.Color.TRANSPARENT);
             expenseBarDataSet.setBarShadowColor(android.graphics.Color.TRANSPARENT);
+            savingsBarDataSet.setBarShadowColor(android.graphics.Color.TRANSPARENT);
 
             // Cập nhật dữ liệu cho biểu đồ
             barChart.setData(barData);
@@ -1980,11 +2067,13 @@ public class AnalysisActivity extends AppCompatActivity {
                             String label = xAxisLabels.get(index);
                             float incomeValue = incomeBarEntries.get(index).getY();
                             float expenseValue = expenseBarEntries.get(index).getY();
+                            float savingsValue = savingsBarEntries.get(index).getY();
 
-                            // Hiển thị giá trị chi tiết tại đây (loại bỏ thông tin tiết kiệm)
+                            // Hiển thị giá trị chi tiết tại đây
                             String message = label + ": " +
                                     "\nThu nhập: " + CurrencyUtils.formatVND(incomeValue) +
-                                    "\nChi tiêu: " + CurrencyUtils.formatVND(expenseValue);
+                                    "\nChi tiêu: " + CurrencyUtils.formatVND(expenseValue) +
+                                    "\nTiết kiệm: " + CurrencyUtils.formatVND(savingsValue);
 
                             Toast.makeText(
                                     AnalysisActivity.this,
@@ -2011,7 +2100,8 @@ public class AnalysisActivity extends AppCompatActivity {
                 if (i < xAxisLabels.size()) {
                     Log.d(TAG, "Cột cuối cùng " + xAxisLabels.get(i) +
                             ": Thu nhập=" + incomeBarEntries.get(i).getY() +
-                            ", Chi tiêu=" + expenseBarEntries.get(i).getY());
+                            ", Chi tiêu=" + expenseBarEntries.get(i).getY() +
+                            ", Tiết kiệm=" + savingsBarEntries.get(i).getY());
                 }
             }
         } catch (Exception e) {
@@ -2247,4 +2337,4 @@ public class AnalysisActivity extends AppCompatActivity {
             Toast.makeText(this, "Không thể mở trang tìm kiếm", Toast.LENGTH_SHORT).show();
         }
     }
-} 
+}
